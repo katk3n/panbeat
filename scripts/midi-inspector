@@ -1,0 +1,13 @@
+#!/bin/sh
+set -eu
+script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+repo="$script_dir/.."
+source="$repo/tools/midi-inspector/main.swift"
+binary="$repo/artifacts/builds/midi-inspector/midi-inspector"
+if [ ! -x "$binary" ] || [ "$source" -nt "$binary" ]; then
+  mkdir -p "$(dirname -- "$binary")"
+  module_cache="$repo/artifacts/tmp/swift-module-cache"
+  mkdir -p "$module_cache"
+  xcrun swiftc -module-cache-path "$module_cache" "$source" -framework CoreMIDI -o "$binary"
+fi
+exec "$binary" "$@"

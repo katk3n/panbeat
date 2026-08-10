@@ -1,0 +1,13 @@
+{
+  "schema_version": "1.0.0",
+  "algorithm": "sha256",
+  "files": {
+    "chart.json": "825e2256754862a0132ada43aacd21d72ba9bb722d4c3c3079e45a09c264ba07",
+    "click-samples.json": "f1ac72b9de33410013fc6c4902625d7404c1725627c44796e4ac344fefd08d93",
+    "click.wav": "f12f33e98f7431539c8790502f5fdfb6e8763883707605243cf5c60aeaacd79a",
+    "golden-inputs.json": "dab29c86b6af6c49f9bc385d5c7e65f23616ec8e88ac5d0fec795db023697a67",
+    "golden-results.json": "66739a72f3cf3c8435e3fa285c052bc28491014632808dd13801c18ad28f6831",
+    "drift-loop-manifest.json": "b3bb7d5fa59152b7276ee5a0dc9dc766e305b03e8e03864d8a6767ab9de077af",
+    "audio-license.json": "7ce85bc3caf4b4b090f4a9ffb55bef35201de531719b319a140e268575abadfa"
+  }
+}

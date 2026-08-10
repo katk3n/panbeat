@@ -1,0 +1,48 @@
+{
+  "schema_version": "1.0.0",
+  "scale": { "minimum": 1, "maximum": 5 },
+  "items": [
+    {
+      "id": "midi-audio-stability",
+      "weight": 30,
+      "unity": { "score": 3, "rationale": "Three release-device sessions had zero drops/unknown mappings and release audio drift passed EC-001, but dispatch jitter remains Not Measured." },
+      "godot": { "score": 4, "rationale": "Three release-device sessions normalized every trigger, arrival spread passed, reconnect recovered, and CoreAudio release drift passed EC-001." }
+    },
+    {
+      "id": "codex-autonomy",
+      "weight": 20,
+      "unity": { "score": 3, "rationale": "CLI test/build/capture work with zero GUI interventions, with Unity licensing and a maintained native CoreMIDI plugin." },
+      "godot": { "score": 4, "rationale": "CLI test/export/capture work with zero GUI interventions; the clean-cache defect was found and fixed from text source." }
+    },
+    {
+      "id": "implementation-maintainability",
+      "weight": 15,
+      "unity": { "score": 3, "rationale": "Domain separation is clear, but the native CoreMIDI bridge adds platform-specific code and lifecycle handling." },
+      "godot": { "score": 4, "rationale": "Typed GDScript and the standard MIDI API avoid a native plugin, with a known limitation in disconnect visibility." }
+    },
+    {
+      "id": "2d-performance",
+      "weight": 15,
+      "unity": { "score": 3, "rationale": "Deterministic 768x768 output, frame-independent kinematics, and zero-allocation pool tests pass; comparable release frame time is not measured." },
+      "godot": { "score": 3, "rationale": "Deterministic 768x768 output and frame-independent kinematics pass; comparable release frame time is not measured." }
+    },
+    {
+      "id": "macos-distribution",
+      "weight": 10,
+      "unity": { "score": 4, "rationale": "Clean release build completed in 12 seconds and three warmed measured builds had 3.316-second p50." },
+      "godot": { "score": 3, "rationale": "Clean release export completed in 8 seconds and three warmed measured exports had 7.506-second p50; the universal export is substantially larger." }
+    },
+    {
+      "id": "web-derivation",
+      "weight": 5,
+      "unity": { "score": 2, "rationale": "The desktop native MIDI bridge cannot be reused by WebGL without a separate Web MIDI adapter." },
+      "godot": { "score": 3, "rationale": "GDScript avoids C# restrictions for web export, though desktop InputEventMIDI still requires a separate web input path." }
+    },
+    {
+      "id": "license-long-term-risk",
+      "weight": 5,
+      "unity": { "score": 3, "rationale": "The selected LTS toolchain is mature but subject to Unity licensing and editor activation requirements." },
+      "godot": { "score": 5, "rationale": "Godot is MIT-licensed and the fixed toolchain runs without account or license activation." }
+    }
+  ]
+}

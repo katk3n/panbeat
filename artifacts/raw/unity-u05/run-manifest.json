@@ -1,0 +1,20 @@
+{
+  "schema_version": "1.0.0",
+  "run_id": "unity-u05",
+  "engine": "unity",
+  "started_at": "2026-08-10T07:26:40.5214250Z",
+  "source_revision": "working-tree",
+  "build_type": "editor",
+  "clock_domains": ["song_time", "unity_dsp"],
+  "inputs": [
+    {"path":"shared/fixtures/test-pack/golden-inputs.json","sha256":"dab29c86b6af6c49f9bc385d5c7e65f23616ec8e88ac5d0fec795db023697a67"},
+    {"path":"shared/fixtures/instrument-profiles/roland-mn10-handpan-minor-v1.json","sha256":"ae0d853db4b1974788c6ffe645fc652110e374eb04fea5ab397adfe6103440f9"},
+    {"path":"artifacts/raw/unity-u03/lifecycle-verified.jsonl","sha256":"2bd29f2af90ec6691785bbb51c4dba0c0aa5bbcd3e1419844a91edcaae02c4ec"}
+  ],
+  "outputs": [
+    {"path":"artifacts/raw/unity-u05/judgements-60hz.json","sha256":"2f57f50d2d049cb933916034de195d6f829192a33335b37bd27c17d3b4a671dd"},
+    {"path":"artifacts/raw/unity-u05/judgements-120hz.json","sha256":"2f57f50d2d049cb933916034de195d6f829192a33335b37bd27c17d3b4a671dd"},
+    {"path":"artifacts/raw/unity-u05/judgements-frame-stall.json","sha256":"2f57f50d2d049cb933916034de195d6f829192a33335b37bd27c17d3b4a671dd"},
+    {"path":"artifacts/raw/unity-u05/performance-log.json","sha256":"1d5d33c9de30deb49e282d7db361fd29697cbddb33f5bab9af1555eefb76a996"}
+  ]
+}

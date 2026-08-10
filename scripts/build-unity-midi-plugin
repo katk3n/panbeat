@@ -1,0 +1,11 @@
+#!/bin/sh
+set -eu
+script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+repository_root=$(CDPATH= cd -- "$script_dir/.." && pwd)
+source_file="$repository_root/pocs/unity/NativeMidi/MoodPanMidi.mm"
+output_dir="$repository_root/pocs/unity/Assets/Plugins/macOS"
+mkdir -p "$output_dir"
+clang++ -std=c++17 -O2 -dynamiclib \
+  -framework CoreFoundation -framework CoreMIDI \
+  -o "$output_dir/libPanBeatMidi.dylib" "$source_file"
+printf 'build-unity-midi-plugin: wrote %s\n' "$output_dir/libPanBeatMidi.dylib"

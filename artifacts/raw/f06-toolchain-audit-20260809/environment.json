@@ -1,0 +1,19 @@
+{
+  "schema_version": "1.0.0",
+  "captured_at": "2026-08-09T10:01:11+09:00",
+  "machine": { "os": "macOS 26.5.2 (25F84)", "architecture": "arm64", "memory_mib": 24576 },
+  "xcode": { "version": "26.6 (17F113)", "developer_path": "/Applications/Xcode.app/Contents/Developer", "macos_sdk": "26.5" },
+  "clang": { "version": "Homebrew clang 22.1.1", "path": "/opt/homebrew/Cellar/llvm/22.1.1/bin/clang" },
+  "dotnet": { "status": "missing" },
+  "godot": { "planned_version": "4.6-stable", "status": "missing", "export_templates": "missing" },
+  "unity": {
+    "planned_family": "Unity 6 LTS",
+    "installed_version": "6000.1.17f1",
+    "editor_path": "/Applications/Unity/Hub/Editor/6000.1.17f1/Unity.app/Contents/MacOS/Unity",
+    "hub_path": "/Applications/Unity Hub.app",
+    "mac_standalone_support": "present",
+    "cli_version_check": "pass",
+    "headless_project_open": "blocked",
+    "blocker": "No valid Unity Editor license found; com.unity.editor.headless entitlement unavailable"
+  }
+}

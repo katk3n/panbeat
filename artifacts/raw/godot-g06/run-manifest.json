@@ -1,0 +1,61 @@
+{
+  "schema_version": "1.0.0",
+  "run_id": "godot-g06",
+  "engine": "godot",
+  "started_at": "2026-08-10T07:17:29.860Z",
+  "source_revision": "working-tree",
+  "build_type": "release",
+  "clock_domains": [
+    "song_time",
+    "monotonic",
+    "godot_audio"
+  ],
+  "inputs": [
+    {
+      "path": "shared/fixtures/instrument-profiles/roland-mn10-handpan-minor-v1.json",
+      "sha256": "ae0d853db4b1974788c6ffe645fc652110e374eb04fea5ab397adfe6103440f9"
+    },
+    {
+      "path": "artifacts/raw/m02-mood-pan-20260810/handpan-minor-slap-left3-then-right3.jsonl",
+      "sha256": "d12ed3f77808be6b76645f454a5b21ec83469056874bc916087203fc6ae2d4c9"
+    },
+    {
+      "path": "artifacts/raw/godot-g03/lifecycle-verified.jsonl",
+      "sha256": "4ee41d5afa2fd65944e531e47f9fde78b5158c9ddeb1d2d97d5b759c53ab0e9b"
+    },
+    {
+      "path": "artifacts/raw/godot-g02/summary.json",
+      "sha256": "b24eb5d5a0a509433869ac0222dd62fb9e4f1d21aced8df35caa0e6accd05819"
+    },
+    {
+      "path": "artifacts/raw/godot-g05/judgements-60hz.json",
+      "sha256": "e775ea79725e76cade6f961b9dc07aa1c2a5430aa3f2c92b778a1dada4ddfef4"
+    }
+  ],
+  "outputs": [
+    {
+      "path": "artifacts/raw/godot-g06/hard-gate-summary.json",
+      "sha256": "8cfc85f6aff5069e65dc081dda011b889f10232498d4801de46df2ef0c9d5390"
+    },
+    {
+      "path": "artifacts/raw/godot-g06/build-metadata.json",
+      "sha256": "139d2ad7de41d6018e2d9f2582f69a926112a4a323e0406492300db7ea48664b"
+    },
+    {
+      "path": "artifacts/reports/godot-g04/three-techniques.png",
+      "sha256": "93c30184e685ca59c652d8e34581f62687a58ef029a3cc8ae45a2e78e46dbcb6"
+    },
+    {
+      "path": "artifacts/builds/godot-g06/PanBeat.zip",
+      "sha256": "ea9022fcb4eabbef1dac21733303640d0516255522c4cc0df5aec28366de2da2"
+    },
+    {
+      "path": "artifacts/reports/godot-g06/headless-verified.log",
+      "sha256": "d932c6eaca3839a54801f6e5dbb9d302066ba2d5a25c65706bde6933c02931ff"
+    },
+    {
+      "path": "artifacts/reports/godot-g06/headless.log",
+      "sha256": "50ba9a0584785dc9272a18629894fda37cc56d45d867248f609889f6317b6e95"
+    }
+  ]
+}

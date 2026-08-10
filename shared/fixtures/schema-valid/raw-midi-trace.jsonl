@@ -1,0 +1,2 @@
+{"schema_version":"1.0.0","record_type":"session","session_id":"synthetic-f03","started_at":"2026-08-09T12:00:00+09:00","clock_domain":"synthetic","time_unit":"microseconds","device_name":"Synthetic MIDI"}
+{"schema_version":"1.0.0","record_type":"event","session_id":"synthetic-f03","sequence":0,"timestamp_us":1000000,"clock_domain":"synthetic","raw_bytes":[144,60,100],"message_type":"note_on","channel_wire":0,"channel_display":1,"data1":60,"data2":100}

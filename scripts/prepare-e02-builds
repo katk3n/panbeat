@@ -1,0 +1,17 @@
+#!/bin/sh
+set -eu
+script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+repository_root=$(CDPATH= cd -- "$script_dir/.." && pwd)
+unity_dir="$repository_root/artifacts/builds/e02-real-device/unity"
+godot_dir="$repository_root/artifacts/builds/e02-real-device/godot"
+report_dir="$repository_root/artifacts/reports/e02-real-device"
+mkdir -p "$unity_dir" "$godot_dir" "$report_dir"
+"$script_dir/build-unity-midi-plugin"
+"$script_dir/unity" -batchmode -nographics -quit -projectPath "$repository_root/pocs/unity" \
+  -executeMethod PanBeat.Editor.BuildCommand.BuildMacRelease \
+  -panbeatBuildPath "$unity_dir/PanBeat.app" \
+  -logFile "$repository_root/artifacts/reports/e02-real-device/unity-build.log"
+"$script_dir/godot" --headless --path "$repository_root/pocs/godot" \
+  --export-release macOS "$godot_dir/PanBeat.zip" \
+  --log-file "$repository_root/artifacts/reports/e02-real-device/godot-build.log"
+ditto -x -k "$godot_dir/PanBeat.zip" "$godot_dir"

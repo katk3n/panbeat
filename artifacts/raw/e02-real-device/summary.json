@@ -1,0 +1,182 @@
+{
+  "schema_version": "1.0.0",
+  "story": "E02",
+  "instrument_setting": "Handpan / Minor",
+  "strike_strength_scoring": "not strict",
+  "expected_script_note_ons_if_followed_exactly": 43,
+  "human_timing_policy": "Observed strike timing and count are authoritative and are not scored as engine dispatch jitter.",
+  "subjective_notes": [],
+  "engines": {
+    "unity": {
+      "planned_sessions": 3,
+      "attempted_sessions": 3,
+      "valid_sessions": 3,
+      "failed_sessions": 0,
+      "missing_sessions": 0,
+      "totals": {
+        "raw_events": 443,
+        "note_ons": 129,
+        "ding": 48,
+        "tone": 44,
+        "slap": 37,
+        "unknown_mappings": 0,
+        "exact_duplicates": 0,
+        "adapter_drops": 0
+      },
+      "sessions": [
+        {
+          "session": 1,
+          "status": "valid",
+          "raw_event_count": 146,
+          "note_on_count": 43,
+          "techniques": {
+            "ding": 16,
+            "tone": 14,
+            "slap": 13
+          },
+          "unknown_mapping_count": 0,
+          "exact_duplicate_count": 0,
+          "adapter_drop_count": 0,
+          "lifecycle_observation": {
+            "explicit_absent_present": true,
+            "recovery_us": 13224000
+          },
+          "evidence": "artifacts/raw/e02-real-device/unity/session-1.jsonl"
+        },
+        {
+          "session": 2,
+          "status": "valid",
+          "raw_event_count": 149,
+          "note_on_count": 43,
+          "techniques": {
+            "ding": 16,
+            "tone": 15,
+            "slap": 12
+          },
+          "unknown_mapping_count": 0,
+          "exact_duplicate_count": 0,
+          "adapter_drop_count": 0,
+          "lifecycle_observation": {
+            "explicit_absent_present": true,
+            "recovery_us": 9982000
+          },
+          "evidence": "artifacts/raw/e02-real-device/unity/session-2.jsonl"
+        },
+        {
+          "session": 3,
+          "status": "valid",
+          "raw_event_count": 148,
+          "note_on_count": 43,
+          "techniques": {
+            "ding": 16,
+            "tone": 15,
+            "slap": 12
+          },
+          "unknown_mapping_count": 0,
+          "exact_duplicate_count": 0,
+          "adapter_drop_count": 0,
+          "lifecycle_observation": {
+            "explicit_absent_present": true,
+            "recovery_us": 8950000
+          },
+          "evidence": "artifacts/raw/e02-real-device/unity/session-3.jsonl"
+        }
+      ]
+    },
+    "godot": {
+      "planned_sessions": 3,
+      "attempted_sessions": 3,
+      "valid_sessions": 3,
+      "failed_sessions": 0,
+      "missing_sessions": 0,
+      "totals": {
+        "raw_events": 444,
+        "note_ons": 129,
+        "ding": 48,
+        "tone": 45,
+        "slap": 36,
+        "unknown_mappings": 0,
+        "exact_duplicates": 0,
+        "adapter_drops": null
+      },
+      "sessions": [
+        {
+          "session": 1,
+          "status": "valid",
+          "raw_event_count": 148,
+          "note_on_count": 43,
+          "techniques": {
+            "ding": 16,
+            "tone": 15,
+            "slap": 12
+          },
+          "unknown_mapping_count": 0,
+          "exact_duplicate_count": 0,
+          "adapter_drop_count": null,
+          "lifecycle_observation": {
+            "explicit_absent_present": false,
+            "reason": "Godot public API kept MN-10 listed",
+            "largest_no_event_gap": {
+              "duration_us": 14393809,
+              "from_us": 25354108,
+              "to_us": 39747917
+            },
+            "input_resumed_after_gap": true
+          },
+          "evidence": "artifacts/raw/e02-real-device/godot/session-1.jsonl"
+        },
+        {
+          "session": 2,
+          "status": "valid",
+          "raw_event_count": 148,
+          "note_on_count": 43,
+          "techniques": {
+            "ding": 16,
+            "tone": 15,
+            "slap": 12
+          },
+          "unknown_mapping_count": 0,
+          "exact_duplicate_count": 0,
+          "adapter_drop_count": null,
+          "lifecycle_observation": {
+            "explicit_absent_present": false,
+            "reason": "Godot public API kept MN-10 listed",
+            "largest_no_event_gap": {
+              "duration_us": 18415872,
+              "from_us": 26677122,
+              "to_us": 45092994
+            },
+            "input_resumed_after_gap": true
+          },
+          "evidence": "artifacts/raw/e02-real-device/godot/session-2.jsonl"
+        },
+        {
+          "session": 3,
+          "status": "valid",
+          "raw_event_count": 148,
+          "note_on_count": 43,
+          "techniques": {
+            "ding": 16,
+            "tone": 15,
+            "slap": 12
+          },
+          "unknown_mapping_count": 0,
+          "exact_duplicate_count": 0,
+          "adapter_drop_count": null,
+          "lifecycle_observation": {
+            "explicit_absent_present": false,
+            "reason": "Godot public API kept MN-10 listed",
+            "largest_no_event_gap": {
+              "duration_us": 17729208,
+              "from_us": 22529233,
+              "to_us": 40258441
+            },
+            "input_resumed_after_gap": true
+          },
+          "evidence": "artifacts/raw/e02-real-device/godot/session-3.jsonl"
+        }
+      ]
+    }
+  },
+  "conclusion": "Both release builds completed three valid real-device sessions, retained all mapped technique classes, and resumed input after each physical reconnect. Godot's public API did not expose port disappearance; Unity explicitly observed it."
+}

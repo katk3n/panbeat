@@ -1,0 +1,25 @@
+#!/bin/sh
+set -eu
+script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+repository_root=$(CDPATH= cd -- "$script_dir/.." && pwd)
+raw_root="$repository_root/artifacts/raw/e03-release-drift"
+report_root="$repository_root/artifacts/reports/e03-release-drift"
+build_root="$repository_root/artifacts/builds/e03-release-drift"
+audio="$repository_root/shared/fixtures/test-pack/click.wav"
+duration=60
+mkdir -p "$raw_root/unity" "$raw_root/godot" "$report_root"
+
+for trial in 1 2 3; do
+  unity_output="$raw_root/unity/trial-$trial.jsonl"
+  godot_output="$raw_root/godot/trial-$trial.jsonl"
+  [ ! -e "$unity_output" ] || { printf 'run-release-drift-comparison: refusing to overwrite %s\n' "$unity_output" >&2; exit 73; }
+  [ ! -e "$godot_output" ] || { printf 'run-release-drift-comparison: refusing to overwrite %s\n' "$godot_output" >&2; exit 73; }
+  "$build_root/unity/PanBeat.app/Contents/MacOS/PanBeat" \
+    -screen-width 320 -screen-height 180 -popupwindow \
+    -logFile "$report_root/unity-trial-$trial.log" \
+    -panbeatDriftOutput "$unity_output" -panbeatAudioPath "$audio" -panbeatDurationSeconds "$duration"
+  "$build_root/godot/PanBeat.app/Contents/MacOS/PanBeat" \
+    --resolution 320x180 --position 0,0 --log-file "$report_root/godot-trial-$trial.log" -- \
+    --drift-output "$godot_output" --audio "$audio" --duration-seconds "$duration"
+done
+node "$script_dir/summarize-release-drift.mjs"

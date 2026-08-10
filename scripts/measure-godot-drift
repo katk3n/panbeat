@@ -1,0 +1,13 @@
+#!/bin/sh
+set -eu
+script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+repository_root=$(CDPATH= cd -- "$script_dir/.." && pwd)
+duration="${1-30}"
+label="${2-30s}"
+raw_dir="$repository_root/artifacts/raw/godot-g02"
+report_dir="$repository_root/artifacts/reports/godot-g02"
+mkdir -p "$raw_dir" "$report_dir"
+"$script_dir/godot" --headless --path "$repository_root/pocs/godot" \
+  --script res://tests/measure_drift.gd --log-file "$report_dir/drift-$label.log" -- \
+  --duration-seconds "$duration" --output "$raw_dir/drift-$label.jsonl" \
+  --manifest "$raw_dir/manifest-$label.json"

@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://panbeat.local/schemas/run-manifest.schema.json",
+  "title": "PanBeat Phase 0 Run Manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "run_id", "engine", "started_at", "source_revision", "build_type", "clock_domains", "inputs", "outputs"],
+  "properties": {
+    "schema_version": { "const": "1.0.0" },
+    "run_id": { "type": "string", "minLength": 1 },
+    "engine": { "enum": ["common", "unity", "godot"] },
+    "started_at": { "type": "string", "minLength": 1 },
+    "source_revision": { "type": "string", "minLength": 1 },
+    "build_type": { "enum": ["tool", "editor", "debug", "release"] },
+    "clock_domains": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "enum": ["song_time", "monotonic", "core_midi_host_time", "synthetic", "unity_dsp", "godot_audio"] }
+    },
+    "inputs": { "$ref": "#/$defs/artifacts" },
+    "outputs": { "$ref": "#/$defs/artifacts" }
+  },
+  "$defs": {
+    "artifacts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["path", "sha256"],
+        "properties": {
+          "path": { "type": "string", "minLength": 1, "pattern": "^(?!/)(?!.*\\\\).+" },
+          "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+        }
+      }
+    }
+  }
+}

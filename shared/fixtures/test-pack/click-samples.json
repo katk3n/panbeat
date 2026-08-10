@@ -1,0 +1,87 @@
+{
+  "schema_version": "1.0.0",
+  "audio_file": "click.wav",
+  "sample_rate_hz": 48000,
+  "clock_domain": "song_time",
+  "entries": [
+    {
+      "timestamp_us": 1000000,
+      "sample_index": 48000,
+      "note_ids": [
+        "note-001"
+      ]
+    },
+    {
+      "timestamp_us": 2000000,
+      "sample_index": 96000,
+      "note_ids": [
+        "note-002"
+      ]
+    },
+    {
+      "timestamp_us": 3000000,
+      "sample_index": 144000,
+      "note_ids": [
+        "note-003"
+      ]
+    },
+    {
+      "timestamp_us": 4000000,
+      "sample_index": 192000,
+      "note_ids": [
+        "note-004",
+        "note-005"
+      ]
+    },
+    {
+      "timestamp_us": 5000000,
+      "sample_index": 240000,
+      "note_ids": [
+        "note-006"
+      ]
+    },
+    {
+      "timestamp_us": 9000000,
+      "sample_index": 432000,
+      "note_ids": [
+        "note-007"
+      ]
+    },
+    {
+      "timestamp_us": 12000000,
+      "sample_index": 576000,
+      "note_ids": [
+        "note-008"
+      ]
+    },
+    {
+      "timestamp_us": 16000000,
+      "sample_index": 768000,
+      "note_ids": [
+        "note-009"
+      ]
+    },
+    {
+      "timestamp_us": 20000000,
+      "sample_index": 960000,
+      "note_ids": [
+        "note-010",
+        "note-011"
+      ]
+    },
+    {
+      "timestamp_us": 25000000,
+      "sample_index": 1200000,
+      "note_ids": [
+        "note-012"
+      ]
+    },
+    {
+      "timestamp_us": 29000000,
+      "sample_index": 1392000,
+      "note_ids": [
+        "note-013"
+      ]
+    }
+  ]
+}

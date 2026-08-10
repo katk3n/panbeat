@@ -1,0 +1,8 @@
+#!/bin/sh
+set -eu
+unity="/Applications/Unity/Hub/Editor/6000.3.21f1/Unity.app/Contents/MacOS/Unity"
+if [ ! -x "$unity" ]; then
+  printf '%s\n' 'unity: Unity 6000.3.21f1 is missing; see pocs/unity/toolchain.md' >&2
+  exit 78
+fi
+exec "$unity" "$@"

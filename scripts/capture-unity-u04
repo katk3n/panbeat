@@ -1,0 +1,11 @@
+#!/bin/sh
+set -eu
+script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+repository_root=$(CDPATH= cd -- "$script_dir/.." && pwd)
+"$script_dir/build-unity-midi-plugin"
+mkdir -p "$repository_root/artifacts/reports/unity-u04"
+"$script_dir/unity" -batchmode -nographics -quit \
+  -projectPath "$repository_root/pocs/unity" \
+  -executeMethod PanBeat.Editor.ScreenshotCommand.Capture \
+  -panbeatScreenshotOutput "$repository_root/artifacts/reports/unity-u04/three-techniques.png" \
+  -logFile "$repository_root/artifacts/reports/unity-u04/capture.log"

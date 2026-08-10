@@ -1,0 +1,1 @@
+{"schema_version":"1.0.0","record_id":"j1","note_id":"n3","input_event_id":"synthetic-f03:0","note_timestamp_us":3000000,"input_timestamp_us":3004000,"delta_us":4000,"clock_domain":"song_time","technique":"slap","target_id":"outer-hit-radius","judgement":"perfect"}

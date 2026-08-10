@@ -1,0 +1,7 @@
+{
+  "schema_version": "1.0.0",
+  "file": "click.wav",
+  "spdx_license": "CC0-1.0",
+  "provenance": "Generated from test-pack-source.json by scripts/generate-test-pack; no third-party audio samples are used.",
+  "waveform": "integer alternating-square pulse with linear decay"
+}

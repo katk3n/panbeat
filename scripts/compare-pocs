@@ -1,0 +1,23 @@
+#!/bin/sh
+set -eu
+script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+repository_root=$(CDPATH= cd -- "$script_dir/.." && pwd)
+unity_results="$repository_root/artifacts/raw/unity-u06"
+godot_results="$repository_root/artifacts/raw/godot-g06"
+output="$repository_root/artifacts/raw/e01-comparison"
+
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    -h|--help)
+      printf '%s\n' 'Usage: scripts/compare-pocs [--unity-results DIR] [--godot-results DIR] [--output DIR]'
+      exit 0
+      ;;
+    --unity-results) unity_results="${2-}"; shift 2 ;;
+    --godot-results) godot_results="${2-}"; shift 2 ;;
+    --output) output="${2-}"; shift 2 ;;
+    *) printf 'compare-pocs: unknown option: %s\n' "$1" >&2; exit 64 ;;
+  esac
+done
+
+node "$script_dir/compare-pocs.mjs" \
+  --unity-results "$unity_results" --godot-results "$godot_results" --output "$output"

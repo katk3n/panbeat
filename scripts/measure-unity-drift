@@ -1,0 +1,34 @@
+#!/bin/sh
+set -eu
+
+script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+repository_root=$(CDPATH= cd -- "$script_dir/.." && pwd)
+duration=30
+label=30s
+
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --duration-seconds) duration="${2-}"; shift 2 ;;
+    --label) label="${2-}"; shift 2 ;;
+    -h|--help)
+      printf '%s\n' 'Usage: scripts/measure-unity-drift [--duration-seconds NUMBER] [--label TEXT]'
+      exit 0
+      ;;
+    *) printf 'measure-unity-drift: unknown option: %s\n' "$1" >&2; exit 64 ;;
+  esac
+done
+
+output_dir="$repository_root/artifacts/raw/unity-u02"
+report_dir="$repository_root/artifacts/reports/unity-u02"
+mkdir -p "$output_dir" "$report_dir"
+
+"$script_dir/unity" -batchmode -nographics -quit \
+  -projectPath "$repository_root/pocs/unity" \
+  -executeMethod PanBeat.Editor.DriftCommand.Run \
+  -panbeatDurationSeconds "$duration" \
+  -panbeatSampleIntervalSeconds 0.1 \
+  -panbeatDriftOutput "$output_dir/drift-$label.jsonl" \
+  -panbeatManifestOutput "$output_dir/manifest-$label.json" \
+  -logFile "$report_dir/drift-$label.log"
+
+printf 'measure-unity-drift: wrote %s\n' "$output_dir/drift-$label.jsonl"

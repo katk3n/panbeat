@@ -1,0 +1,11 @@
+{
+  "audio_offset_us": 0,
+  "engine": "godot",
+  "input_offset_us": 0,
+  "scenarios": [
+    "60hz",
+    "120hz",
+    "frame-stall"
+  ],
+  "schema_version": "1.0.0"
+}

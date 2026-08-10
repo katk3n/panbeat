@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://panbeat.local/schemas/instrument-profile.schema.json",
+  "title": "PanBeat Phase 0 Instrument Profile",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "profile_id", "device", "settings", "unknown_policy", "deduplication", "mappings"],
+  "properties": {
+    "schema_version": { "const": "1.0.0" },
+    "profile_id": { "type": "string", "minLength": 1 },
+    "device": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["manufacturer", "model"],
+      "properties": {
+        "manufacturer": { "type": "string", "minLength": 1 },
+        "model": { "type": "string", "minLength": 1 },
+        "firmware": { "type": "string", "minLength": 1 }
+      }
+    },
+    "settings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["tone", "style"],
+      "properties": {
+        "tone": { "type": "string", "minLength": 1 },
+        "style": { "type": "string", "minLength": 1 }
+      }
+    },
+    "unknown_policy": { "const": "diagnostic" },
+    "deduplication": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mode", "window_us", "signature_fields", "reason"],
+      "properties": {
+        "mode": { "enum": ["none", "drop_matching_within_window"] },
+        "window_us": { "type": "integer", "minimum": 0, "maximum": 1000000 },
+        "signature_fields": {
+          "type": "array",
+          "items": { "enum": ["channel_wire", "note", "velocity"] },
+          "uniqueItems": true
+        },
+        "reason": { "type": "string", "minLength": 1 }
+      }
+    },
+    "mappings": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["channel_wire", "note", "velocity_min", "velocity_max", "technique", "target_id"],
+        "properties": {
+          "channel_wire": { "type": "integer", "minimum": 0, "maximum": 15 },
+          "note": { "type": "integer", "minimum": 0, "maximum": 127 },
+          "velocity_min": { "type": "integer", "minimum": 1, "maximum": 127 },
+          "velocity_max": { "type": "integer", "minimum": 1, "maximum": 127 },
+          "technique": { "enum": ["tone", "ding", "slap"] },
+          "target_id": { "type": "string", "minLength": 1 }
+        }
+      }
+    }
+  }
+}

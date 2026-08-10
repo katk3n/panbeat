@@ -1,0 +1,1 @@
+{"schema_version":"1.0.0","record_id":"bad-miss","note_id":"n1","input_event_id":"event-must-be-omitted-for-miss","note_timestamp_us":1000000,"clock_domain":"song_time","technique":"tone","target_id":"tone-1","judgement":"miss"}

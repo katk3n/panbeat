@@ -1,0 +1,28 @@
+{
+  "schema_version": "1.0.0",
+  "pack_id": "phase0-30s-v1",
+  "bpm": 120,
+  "duration_us": 30000000,
+  "sample_rate_hz": 48000,
+  "channels": 1,
+  "bits_per_sample": 16,
+  "click_duration_samples": 480,
+  "click_peak_amplitude": 12000,
+  "drift_loop_count": 10,
+  "timing_windows_us": { "perfect": 30000, "great": 60000, "good": 100000 },
+  "events": [
+    { "beat": 2, "notes": [{ "technique": "tone", "target_id": "tone-1" }] },
+    { "beat": 4, "notes": [{ "technique": "ding", "target_id": "ding" }] },
+    { "beat": 6, "notes": [{ "technique": "slap", "target_id": "outer-hit-radius" }] },
+    { "beat": 8, "notes": [{ "technique": "tone", "target_id": "tone-2" }, { "technique": "ding", "target_id": "ding" }] },
+    { "beat": 10, "notes": [{ "technique": "tone", "target_id": "tone-3" }] },
+    { "beat": 18, "notes": [{ "technique": "slap", "target_id": "outer-hit-radius" }] },
+    { "beat": 24, "notes": [{ "technique": "ding", "target_id": "ding" }] },
+    { "beat": 32, "notes": [{ "technique": "tone", "target_id": "tone-4" }] },
+    { "beat": 40, "notes": [{ "technique": "slap", "target_id": "outer-hit-radius" }, { "technique": "tone", "target_id": "tone-5" }] },
+    { "beat": 50, "notes": [{ "technique": "ding", "target_id": "ding" }] },
+    { "beat": 58, "notes": [{ "technique": "tone", "target_id": "tone-1" }] }
+  ],
+  "golden_deltas_us": [-100001, -100000, -60001, -60000, -30001, -30000, 0, 30000, 30001, 60000, 60001, 100000, 100001],
+  "include_no_input_miss": true
+}

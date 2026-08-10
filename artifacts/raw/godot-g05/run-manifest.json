@@ -1,0 +1,44 @@
+{
+  "build_type": "editor",
+  "clock_domains": [
+    "song_time",
+    "godot_audio"
+  ],
+  "engine": "godot",
+  "inputs": [
+    {
+      "path": "shared/fixtures/test-pack/golden-inputs.json",
+      "sha256": "dab29c86b6af6c49f9bc385d5c7e65f23616ec8e88ac5d0fec795db023697a67"
+    },
+    {
+      "path": "shared/fixtures/instrument-profiles/roland-mn10-handpan-minor-v1.json",
+      "sha256": "ae0d853db4b1974788c6ffe645fc652110e374eb04fea5ab397adfe6103440f9"
+    },
+    {
+      "path": "artifacts/raw/godot-g03/lifecycle-verified.jsonl",
+      "sha256": "4ee41d5afa2fd65944e531e47f9fde78b5158c9ddeb1d2d97d5b759c53ab0e9b"
+    }
+  ],
+  "outputs": [
+    {
+      "path": "artifacts/raw/godot-g05/judgements-60hz.json",
+      "sha256": "e775ea79725e76cade6f961b9dc07aa1c2a5430aa3f2c92b778a1dada4ddfef4"
+    },
+    {
+      "path": "artifacts/raw/godot-g05/judgements-120hz.json",
+      "sha256": "e775ea79725e76cade6f961b9dc07aa1c2a5430aa3f2c92b778a1dada4ddfef4"
+    },
+    {
+      "path": "artifacts/raw/godot-g05/judgements-frame-stall.json",
+      "sha256": "e775ea79725e76cade6f961b9dc07aa1c2a5430aa3f2c92b778a1dada4ddfef4"
+    },
+    {
+      "path": "artifacts/raw/godot-g05/performance-log.json",
+      "sha256": "310587694d3acdd08960ef1baa6aebb4186a05ea3dba666b8e602e87f671a37c"
+    }
+  ],
+  "run_id": "godot-g05",
+  "schema_version": "1.0.0",
+  "source_revision": "working-tree",
+  "started_at": "2026-08-10T07:26:48"
+}

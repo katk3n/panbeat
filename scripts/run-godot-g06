@@ -1,0 +1,40 @@
+#!/bin/sh
+set -eu
+script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+repository_root=$(CDPATH= cd -- "$script_dir/.." && pwd)
+report_dir="$repository_root/artifacts/reports/godot-g06"
+build_dir="$repository_root/artifacts/builds/godot-g06"
+temporary_root=$(mktemp -d /private/tmp/panbeat-godot-g06.XXXXXX)
+clean_root="$temporary_root/checkout"
+clean_project="$clean_root/pocs/godot"
+cleanup() { rm -rf "$temporary_root"; }
+trap cleanup EXIT HUP INT TERM
+mkdir -p "$report_dir" "$build_dir" "$clean_root"
+
+attempt=${PANBEAT_ATTEMPT:-verified}
+
+rsync -a \
+  --exclude .git --exclude .tools --exclude node_modules \
+  --exclude pocs/unity/Library --exclude pocs/unity/UserSettings \
+  --exclude pocs/godot/.godot --exclude artifacts/builds --exclude artifacts/reports \
+  "$repository_root/" "$clean_root/"
+
+test_start=$(date +%s)
+"$script_dir/godot" --headless --path "$clean_project" \
+  --script res://tests/run_tests.gd --log-file "$report_dir/headless-$attempt.log"
+rg -q 'PANBEAT_GODOT_TESTS_OK 45/45' "$report_dir/headless-$attempt.log" || {
+  printf '%s\n' 'run-godot-g06: success marker missing from clean test log' >&2
+  exit 1
+}
+test_end=$(date +%s)
+
+build_start=$(date +%s)
+"$script_dir/godot" --headless --path "$clean_project" \
+  --export-release macOS "$build_dir/PanBeat.zip" --log-file "$report_dir/build-$attempt.log"
+build_end=$(date +%s)
+
+"$script_dir/run-godot-g05"
+"$script_dir/capture-godot-g04"
+node "$script_dir/create-hard-gate-bundle.mjs" --engine godot \
+  --clean-test-seconds "$((test_end - test_start))" \
+  --clean-build-seconds "$((build_end - build_start))"

@@ -1,0 +1,12 @@
+{
+  "schema_version": "1.0.0",
+  "test_id": "phase0-5min-drift-v1",
+  "source_pack": "phase0-30s-v1",
+  "audio_file": "click.wav",
+  "loop_count": 10,
+  "loop_duration_us": 30000000,
+  "expected_duration_us": 300000000,
+  "sample_rate_hz": 48000,
+  "expected_total_samples": 14400000,
+  "clock_domain": "song_time"
+}

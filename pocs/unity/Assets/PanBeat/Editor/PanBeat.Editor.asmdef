@@ -1,0 +1,7 @@
+{
+  "name": "PanBeat.Editor",
+  "rootNamespace": "PanBeat.Editor",
+  "references": ["PanBeat.Domain", "PanBeat.Infrastructure", "PanBeat.Presentation"],
+  "includePlatforms": ["Editor"],
+  "autoReferenced": true
+}

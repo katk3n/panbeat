@@ -1,0 +1,14 @@
+{
+  "audio_driver": "Dummy",
+  "backward_count": 343,
+  "clock_domain": "audio_server_time_since_last_mix_with_monotonic_reference",
+  "correction_count": 343,
+  "duration_seconds": 300.0,
+  "engine": "godot",
+  "engine_version": "4.6-stable (official)",
+  "max_backward_us": 102220,
+  "measurement_scope": "headless diagnostic; Dummy driver is not real output latency evidence",
+  "mix_rate_hz": 44100.0,
+  "output_latency_seconds": 0.0,
+  "schema_version": "1.0.0"
+}

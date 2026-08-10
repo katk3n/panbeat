@@ -1,0 +1,39 @@
+{
+  "schema_version": "1.0.0",
+  "run_id": "e03-engine-selection",
+  "engine": "common",
+  "started_at": "2026-08-10T08:35:04.814Z",
+  "source_revision": "working-tree",
+  "build_type": "tool",
+  "clock_domains": [
+    "monotonic"
+  ],
+  "inputs": [
+    {
+      "path": "shared/fixtures/engine-evaluation-scores.json",
+      "sha256": "d3efb108e7cd822e0f2f8d643b6530321912c376ede78d1c6988ec6194d86e61"
+    },
+    {
+      "path": "artifacts/raw/unity-u06/hard-gate-summary.json",
+      "sha256": "042650d4083a59490bd4361ccbc5f2646471379322094ce2db0156356dc071ab"
+    },
+    {
+      "path": "artifacts/raw/godot-g06/hard-gate-summary.json",
+      "sha256": "8cfc85f6aff5069e65dc081dda011b889f10232498d4801de46df2ef0c9d5390"
+    },
+    {
+      "path": "artifacts/raw/e02-real-device/summary.json",
+      "sha256": "c95d7ecf0477bdb54e355c175b15664d53b8b4405682ba311ae72bd25811fda2"
+    },
+    {
+      "path": "artifacts/raw/e03-release-drift/summary.json",
+      "sha256": "868d87ca13e834a1970fd58149b9fa2a15585acd4970a6cbc0ea9ff4197a6deb"
+    }
+  ],
+  "outputs": [
+    {
+      "path": "artifacts/raw/e03-engine-selection/score-result.json",
+      "sha256": "e8f192d50f91460dd0ceb554afa64aabe6b1b114b917f2351dc539a3eafbf04f"
+    }
+  ]
+}

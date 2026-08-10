@@ -1,0 +1,28 @@
+#!/bin/sh
+set -eu
+script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+repository_root=$(CDPATH= cd -- "$script_dir/.." && pwd)
+project="$repository_root/pocs/godot"
+mode=all
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    -h|--help) printf '%s\n' 'Usage: scripts/check-godot [--project PATH] [--mode test|build|all]'; exit 0 ;;
+    --project) case "${2-}" in /*) project="$2" ;; *) project="$repository_root/${2-}" ;; esac; shift 2 ;;
+    --mode) case "${2-}" in test|build|all) mode="$2"; shift 2 ;; *) printf '%s\n' 'check-godot: --mode must be test, build, or all' >&2; exit 64 ;; esac ;;
+    *) printf 'check-godot: unknown option: %s\n' "$1" >&2; exit 64 ;;
+  esac
+done
+[ -f "$project/project.godot" ] || { printf 'check-godot: not a Godot project: %s\n' "$project" >&2; exit 66; }
+report_dir="$repository_root/artifacts/reports/godot-g01"
+build_dir="$repository_root/artifacts/builds/godot-g01"
+mkdir -p "$report_dir" "$build_dir"
+run_test() {
+  "$script_dir/godot" --headless --path "$project" --script res://tests/run_tests.gd --log-file "$report_dir/headless.log"
+  rg -q 'PANBEAT_GODOT_TESTS_OK 45/45' "$report_dir/headless.log" || {
+    printf '%s\n' 'check-godot: success marker missing from headless test log' >&2
+    exit 1
+  }
+}
+run_build() { "$script_dir/godot" --headless --path "$project" --export-debug macOS "$build_dir/PanBeat.zip" --log-file "$report_dir/export.log"; }
+case "$mode" in test) run_test ;; build) run_build ;; all) run_test; run_build ;; esac
+printf 'check-godot: %s succeeded\n' "$mode"

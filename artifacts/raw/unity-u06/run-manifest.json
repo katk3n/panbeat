@@ -1,0 +1,61 @@
+{
+  "schema_version": "1.0.0",
+  "run_id": "unity-u06",
+  "engine": "unity",
+  "started_at": "2026-08-10T07:15:22.220Z",
+  "source_revision": "working-tree",
+  "build_type": "release",
+  "clock_domains": [
+    "song_time",
+    "monotonic",
+    "unity_dsp"
+  ],
+  "inputs": [
+    {
+      "path": "shared/fixtures/instrument-profiles/roland-mn10-handpan-minor-v1.json",
+      "sha256": "ae0d853db4b1974788c6ffe645fc652110e374eb04fea5ab397adfe6103440f9"
+    },
+    {
+      "path": "artifacts/raw/m02-mood-pan-20260810/handpan-minor-slap-left3-then-right3.jsonl",
+      "sha256": "d12ed3f77808be6b76645f454a5b21ec83469056874bc916087203fc6ae2d4c9"
+    },
+    {
+      "path": "artifacts/raw/unity-u03/lifecycle-verified.jsonl",
+      "sha256": "2bd29f2af90ec6691785bbb51c4dba0c0aa5bbcd3e1419844a91edcaae02c4ec"
+    },
+    {
+      "path": "artifacts/raw/unity-u02/summary.json",
+      "sha256": "da9aa6a1d5e4db598807a3a8480af24fea5fc1282b35cd85675f35408d9890b4"
+    },
+    {
+      "path": "artifacts/raw/unity-u05/judgements-60hz.json",
+      "sha256": "2f57f50d2d049cb933916034de195d6f829192a33335b37bd27c17d3b4a671dd"
+    }
+  ],
+  "outputs": [
+    {
+      "path": "artifacts/raw/unity-u06/hard-gate-summary.json",
+      "sha256": "042650d4083a59490bd4361ccbc5f2646471379322094ce2db0156356dc071ab"
+    },
+    {
+      "path": "artifacts/raw/unity-u06/build-metadata.json",
+      "sha256": "6fc2bbe1b72fd6e5ba23f034e28bfacb09634a69360d2cde806c58243f7c4688"
+    },
+    {
+      "path": "artifacts/reports/unity-u04/three-techniques.png",
+      "sha256": "d12c41fae3d6d1c00954b7b8e52cd0507226999c13a88fefff2418d20b032b6b"
+    },
+    {
+      "path": "artifacts/builds/unity-u06/PanBeat.zip",
+      "sha256": "7176601a13d6f231f901d93e08b645dec91615d7a2f2617c998827a9582ec6ba"
+    },
+    {
+      "path": "artifacts/reports/unity-u06/editmode.log",
+      "sha256": "7a790d81cc6ab7fc4c19b5b53307c868b01fe027a01544025e7cb99fe35ae5a0"
+    },
+    {
+      "path": "artifacts/reports/unity-u06/editmode-results.xml",
+      "sha256": "3f404dd5387c00f0fe4d5afcca0115c827eb5234ff1c2ea5436579ff3e0b6555"
+    }
+  ]
+}

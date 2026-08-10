@@ -1,0 +1,9 @@
+#!/bin/sh
+set -eu
+script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+godot="$script_dir/../.tools/godot/4.6/Godot.app/Contents/MacOS/Godot"
+if [ ! -x "$godot" ]; then
+  printf '%s\n' 'godot: repository-local Godot 4.6 is missing; see pocs/godot/toolchain.md' >&2
+  exit 78
+fi
+exec "$godot" "$@"

@@ -1,0 +1,8 @@
+{
+  "name": "PanBeat.Domain.Tests",
+  "rootNamespace": "PanBeat.Domain.Tests",
+  "references": ["PanBeat.Domain", "PanBeat.Infrastructure"],
+  "optionalUnityReferences": ["TestAssemblies"],
+  "includePlatforms": ["Editor"],
+  "autoReferenced": false
+}

@@ -1,0 +1,38 @@
+#!/bin/sh
+set -eu
+script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+repository_root=$(CDPATH= cd -- "$script_dir/.." && pwd)
+engine=""
+session=""
+duration=90
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --engine) engine="${2-}"; shift 2 ;;
+    --session) session="${2-}"; shift 2 ;;
+    --duration-seconds) duration="${2-}"; shift 2 ;;
+    -h|--help) printf '%s\n' 'Usage: scripts/run-e02-session --engine unity|godot --session 1|2|3 [--duration-seconds 90]'; exit 0 ;;
+    *) printf 'run-e02-session: unknown option: %s\n' "$1" >&2; exit 64 ;;
+  esac
+done
+case "$engine" in unity|godot) ;; *) printf '%s\n' 'run-e02-session: --engine must be unity or godot' >&2; exit 64 ;; esac
+case "$session" in 1|2|3) ;; *) printf '%s\n' 'run-e02-session: --session must be 1, 2, or 3' >&2; exit 64 ;; esac
+raw_dir="$repository_root/artifacts/raw/e02-real-device/$engine"
+report_dir="$repository_root/artifacts/reports/e02-real-device/$engine"
+output="$raw_dir/session-$session.jsonl"
+[ ! -e "$output" ] || { printf 'run-e02-session: refusing to overwrite %s\n' "$output" >&2; exit 73; }
+mkdir -p "$raw_dir" "$report_dir"
+
+if [ "$engine" = unity ]; then
+  executable="$repository_root/artifacts/builds/e02-real-device/unity/PanBeat.app/Contents/MacOS/PanBeat"
+  [ -x "$executable" ] || { printf '%s\n' 'run-e02-session: Unity E02 release build is missing; run scripts/prepare-e02-builds' >&2; exit 66; }
+  "$executable" -batchmode -nographics -logFile "$report_dir/session-$session.log" \
+    -panbeatE02Output "$output" -panbeatDurationSeconds "$duration"
+else
+  executable="$repository_root/artifacts/builds/e02-real-device/godot/PanBeat.app/Contents/MacOS/PanBeat"
+  [ -x "$executable" ] || { printf '%s\n' 'run-e02-session: Godot E02 release build is missing; run scripts/prepare-e02-builds' >&2; exit 66; }
+  "$executable" --headless --log-file "$report_dir/session-$session.log" -- \
+    --e02-output "$output" --duration-seconds "$duration" \
+    --profile "$repository_root/shared/fixtures/instrument-profiles/roland-mn10-handpan-minor-v1.json"
+fi
+shasum -a 256 "$output" > "$raw_dir/session-$session.sha256"
+printf 'run-e02-session: wrote %s\n' "$output"

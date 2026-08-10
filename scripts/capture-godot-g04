@@ -1,0 +1,9 @@
+#!/bin/sh
+set -eu
+script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+repository_root=$(CDPATH= cd -- "$script_dir/.." && pwd)
+output_dir="$repository_root/artifacts/reports/godot-g04"
+mkdir -p "$output_dir"
+"$script_dir/godot" --headless --path "$repository_root/pocs/godot" \
+  --script res://tests/capture_preview.gd --log-file "$output_dir/capture.log" -- \
+  --output "$output_dir/three-techniques.png"

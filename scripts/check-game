@@ -1,0 +1,23 @@
+#!/bin/sh
+set -eu
+script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+repository_root=$(CDPATH= cd -- "$script_dir/.." && pwd)
+project="$repository_root/game"
+mode=all
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    -h|--help) printf '%s\n' 'Usage: scripts/check-game [--mode test|build|all]'; exit 0 ;;
+    --mode) case "${2-}" in test|build|all) mode="$2"; shift 2 ;; *) printf '%s\n' 'check-game: --mode must be test, build, or all' >&2; exit 64 ;; esac ;;
+    *) printf 'check-game: unknown option: %s\n' "$1" >&2; exit 64 ;;
+  esac
+done
+report_dir="$repository_root/artifacts/reports/game"
+build_dir="$repository_root/artifacts/builds/game"
+mkdir -p "$report_dir" "$build_dir"
+run_test() {
+  "$script_dir/godot" --headless --path "$project" --script res://tests/run_tests.gd --log-file "$report_dir/test.log"
+  rg -q 'PANBEAT_GAME_TESTS_OK 6/6' "$report_dir/test.log" || { printf '%s\n' 'check-game: success marker missing' >&2; exit 1; }
+}
+run_build() { "$script_dir/godot" --headless --path "$project" --export-release macOS "$build_dir/PanBeat.zip" --log-file "$report_dir/build.log"; }
+case "$mode" in test) run_test ;; build) run_build ;; all) run_test; run_build ;; esac
+printf 'check-game: %s succeeded\n' "$mode"

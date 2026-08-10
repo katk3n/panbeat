@@ -1,0 +1,14 @@
+{
+  "schema_version": "1.0.0",
+  "verified_at": "2026-08-09T18:55:17+09:00",
+  "version": "6000.3.21f1",
+  "revision": "c02631ffc030",
+  "editor_path": "/Applications/Unity/Hub/Editor/6000.3.21f1/Unity.app/Contents/MacOS/Unity",
+  "architecture": "arm64",
+  "mac_standalone_support": "present",
+  "license": { "product": "Unity Personal", "type": "Assigned", "expiration": "Unlimited" },
+  "cli_version_check": "pass",
+  "headless_project_open": "pass",
+  "headless_exit": 0,
+  "note": "External dotnet SDK warning appeared during shutdown; Unity internal compilation and batch exit succeeded."
+}

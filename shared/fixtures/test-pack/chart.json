@@ -1,0 +1,87 @@
+{
+  "schema_version": "1.0.0",
+  "chart_id": "phase0-30s-v1",
+  "clock_domain": "song_time",
+  "time_unit": "microseconds",
+  "duration_us": 30000000,
+  "notes": [
+    {
+      "note_id": "note-001",
+      "timestamp_us": 1000000,
+      "technique": "tone",
+      "target_id": "tone-1"
+    },
+    {
+      "note_id": "note-002",
+      "timestamp_us": 2000000,
+      "technique": "ding",
+      "target_id": "ding"
+    },
+    {
+      "note_id": "note-003",
+      "timestamp_us": 3000000,
+      "technique": "slap",
+      "target_id": "outer-hit-radius"
+    },
+    {
+      "note_id": "note-004",
+      "timestamp_us": 4000000,
+      "technique": "tone",
+      "target_id": "tone-2"
+    },
+    {
+      "note_id": "note-005",
+      "timestamp_us": 4000000,
+      "technique": "ding",
+      "target_id": "ding"
+    },
+    {
+      "note_id": "note-006",
+      "timestamp_us": 5000000,
+      "technique": "tone",
+      "target_id": "tone-3"
+    },
+    {
+      "note_id": "note-007",
+      "timestamp_us": 9000000,
+      "technique": "slap",
+      "target_id": "outer-hit-radius"
+    },
+    {
+      "note_id": "note-008",
+      "timestamp_us": 12000000,
+      "technique": "ding",
+      "target_id": "ding"
+    },
+    {
+      "note_id": "note-009",
+      "timestamp_us": 16000000,
+      "technique": "tone",
+      "target_id": "tone-4"
+    },
+    {
+      "note_id": "note-010",
+      "timestamp_us": 20000000,
+      "technique": "slap",
+      "target_id": "outer-hit-radius"
+    },
+    {
+      "note_id": "note-011",
+      "timestamp_us": 20000000,
+      "technique": "tone",
+      "target_id": "tone-5"
+    },
+    {
+      "note_id": "note-012",
+      "timestamp_us": 25000000,
+      "technique": "ding",
+      "target_id": "ding"
+    },
+    {
+      "note_id": "note-013",
+      "timestamp_us": 29000000,
+      "technique": "tone",
+      "target_id": "tone-1"
+    }
+  ]
+}

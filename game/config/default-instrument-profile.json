@@ -1,0 +1,32 @@
+{
+  "schema_version": "1.0.0",
+  "profile_id": "roland-mn10-handpan-minor-v1",
+  "device": {
+    "manufacturer": "Roland",
+    "model": "Mood Pan MN-10"
+  },
+  "settings": {
+    "tone": "handpan",
+    "style": "minor"
+  },
+  "unknown_policy": "diagnostic",
+  "deduplication": {
+    "mode": "none",
+    "window_us": 0,
+    "signature_fields": [],
+    "reason": "No Ch.1/Ch.2 duplicate was observed in the measured Handpan / Minor traces."
+  },
+  "mappings": [
+    { "channel_wire": 0, "note": 50, "velocity_min": 1, "velocity_max": 127, "technique": "ding", "target_id": "ding" },
+    { "channel_wire": 0, "note": 57, "velocity_min": 1, "velocity_max": 127, "technique": "tone", "target_id": "tone-2" },
+    { "channel_wire": 0, "note": 58, "velocity_min": 1, "velocity_max": 127, "technique": "tone", "target_id": "tone-3" },
+    { "channel_wire": 0, "note": 60, "velocity_min": 1, "velocity_max": 127, "technique": "tone", "target_id": "tone-4" },
+    { "channel_wire": 0, "note": 62, "velocity_min": 1, "velocity_max": 127, "technique": "tone", "target_id": "tone-5" },
+    { "channel_wire": 0, "note": 64, "velocity_min": 1, "velocity_max": 127, "technique": "tone", "target_id": "tone-6" },
+    { "channel_wire": 0, "note": 65, "velocity_min": 1, "velocity_max": 127, "technique": "tone", "target_id": "tone-7" },
+    { "channel_wire": 0, "note": 67, "velocity_min": 1, "velocity_max": 127, "technique": "tone", "target_id": "tone-8" },
+    { "channel_wire": 0, "note": 69, "velocity_min": 1, "velocity_max": 127, "technique": "tone", "target_id": "tone-9" },
+    { "channel_wire": 0, "note": 93, "velocity_min": 1, "velocity_max": 127, "technique": "slap", "target_id": "outer-hit-radius" },
+    { "channel_wire": 0, "note": 95, "velocity_min": 1, "velocity_max": 127, "technique": "slap", "target_id": "outer-hit-radius" }
+  ]
+}

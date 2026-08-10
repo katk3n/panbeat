@@ -1,0 +1,126 @@
+{
+  "schema_version": "1.0.0",
+  "contract_change": "EC-001",
+  "fixture": "shared/fixtures/test-pack/click.wav",
+  "engines": {
+    "unity": {
+      "planned": 3,
+      "attempted": 3,
+      "valid": 3,
+      "failed": 0,
+      "missing": 0,
+      "duration_seconds": 60,
+      "threshold_us": 5000,
+      "audio_driver_valid": true,
+      "final_absolute_us": {
+        "samples": 3,
+        "mean": 6,
+        "p50": 6,
+        "p95": 6,
+        "p99": 6,
+        "max": 6
+      },
+      "all_sample_absolute_us": {
+        "samples": 1794,
+        "mean": 5.753065774804905,
+        "p50": 5,
+        "p95": 13,
+        "p99": 14,
+        "max": 14
+      },
+      "trials": [
+        {
+          "trial": 1,
+          "status": "valid",
+          "samples": 598,
+          "final_drift_us": 6,
+          "final_absolute_drift_us": 6,
+          "audio_driver": "Unity audio output",
+          "output_sample_rate_hz": 44100,
+          "evidence": "artifacts/raw/e03-release-drift/unity/trial-1.jsonl"
+        },
+        {
+          "trial": 2,
+          "status": "valid",
+          "samples": 598,
+          "final_drift_us": 6,
+          "final_absolute_drift_us": 6,
+          "audio_driver": "Unity audio output",
+          "output_sample_rate_hz": 44100,
+          "evidence": "artifacts/raw/e03-release-drift/unity/trial-2.jsonl"
+        },
+        {
+          "trial": 3,
+          "status": "valid",
+          "samples": 598,
+          "final_drift_us": 6,
+          "final_absolute_drift_us": 6,
+          "audio_driver": "Unity audio output",
+          "output_sample_rate_hz": 44100,
+          "evidence": "artifacts/raw/e03-release-drift/unity/trial-3.jsonl"
+        }
+      ],
+      "hard_gate": "Pass"
+    },
+    "godot": {
+      "planned": 3,
+      "attempted": 3,
+      "valid": 3,
+      "failed": 0,
+      "missing": 0,
+      "duration_seconds": 60,
+      "threshold_us": 5000,
+      "audio_driver_valid": true,
+      "final_absolute_us": {
+        "samples": 3,
+        "mean": 1375.6666666666667,
+        "p50": 495,
+        "p95": 3155,
+        "p99": 3155,
+        "max": 3155
+      },
+      "all_sample_absolute_us": {
+        "samples": 1797,
+        "mean": 1129.5125208681136,
+        "p50": 1004,
+        "p95": 2589,
+        "p99": 3003,
+        "max": 9552
+      },
+      "trials": [
+        {
+          "trial": 1,
+          "status": "valid",
+          "samples": 599,
+          "final_drift_us": -477,
+          "final_absolute_drift_us": 477,
+          "audio_driver": "CoreAudio",
+          "output_sample_rate_hz": 44100,
+          "evidence": "artifacts/raw/e03-release-drift/godot/trial-1.jsonl"
+        },
+        {
+          "trial": 2,
+          "status": "valid",
+          "samples": 599,
+          "final_drift_us": -3155,
+          "final_absolute_drift_us": 3155,
+          "audio_driver": "CoreAudio",
+          "output_sample_rate_hz": 44100,
+          "evidence": "artifacts/raw/e03-release-drift/godot/trial-2.jsonl"
+        },
+        {
+          "trial": 3,
+          "status": "valid",
+          "samples": 599,
+          "final_drift_us": -495,
+          "final_absolute_drift_us": 495,
+          "audio_driver": "CoreAudio",
+          "output_sample_rate_hz": 44100,
+          "evidence": "artifacts/raw/e03-release-drift/godot/trial-3.jsonl"
+        }
+      ],
+      "hard_gate": "Pass"
+    }
+  },
+  "residual_risk": "Drift beyond one minute is not a Phase 0 hard gate after EC-001 and remains a Phase 1 measurement."
+}

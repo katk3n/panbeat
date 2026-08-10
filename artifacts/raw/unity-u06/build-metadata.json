@@ -1,0 +1,33 @@
+{
+  "schema_version": "1.0.0",
+  "engine": "unity",
+  "build_type": "release",
+  "clean_checkout_equivalent": true,
+  "excluded_from_clean_copy": [
+    ".git",
+    ".tools",
+    "node_modules",
+    "pocs/unity/Library",
+    "pocs/unity/UserSettings",
+    "pocs/godot/.godot",
+    "artifacts/builds",
+    "artifacts/reports"
+  ],
+  "clean_test_seconds": 8,
+  "clean_build_seconds": 12,
+  "gui_intervention_count": 0,
+  "automatic_retry_count": 0,
+  "machine": {
+    "hostname": "kk2024-m4-mbp.local",
+    "platform": "darwin",
+    "release": "25.5.0",
+    "architecture": "arm64",
+    "cpu": "Apple M4",
+    "logical_cpu_count": 10,
+    "memory_bytes": 25769803776
+  },
+  "build_artifact": {
+    "path": "artifacts/builds/unity-u06/PanBeat.zip",
+    "sha256": "7176601a13d6f231f901d93e08b645dec91615d7a2f2617c998827a9582ec6ba"
+  }
+}

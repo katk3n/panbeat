@@ -1,0 +1,121 @@
+{
+  "schema_version": "1.0.0",
+  "clock_domain": "song_time",
+  "timing_windows_us": {
+    "perfect": 30000,
+    "great": 60000,
+    "good": 100000
+  },
+  "cases": [
+    {
+      "case_id": "boundary-01",
+      "note_timestamp_us": 1000000,
+      "input_timestamp_us": 899999,
+      "delta_us": -100001,
+      "technique": "tone",
+      "target_id": "tone-1"
+    },
+    {
+      "case_id": "boundary-02",
+      "note_timestamp_us": 1000000,
+      "input_timestamp_us": 900000,
+      "delta_us": -100000,
+      "technique": "ding",
+      "target_id": "ding"
+    },
+    {
+      "case_id": "boundary-03",
+      "note_timestamp_us": 1000000,
+      "input_timestamp_us": 939999,
+      "delta_us": -60001,
+      "technique": "slap",
+      "target_id": "outer-hit-radius"
+    },
+    {
+      "case_id": "boundary-04",
+      "note_timestamp_us": 1000000,
+      "input_timestamp_us": 940000,
+      "delta_us": -60000,
+      "technique": "tone",
+      "target_id": "tone-1"
+    },
+    {
+      "case_id": "boundary-05",
+      "note_timestamp_us": 1000000,
+      "input_timestamp_us": 969999,
+      "delta_us": -30001,
+      "technique": "ding",
+      "target_id": "ding"
+    },
+    {
+      "case_id": "boundary-06",
+      "note_timestamp_us": 1000000,
+      "input_timestamp_us": 970000,
+      "delta_us": -30000,
+      "technique": "slap",
+      "target_id": "outer-hit-radius"
+    },
+    {
+      "case_id": "boundary-07",
+      "note_timestamp_us": 1000000,
+      "input_timestamp_us": 1000000,
+      "delta_us": 0,
+      "technique": "tone",
+      "target_id": "tone-1"
+    },
+    {
+      "case_id": "boundary-08",
+      "note_timestamp_us": 1000000,
+      "input_timestamp_us": 1030000,
+      "delta_us": 30000,
+      "technique": "ding",
+      "target_id": "ding"
+    },
+    {
+      "case_id": "boundary-09",
+      "note_timestamp_us": 1000000,
+      "input_timestamp_us": 1030001,
+      "delta_us": 30001,
+      "technique": "slap",
+      "target_id": "outer-hit-radius"
+    },
+    {
+      "case_id": "boundary-10",
+      "note_timestamp_us": 1000000,
+      "input_timestamp_us": 1060000,
+      "delta_us": 60000,
+      "technique": "tone",
+      "target_id": "tone-1"
+    },
+    {
+      "case_id": "boundary-11",
+      "note_timestamp_us": 1000000,
+      "input_timestamp_us": 1060001,
+      "delta_us": 60001,
+      "technique": "ding",
+      "target_id": "ding"
+    },
+    {
+      "case_id": "boundary-12",
+      "note_timestamp_us": 1000000,
+      "input_timestamp_us": 1100000,
+      "delta_us": 100000,
+      "technique": "slap",
+      "target_id": "outer-hit-radius"
+    },
+    {
+      "case_id": "boundary-13",
+      "note_timestamp_us": 1000000,
+      "input_timestamp_us": 1100001,
+      "delta_us": 100001,
+      "technique": "tone",
+      "target_id": "tone-1"
+    },
+    {
+      "case_id": "no-input-miss",
+      "note_timestamp_us": 1000000,
+      "technique": "tone",
+      "target_id": "tone-1"
+    }
+  ]
+}

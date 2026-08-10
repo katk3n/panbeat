@@ -1,0 +1,6 @@
+{
+  "name": "PanBeat.Infrastructure",
+  "rootNamespace": "PanBeat.Infrastructure",
+  "references": ["PanBeat.Domain"],
+  "autoReferenced": true
+}

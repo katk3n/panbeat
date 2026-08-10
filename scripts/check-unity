@@ -1,0 +1,68 @@
+#!/bin/sh
+set -eu
+
+script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+repository_root=$(CDPATH= cd -- "$script_dir/.." && pwd)
+project="$repository_root/pocs/unity"
+mode=all
+
+usage() {
+  cat <<'EOF'
+Usage: scripts/check-unity [--project PATH] [--mode test|build|all]
+
+Run the Unity Phase 0 EditMode tests and/or macOS development build.
+
+Options:
+  --project PATH  Unity project path (default: pocs/unity)
+  --mode MODE     test, build, or all (default: all)
+  -h, --help      Show this help
+EOF
+}
+
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    -h|--help) usage; exit 0 ;;
+    --project)
+      [ -n "${2-}" ] || { printf '%s\n' 'check-unity: --project requires a path' >&2; exit 64; }
+      case "$2" in /*) project="$2" ;; *) project="$repository_root/$2" ;; esac
+      shift 2
+      ;;
+    --mode)
+      case "${2-}" in test|build|all) mode="$2"; shift 2 ;; *) printf '%s\n' 'check-unity: --mode must be test, build, or all' >&2; exit 64 ;; esac
+      ;;
+    *) printf 'check-unity: unknown option: %s\n' "$1" >&2; exit 64 ;;
+  esac
+done
+
+[ -f "$project/ProjectSettings/ProjectVersion.txt" ] || {
+  printf 'check-unity: not a Unity project: %s\n' "$project" >&2
+  exit 66
+}
+
+"$script_dir/build-unity-midi-plugin"
+
+report_dir="$repository_root/artifacts/reports/unity-u01"
+build_path="$repository_root/artifacts/builds/unity-u01/PanBeat.app"
+mkdir -p "$report_dir" "$repository_root/artifacts/builds/unity-u01"
+
+run_tests() {
+  "$script_dir/unity" -batchmode -nographics -projectPath "$project" \
+    -runTests -testPlatform EditMode \
+    -testResults "$report_dir/editmode-results.xml" \
+    -logFile "$report_dir/editmode.log"
+}
+
+run_build() {
+  "$script_dir/unity" -batchmode -nographics -quit -projectPath "$project" \
+    -executeMethod PanBeat.Editor.BuildCommand.BuildMac \
+    -panbeatBuildPath "$build_path" \
+    -logFile "$report_dir/build.log"
+}
+
+case "$mode" in
+  test) run_tests ;;
+  build) run_build ;;
+  all) run_tests; run_build ;;
+esac
+
+printf 'check-unity: %s succeeded\n' "$mode"

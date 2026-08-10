@@ -1,0 +1,18 @@
+{
+  "name": "panbeat-phase0-tools",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Engine-independent validation tools for PanBeat Phase 0",
+  "scripts": {
+    "generate:test-pack": "node scripts/generate-test-pack.mjs generate",
+    "audit:instrument-profile": "node scripts/instrument-profile.mjs audit --output artifacts/reports/m03-instrument-profile-audit.json",
+    "test:instrument-profile": "node --test scripts/instrument-profile.test.mjs",
+    "test:midi-trace": "node --test scripts/midi-trace.test.mjs",
+    "test:midi-inspector": "node --test scripts/midi-inspector.test.mjs",
+    "verify:test-pack": "node scripts/generate-test-pack.mjs verify",
+    "validate:fixtures": "node scripts/validate-fixtures.mjs"
+  },
+  "devDependencies": {
+    "ajv": "8.20.0"
+  }
+}

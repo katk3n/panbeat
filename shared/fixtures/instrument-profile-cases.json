@@ -1,0 +1,18 @@
+{
+  "schema_version": "1.0.0",
+  "profile": "shared/fixtures/instrument-profiles/roland-mn10-handpan-minor-v1.json",
+  "cases": [
+    { "trace": "artifacts/raw/m02-mood-pan-20260810/all-tone-positions-style-minor-pad1-left-slap-right-slap.jsonl", "scope": "out_of_scope", "reason": "aborted exhaustive Tone sweep" },
+    { "trace": "artifacts/raw/m02-mood-pan-20260810/connection-smoke-default-tone-style.jsonl", "scope": "out_of_scope", "reason": "unknown Tone/Style" },
+    { "trace": "artifacts/raw/m02-mood-pan-20260810/gamelan-major-pads1-9-medium.jsonl", "scope": "out_of_scope", "reason": "Style is Major" },
+    { "trace": "artifacts/raw/m02-mood-pan-20260810/gamelan-minor-pads1-9-medium.jsonl", "scope": "out_of_scope", "reason": "Tone is Gamelan" },
+    { "trace": "artifacts/raw/m02-mood-pan-20260810/gamelan-minor-pads1-9-strong-approximate.jsonl", "scope": "out_of_scope", "reason": "Tone is Gamelan" },
+    { "trace": "artifacts/raw/m02-mood-pan-20260810/gamelan-minor-pads1-9-weak.jsonl", "scope": "out_of_scope", "reason": "Tone is Gamelan; one physical strike is ambiguous" },
+    { "trace": "artifacts/raw/m02-mood-pan-20260810/gamelan-minor-simultaneous-pad2-pad3-then-pad1-rapid10.jsonl", "scope": "out_of_scope", "reason": "Tone is Gamelan" },
+    { "trace": "artifacts/raw/m02-mood-pan-20260810/gamelan-minor-slap-left3-then-right3.jsonl", "scope": "out_of_scope", "reason": "Tone is Gamelan" },
+    { "trace": "artifacts/raw/m02-mood-pan-20260810/gamelan-minor-special-pad-tap3-press2s.jsonl", "scope": "out_of_scope", "reason": "Tone is Gamelan" },
+    { "trace": "artifacts/raw/m02-mood-pan-20260810/handpan-minor-pads1-9-medium.jsonl", "scope": "profile", "expected_note_on": 9, "expected_mapped": 9 },
+    { "trace": "artifacts/raw/m02-mood-pan-20260810/handpan-minor-slap-left3-then-right3.jsonl", "scope": "profile", "expected_note_on": 6, "expected_mapped": 6 },
+    { "trace": "artifacts/raw/m02-mood-pan-20260810/handpan-minor-special3-pressure-pad1-2s-mute-pad1x3.jsonl", "scope": "profile", "expected_note_on": 3, "expected_mapped": 3 }
+  ]
+}

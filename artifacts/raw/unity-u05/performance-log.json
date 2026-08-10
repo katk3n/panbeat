@@ -1,0 +1,7 @@
+{
+  "schema_version": "1.0.0",
+  "engine": "unity",
+  "input_offset_us": 0,
+  "audio_offset_us": 0,
+  "scenarios": ["60hz", "120hz", "frame-stall"]
+}

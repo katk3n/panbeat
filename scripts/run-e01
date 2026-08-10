@@ -1,0 +1,47 @@
+#!/bin/sh
+set -eu
+script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+repository_root=$(CDPATH= cd -- "$script_dir/.." && pwd)
+raw_dir="$repository_root/artifacts/raw/e01-comparison"
+report_dir="$repository_root/artifacts/reports/e01-comparison"
+build_dir="$repository_root/artifacts/builds/e01-comparison"
+mkdir -p "$raw_dir/trials/unity" "$raw_dir/trials/godot" "$report_dir" "$build_dir/unity" "$build_dir/godot"
+: > "$raw_dir/build-times.tsv"
+
+milliseconds() { perl -MTime::HiRes=time -e 'printf "%.0f", time * 1000'; }
+unity_build() {
+  label="$1"
+  start=$(milliseconds)
+  "$script_dir/unity" -batchmode -nographics -quit -projectPath "$repository_root/pocs/unity" \
+    -executeMethod PanBeat.Editor.BuildCommand.BuildMacRelease \
+    -panbeatBuildPath "$build_dir/unity/PanBeat-$label.app" \
+    -logFile "$report_dir/unity-build-$label.log"
+  end=$(milliseconds)
+  printf 'unity\t%s\t%s\t%s\n' "$label" "$start" "$end" >> "$raw_dir/build-times.tsv"
+}
+godot_build() {
+  label="$1"
+  start=$(milliseconds)
+  "$script_dir/godot" --headless --path "$repository_root/pocs/godot" \
+    --export-release macOS "$build_dir/godot/PanBeat-$label.zip" \
+    --log-file "$report_dir/godot-build-$label.log"
+  end=$(milliseconds)
+  printf 'godot\t%s\t%s\t%s\n' "$label" "$start" "$end" >> "$raw_dir/build-times.tsv"
+}
+
+"$script_dir/build-unity-midi-plugin"
+unity_build warmup
+godot_build warmup
+for trial in 1 2 3; do
+  unity_build "trial-$trial"
+  "$script_dir/run-unity-u05"
+  cp "$repository_root/artifacts/raw/unity-u05/judgements-60hz.json" "$raw_dir/trials/unity/trial-$trial.json"
+  godot_build "trial-$trial"
+  "$script_dir/run-godot-g05"
+  cp "$repository_root/artifacts/raw/godot-g05/judgements-60hz.json" "$raw_dir/trials/godot/trial-$trial.json"
+done
+
+magick "$repository_root/artifacts/reports/unity-u04/three-techniques.png" \
+  "$repository_root/artifacts/reports/godot-g04/three-techniques.png" +append \
+  "$report_dir/same-time-side-by-side.png"
+"$script_dir/compare-pocs"

@@ -1,0 +1,239 @@
+{
+  "schema_version": "1.0.0",
+  "story": "E03",
+  "status": "Complete",
+  "engines": {
+    "unity": {
+      "hard_gates": [
+        {
+          "id": "slap-identification",
+          "status": "Pass",
+          "rationale": "Handpan left/right Slap produced the dedicated profile mapping in the retained real-device trace; mapper regression tests passed.",
+          "evidence": [
+            "artifacts/raw/m02-mood-pan-20260810/handpan-minor-slap-left3-then-right3.jsonl",
+            "shared/fixtures/instrument-profiles/roland-mn10-handpan-minor-v1.json"
+          ]
+        },
+        {
+          "id": "input-jitter",
+          "status": "Not Measured",
+          "rationale": "CoreMIDI packet timestamps were retained, but this run has no independent engine-dispatch timestamp from which callback-to-engine jitter can be computed without fabrication.",
+          "evidence": [
+            "artifacts/raw/unity-u03/lifecycle-verified.jsonl"
+          ]
+        },
+        {
+          "id": "audio-visual-drift",
+          "status": "Pass",
+          "rationale": "EC-001 release measurement completed 3/3 one-minute trials; final absolute drift max was 0.006 ms against the 5 ms threshold.",
+          "evidence": [
+            "artifacts/raw/e03-release-drift/summary.json"
+          ]
+        },
+        {
+          "id": "frame-independence",
+          "status": "Pass",
+          "rationale": "60 Hz, 120 Hz, and intentional frame-stall judgement records all equal the shared golden result.",
+          "evidence": [
+            "artifacts/raw/unity-u05/judgements-60hz.json"
+          ]
+        },
+        {
+          "id": "device-lifecycle",
+          "status": "Pass",
+          "rationale": "The actual trace records present, absent, present and six mapped strikes with zero native queue drops.",
+          "evidence": [
+            "artifacts/raw/unity-u03/lifecycle-verified.jsonl"
+          ]
+        },
+        {
+          "id": "automation",
+          "status": "Pass",
+          "rationale": "A fresh project import, EditMode suite, release build, slice generation, and capture are CLI-driven with zero GUI interventions.",
+          "evidence": [
+            "artifacts/reports/unity-u06/editmode.log",
+            "artifacts/builds/unity-u06/PanBeat.zip"
+          ]
+        }
+      ],
+      "eligibility": "Pending risk acceptance or measurement",
+      "failed_gates": [],
+      "not_measured_gates": [
+        "input-jitter"
+      ],
+      "items": [
+        {
+          "id": "midi-audio-stability",
+          "weight": 30,
+          "score": 3,
+          "weighted": 18,
+          "rationale": "Three release-device sessions had zero drops/unknown mappings and release audio drift passed EC-001, but dispatch jitter remains Not Measured."
+        },
+        {
+          "id": "codex-autonomy",
+          "weight": 20,
+          "score": 3,
+          "weighted": 12,
+          "rationale": "CLI test/build/capture work with zero GUI interventions, with Unity licensing and a maintained native CoreMIDI plugin."
+        },
+        {
+          "id": "implementation-maintainability",
+          "weight": 15,
+          "score": 3,
+          "weighted": 9,
+          "rationale": "Domain separation is clear, but the native CoreMIDI bridge adds platform-specific code and lifecycle handling."
+        },
+        {
+          "id": "2d-performance",
+          "weight": 15,
+          "score": 3,
+          "weighted": 9,
+          "rationale": "Deterministic 768x768 output, frame-independent kinematics, and zero-allocation pool tests pass; comparable release frame time is not measured."
+        },
+        {
+          "id": "macos-distribution",
+          "weight": 10,
+          "score": 4,
+          "weighted": 8,
+          "rationale": "Clean release build completed in 12 seconds and three warmed measured builds had 3.316-second p50."
+        },
+        {
+          "id": "web-derivation",
+          "weight": 5,
+          "score": 2,
+          "weighted": 2,
+          "rationale": "The desktop native MIDI bridge cannot be reused by WebGL without a separate Web MIDI adapter."
+        },
+        {
+          "id": "license-long-term-risk",
+          "weight": 5,
+          "score": 3,
+          "weighted": 3,
+          "rationale": "The selected LTS toolchain is mature but subject to Unity licensing and editor activation requirements."
+        }
+      ],
+      "weighted_total": 61
+    },
+    "godot": {
+      "hard_gates": [
+        {
+          "id": "slap-identification",
+          "status": "Pass",
+          "rationale": "Handpan left/right Slap produced the dedicated profile mapping in the retained real-device trace; mapper regression tests passed.",
+          "evidence": [
+            "artifacts/raw/m02-mood-pan-20260810/handpan-minor-slap-left3-then-right3.jsonl",
+            "shared/fixtures/instrument-profiles/roland-mn10-handpan-minor-v1.json"
+          ]
+        },
+        {
+          "id": "input-jitter",
+          "status": "Pass",
+          "rationale": "The standard adapter arrival-handling spread was 0.069 ms p95 over 24 retained messages, below the fixed 5 ms target; this is not physical or CoreMIDI latency.",
+          "evidence": [
+            "artifacts/raw/godot-g03/lifecycle-verified.jsonl"
+          ]
+        },
+        {
+          "id": "audio-visual-drift",
+          "status": "Pass",
+          "rationale": "EC-001 release measurement completed 3/3 one-minute trials; final absolute drift max was 3.155 ms against the 5 ms threshold.",
+          "evidence": [
+            "artifacts/raw/e03-release-drift/summary.json"
+          ]
+        },
+        {
+          "id": "frame-independence",
+          "status": "Pass",
+          "rationale": "60 Hz, 120 Hz, and intentional frame-stall judgement records all equal the shared golden result.",
+          "evidence": [
+            "artifacts/raw/godot-g05/judgements-60hz.json"
+          ]
+        },
+        {
+          "id": "device-lifecycle",
+          "status": "Pass",
+          "rationale": "Godot kept the port listed, stopped receiving while disconnected, and automatically resumed; six mapped strikes were retained across the disconnect.",
+          "evidence": [
+            "artifacts/raw/godot-g03/lifecycle-verified.jsonl"
+          ]
+        },
+        {
+          "id": "automation",
+          "status": "Pass",
+          "rationale": "A fresh project import, headless suite, release export, slice generation, and capture are CLI-driven with zero GUI interventions.",
+          "evidence": [
+            "artifacts/reports/godot-g06/headless-verified.log",
+            "artifacts/builds/godot-g06/PanBeat.zip"
+          ]
+        }
+      ],
+      "eligibility": "Eligible",
+      "failed_gates": [],
+      "not_measured_gates": [],
+      "items": [
+        {
+          "id": "midi-audio-stability",
+          "weight": 30,
+          "score": 4,
+          "weighted": 24,
+          "rationale": "Three release-device sessions normalized every trigger, arrival spread passed, reconnect recovered, and CoreAudio release drift passed EC-001."
+        },
+        {
+          "id": "codex-autonomy",
+          "weight": 20,
+          "score": 4,
+          "weighted": 16,
+          "rationale": "CLI test/export/capture work with zero GUI interventions; the clean-cache defect was found and fixed from text source."
+        },
+        {
+          "id": "implementation-maintainability",
+          "weight": 15,
+          "score": 4,
+          "weighted": 12,
+          "rationale": "Typed GDScript and the standard MIDI API avoid a native plugin, with a known limitation in disconnect visibility."
+        },
+        {
+          "id": "2d-performance",
+          "weight": 15,
+          "score": 3,
+          "weighted": 9,
+          "rationale": "Deterministic 768x768 output and frame-independent kinematics pass; comparable release frame time is not measured."
+        },
+        {
+          "id": "macos-distribution",
+          "weight": 10,
+          "score": 3,
+          "weighted": 6,
+          "rationale": "Clean release export completed in 8 seconds and three warmed measured exports had 7.506-second p50; the universal export is substantially larger."
+        },
+        {
+          "id": "web-derivation",
+          "weight": 5,
+          "score": 3,
+          "weighted": 3,
+          "rationale": "GDScript avoids C# restrictions for web export, though desktop InputEventMIDI still requires a separate web input path."
+        },
+        {
+          "id": "license-long-term-risk",
+          "weight": 5,
+          "score": 5,
+          "weighted": 5,
+          "rationale": "Godot is MIT-licensed and the fixed toolchain runs without account or license activation."
+        }
+      ],
+      "weighted_total": 75
+    }
+  },
+  "formal_recommendation": {
+    "engine": "godot",
+    "language": "typed GDScript",
+    "version": "4.6.stable.official.89cea1439",
+    "weighted_total": 75
+  },
+  "blocker": null,
+  "residual_risks": [
+    "Unity input dispatch jitter remains Not Measured, so Unity is not eligible without risk acceptance.",
+    "Drift beyond one minute remains a Phase 1 measurement after EC-001.",
+    "Godot's public MIDI API does not expose physical disconnect state or OS receive timestamps."
+  ]
+}

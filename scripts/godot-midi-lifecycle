@@ -1,0 +1,13 @@
+#!/bin/sh
+set -eu
+script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+repository_root=$(CDPATH= cd -- "$script_dir/.." && pwd)
+duration="${1-45}"
+label="${2-lifecycle}"
+raw_dir="$repository_root/artifacts/raw/godot-g03"
+report_dir="$repository_root/artifacts/reports/godot-g03"
+mkdir -p "$raw_dir" "$report_dir"
+"$script_dir/godot" --headless --path "$repository_root/pocs/godot" \
+  --script res://tests/capture_midi_lifecycle.gd --log-file "$report_dir/lifecycle.log" -- \
+  --duration-seconds "$duration" --output "$raw_dir/lifecycle-$label.jsonl" \
+  --profile "$repository_root/shared/fixtures/instrument-profiles/roland-mn10-handpan-minor-v1.json"

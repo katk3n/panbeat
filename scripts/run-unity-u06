@@ -1,0 +1,40 @@
+#!/bin/sh
+set -eu
+script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+repository_root=$(CDPATH= cd -- "$script_dir/.." && pwd)
+report_dir="$repository_root/artifacts/reports/unity-u06"
+build_dir="$repository_root/artifacts/builds/unity-u06"
+temporary_root=$(mktemp -d /private/tmp/panbeat-unity-u06.XXXXXX)
+clean_root="$temporary_root/checkout"
+clean_project="$clean_root/pocs/unity"
+cleanup() { rm -rf "$temporary_root"; }
+trap cleanup EXIT HUP INT TERM
+mkdir -p "$report_dir" "$build_dir" "$clean_root"
+
+"$script_dir/build-unity-midi-plugin"
+rsync -a \
+  --exclude .git --exclude .tools --exclude node_modules \
+  --exclude pocs/unity/Library --exclude pocs/unity/UserSettings \
+  --exclude pocs/godot/.godot --exclude artifacts/builds --exclude artifacts/reports \
+  "$repository_root/" "$clean_root/"
+
+test_start=$(date +%s)
+"$script_dir/unity" -batchmode -nographics -projectPath "$clean_project" \
+  -runTests -testPlatform EditMode \
+  -testResults "$report_dir/editmode-results.xml" \
+  -logFile "$report_dir/editmode.log"
+test_end=$(date +%s)
+
+build_start=$(date +%s)
+"$script_dir/unity" -batchmode -nographics -quit -projectPath "$clean_project" \
+  -executeMethod PanBeat.Editor.BuildCommand.BuildMacRelease \
+  -panbeatBuildPath "$build_dir/PanBeat.app" \
+  -logFile "$report_dir/build.log"
+build_end=$(date +%s)
+
+ditto -c -k --sequesterRsrc --keepParent "$build_dir/PanBeat.app" "$build_dir/PanBeat.zip"
+"$script_dir/run-unity-u05"
+"$script_dir/capture-unity-u04"
+node "$script_dir/create-hard-gate-bundle.mjs" --engine unity \
+  --clean-test-seconds "$((test_end - test_start))" \
+  --clean-build-seconds "$((build_end - build_start))"

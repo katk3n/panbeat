@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://panbeat.local/schemas/judgement-record.schema.json",
+  "title": "PanBeat Phase 0 Judgement Record",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "record_id", "note_id", "note_timestamp_us", "clock_domain", "technique", "target_id", "judgement"],
+  "properties": {
+    "schema_version": { "const": "1.0.0" },
+    "record_id": { "type": "string", "minLength": 1 },
+    "note_id": { "type": "string", "minLength": 1 },
+    "input_event_id": { "type": "string", "minLength": 1 },
+    "note_timestamp_us": { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+    "input_timestamp_us": { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+    "delta_us": { "type": "integer", "minimum": -9007199254740991, "maximum": 9007199254740991 },
+    "clock_domain": { "const": "song_time" },
+    "technique": { "enum": ["tone", "ding", "slap"] },
+    "target_id": { "type": "string", "minLength": 1 },
+    "judgement": { "enum": ["perfect", "great", "good", "miss"] }
+  },
+  "if": { "properties": { "judgement": { "const": "miss" } }, "required": ["judgement"] },
+  "then": {
+    "properties": {
+      "input_event_id": false,
+      "input_timestamp_us": false,
+      "delta_us": false
+    }
+  },
+  "else": {
+    "required": ["input_event_id", "input_timestamp_us", "delta_us"],
+    "properties": {
+      "input_event_id": {},
+      "input_timestamp_us": {},
+      "delta_us": {}
+    }
+  }
+}

@@ -1,0 +1,14 @@
+#!/bin/sh
+set -eu
+script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+repository_root=$(CDPATH= cd -- "$script_dir/.." && pwd)
+duration="${1-45}"
+label="${2-lifecycle}"
+"$script_dir/build-unity-midi-plugin"
+mkdir -p "$repository_root/artifacts/raw/unity-u03" "$repository_root/artifacts/reports/unity-u03"
+"$script_dir/unity" -batchmode -nographics -quit \
+  -projectPath "$repository_root/pocs/unity" \
+  -executeMethod PanBeat.Editor.MidiLifecycleCommand.Run \
+  -panbeatDurationSeconds "$duration" \
+  -panbeatMidiLifecycleOutput "$repository_root/artifacts/raw/unity-u03/lifecycle-$label.jsonl" \
+  -logFile "$repository_root/artifacts/reports/unity-u03/lifecycle-$label.log"
