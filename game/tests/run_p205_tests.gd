@@ -20,6 +20,17 @@ func _initialize() -> void:
 	var ding_chart := _chart_with_notes([_timed_note("ding-note", "D", 3, 0)])
 	var ding := Merger.merge(ding_chart, {}, SOURCE_SHA, profile)
 	_check(ding.get("ok") == true and ding["chart"]["notes"][0]["technique"] == "ding" and ding["chart"]["notes"][0]["target_id"] == "ding", "overlay-free Ding resolved by profile", failures)
+	var written_high_chart := _chart_with_notes([_timed_note("written-a4", "A", 4, 0)])
+	var as_written := Merger.merge(written_high_chart, {}, SOURCE_SHA, profile)
+	var octave_down := Merger.merge(written_high_chart, {}, SOURCE_SHA, profile, {}, -1)
+	_check(as_written.get("ok") and as_written["chart"]["notes"][0]["target_id"] == "tone-8" and octave_down.get("ok") and octave_down["chart"]["notes"][0]["target_id"] == "tone-1" and octave_down["chart"]["notes"][0]["pitch"]["octave"] == 4, "written-one-octave-high option maps sounding pitch down while preserving source pitch", failures)
+	var notepan_parsed := Reader.read_file(ProjectSettings.globalize_path("res://../shared/fixtures/musicxml/notepan-unpitched.musicxml"))
+	var notepan_compiled := Compiler.compile(notepan_parsed["score"], "notepan-unpitched")
+	var notepan_merged := Merger.merge(notepan_compiled["chart"], {}, FileAccess.get_sha256(ProjectSettings.globalize_path("res://../shared/fixtures/musicxml/notepan-unpitched.musicxml")), profile, {}, -1)
+	var notepan_notes: Array = notepan_merged.get("chart", {}).get("notes", [])
+	var notepan_pairs: Array[String] = []
+	for note: Dictionary in notepan_notes: notepan_pairs.append("%s:%s" % [note["technique"], note["target_id"]])
+	_check(notepan_merged.get("ok") and notepan_notes.size() == 4 and notepan_pairs.count("slap:outer-hit-radius") == 2 and "tone:tone-1" in notepan_pairs and "tone:tone-6" in notepan_pairs and not "ding:ding" in notepan_pairs, "NotePan standalone S/T map to Slap while S/T members of Tone chords are absent", failures)
 	var mismatch := overlay.duplicate(true); mismatch["source_musicxml_sha256"] = "0".repeat(64)
 	_check(_code(Merger.merge(compiled["chart"], mismatch, SOURCE_SHA, profile)) == "overlay_source_checksum_mismatch", "source checksum mismatch rejected", failures)
 	var missing := overlay.duplicate(true); missing["annotations"][0]["selector"] = {"note_id":"missing"}
@@ -40,7 +51,7 @@ func _initialize() -> void:
 	var slap_pitch_chart := _chart_with_notes([_timed_note("a6", "A", 6, 0)])
 	_check(_code(Merger.merge(slap_pitch_chart, {}, SOURCE_SHA, profile)) == "unsupported_pitch", "Slap is not inferred from MusicXML pitch", failures)
 	_check(slap.get("ok") and slap["canonical_json"] == Merger.merge(compiled["chart"], overlay, SOURCE_SHA, profile)["canonical_json"], "overlay merge canonical output deterministic", failures)
-	_finish(failures, 13)
+	_finish(failures, 15)
 
 func _chart_with_notes(notes: Array[Dictionary]) -> RefCounted:
 	return TimedChart.new("test", "panbeat-musicxml-importer-v1", 4, 4, 500000, [{"tick":0,"bpm_milli":120000,"start_us":0}], [], notes)

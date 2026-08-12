@@ -15,7 +15,7 @@ Phase 1の固定曲とreplayは回帰fixtureとして保持する。長時間dri
 ### 2.1 対象
 
 - MusicXML 4.0 `score-partwise`のMVP subset
-- 単一part、単一voice、単音、基本音価、休符、拍子、tempo、基本tempo change、tie
+- 単一part、単一voice、単音と和音、基本音価、休符、拍子、tempo、基本tempo change、tie
 - MusicXMLを音楽原本、PanBeat overlayをSlap等のゲーム注釈とする変換pipeline
 - `.musicxml` / `.xml`と、安全に展開する`.mxl`
 - ユーザー曲import、validation diagnostics、runtime chart cache
@@ -31,7 +31,7 @@ Phase 1の固定曲とreplayは回帰fixtureとして保持する。長時間dri
 
 ### 2.2 Phase 2で対応しないもの
 
-- Chord、Tuplet、Grace Note、Repeat、Volta、D.C. / D.S.、複数part、複数voice
+- Tuplet、Grace Note、Repeat、Volta、D.C. / D.S.、複数part、複数voice
 - MusicXML内の任意notationからSlapを推測すること
 - Practice Mode、BPM変更、seek、区間loop、metronome、左右手ガイド
 - Free Play、Pressure、dynamics、Mute、Ghost Note、Roll
@@ -211,9 +211,9 @@ P202、P203、P206、P209はP201後に並行してよい。P210とP211も依存�
 **受け入れ条件:**
 
 - XML external entity、DTD、network/file entity解決を禁止する
-- 単一part / 単一voice / 単音制約を検証し、違反位置をpart/measure/elementで示す
+- 単一part / 単一voice制約を検証し、違反位置をpart/measure/elementで示す。`<chord/>` memberは直前のbase noteと同じonsetに正規化する
 - divisions変更、休符、拍子、tempo change、tie情報を整数tickのmodelへ保持する
-- chord、tuplet、grace、repeat、backup/forward、複数part/voiceを黙って破棄せずunsupported diagnosticにする
+- tuplet、grace、repeat、backup/forward、複数part/voiceを黙って破棄せずunsupported diagnosticにし、不正な位置の`<chord/>`を具体的に診断する
 - malformed XML、巨大深度、過大要素数、未知root/versionを安全に拒否する
 - MuseScore等からexportした最小fixtureと、valid/invalid/security fixtureの自動testがある
 
@@ -236,7 +236,7 @@ P202、P203、P206、P209はP201後に並行してよい。P210とP211も依存�
 
 **ストーリー:** 譜面作成者として、MusicXML原譜をPanBeat専用情報で汚さず、Slapやtargetを明示したい。exporter固有notationの推測で奏法を誤らないようにするためである。
 
-**実施内容:** version付きPanBeat overlay schemaを作り、source checksum、note selector、technique、target、難易度情報をSymbolic Scoreへmergeする。pitchからTone targetへのmappingはInstrument Profileまたは明示mappingだけで行う。
+**実施内容:** version付きPanBeat overlay schemaを作り、source checksum、note selector、technique、target、難易度情報をSymbolic Scoreへmergeする。pitchからTone targetへのmappingはInstrument Profileまたは明示mappingだけで行う。実音より1オクターブ高いハンドパン記譜は、原譜pitchを保持した明示的なoctave-down import optionで扱う。
 
 **受け入れ条件:**
 
@@ -244,6 +244,8 @@ P202、P203、P206、P209はP201後に並行してよい。P210とP211も依存�
 - note IDまたはpart/measure/tick/voice selectorが一件だけに一致することを検証する
 - Slapはoverlayの明示annotationで表現し、MusicXML notationから推測しない
 - Tone pitch、Ding、Slapをcanonical target/techniqueへ解決できる
+- 「1オクターブ高く記譜」を選んだ場合だけtarget解決pitchを12 semitone下げ、選択内容をcache keyとpackage metadataへ保持する
+- NotePan `<unpitched>`の`g`を無視し、単独の`S`と`T`をSlapへ解決する。`S+6`や`T+1`等ではMood PanでTone Fieldとの和音を演奏できないため`S`/`T`側を無視し、pitched chord memberだけを保持する
 - 未対応pitch、存在しないtarget、重複selector、複数一致、未使用annotationを具体的に診断する
 - overlayなしで表現可能なTone/Ding譜面と、overlay付きSlap譜面のgolden testがある
 
@@ -264,14 +266,15 @@ P202、P203、P206、P209はP201後に並行してよい。P210とP211も依存�
 
 ### P207: 安全でatomicな曲import pipelineを実装する
 
-**ストーリー:** 利用者として、譜面・overlay・音源を選ぶと、問題箇所を確認してから曲を追加したい。壊れたbundleや悪意あるarchiveで既存libraryを破損させないためである。
+**ストーリー:** 利用者として、譜面・overlay・任意の伴奏音源を選ぶと、問題箇所を確認してから曲を追加したい。Mood Pan本体の音だけで演奏する曲も扱いながら、壊れたbundleや悪意あるarchiveで既存libraryを破損させないためである。
 
-**実施内容:** `.musicxml` / `.xml` / `.mxl`、overlay、audioをstaging directoryへ取り込み、schema/semantic/security validation、audio変換、Runtime Chart生成、cache key作成、atomic commitを行うApplication serviceを実装する。
+**実施内容:** `.musicxml` / `.xml` / `.mxl`、任意のoverlay、任意のaudioをstaging directoryへ取り込み、schema/semantic/security validation、指定時のaudio変換、Runtime Chart生成、cache key作成、atomic commitを行うApplication serviceを実装する。audioなしでは譜面durationをpackage durationとして保存する。
 
 **受け入れ条件:**
 
 - `.mxl`のcontainer rootfileを解決し、Zip Slip、symlink、absolute path、zip bomb、entry数/展開size超過を拒否する
 - source path、extension、size、checksumを検査し、元ファイルを変更しない
+- audioを指定しない曲を受理し、runtime audio assetを要求せず譜面durationで再生できる
 - diagnosticsにseverity、code、file、part/measure/elementまたはoverlay location、修正方針を含める
 - importer/source/overlay/profileのversionまたはchecksum変更時にcacheを無効化する
 - import失敗・cancel・process中断で半端な曲がSong Repositoryへ現れない

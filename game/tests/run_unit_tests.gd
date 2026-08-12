@@ -5,8 +5,10 @@ const Judgement := preload("res://domain/judgement_engine.gd")
 const ObjectPool := preload("res://domain/fixed_object_pool.gd")
 const Kinematics := preload("res://domain/note_visual_kinematics.gd")
 const AudioTransport := preload("res://application/audio_transport_service.gd")
+const SilentClockBackend := preload("res://infrastructure/silent_clock_backend.gd")
 const InputQueue := preload("res://application/normalized_input_queue.gd")
 const ChartFactory := preload("res://application/runtime_chart_factory.gd")
+const JudgementPipeline := preload("res://application/judgement_pipeline.gd")
 const Session := preload("res://application/game_session.gd")
 const MidiPorts := preload("res://application/midi_port_service.gd")
 const Normalizer := preload("res://infrastructure/midi_normalizer.gd")
@@ -30,6 +32,10 @@ class FakeAudioBackend extends RefCounted:
 	func sample_rate_hz() -> int: return 48000
 	func output_latency_seconds() -> float: return 0.01
 	func buffer_frames_estimate() -> int: return 480
+
+class FakeClock extends RefCounted:
+	var now := 0.0
+	func monotonic_seconds() -> float: return now
 
 class FakeMidiPortBackend extends RefCounted:
 	var port_values: PackedStringArray = []
@@ -81,6 +87,13 @@ func _initialize() -> void:
 	missing_backend.available = false
 	var failed_transport := AudioTransport.new(missing_backend, 1_000_000)
 	_check(failed_transport.schedule_start(0.0).get("ok") == false and failed_transport.state() == AudioTransport.FAILED, "audio load failure", failures)
+	var clock := FakeClock.new(); clock.now = 5.0
+	var silent_transport := AudioTransport.new(SilentClockBackend.new(1_000_000, clock), 1_000_000)
+	_check(silent_transport.schedule_start(0.0).get("ok"), "silent clock transport schedules", failures)
+	silent_transport.update(); clock.now = 5.4
+	_check(silent_transport.now_us() == 400_000, "silent clock transport advances without audio", failures)
+	silent_transport.pause(); clock.now = 6.0; silent_transport.resume(); clock.now = 6.6; silent_transport.update()
+	_check(silent_transport.state() == AudioTransport.COMPLETED and silent_transport.now_us() == 1_000_000, "silent clock transport pauses and completes at score duration", failures)
 	var midi_backend := FakeMidiPortBackend.new()
 	var midi_ports := MidiPorts.new(midi_backend, "MN-10")
 	_check(midi_ports.open()["code"] == "no_ports", "MIDI no-port diagnostic", failures)
@@ -114,6 +127,17 @@ func _initialize() -> void:
 	var profile: Dictionary = {"mappings": [{"technique":"ding", "target_id":"ding"}]}
 	var chart: Dictionary = {"schema_version":"1.0.0", "chart_id":"unit", "duration_us":2_000_000, "notes":[{"note_id":"one", "timestamp_us":1_000_000, "technique":"ding", "target_id":"ding"}]}
 	var built: Dictionary = ChartFactory.build(chart, profile, 2_000_000)
+	var chord_chart := {"schema_version":"1.0.0", "chart_id":"unit-chord", "duration_us":2_000_000, "notes":[{"note_id":"chord-ding","timestamp_us":1_000_000,"technique":"ding","target_id":"ding"},{"note_id":"chord-tone","timestamp_us":1_000_000,"technique":"tone","target_id":"tone-1"}]}
+	var chord_profile := {"mappings":[{"technique":"ding","target_id":"ding"},{"technique":"tone","target_id":"tone-1"}]}
+	var chord_built := ChartFactory.build(chord_chart, chord_profile, 2_000_000)
+	var chord_pipeline := JudgementPipeline.new(chord_built["chart"], {"schema_version":"1.0.0","rule_id":"chord-test","clock_domain":"song_time","perfect_max_abs_delta_us":30_000,"great_max_abs_delta_us":60_000,"good_max_abs_delta_us":100_000,"miss_window_us":100_000})
+	var chord_ding := chord_pipeline.process_input({"kind":"normalized_input","input_event_id":"ding-hit","technique":"ding","target_id":"ding"}, 1_000_000)
+	var chord_tone := chord_pipeline.process_input({"kind":"normalized_input","input_event_id":"tone-hit","technique":"tone","target_id":"tone-1"}, 1_020_000)
+	_check(chord_ding["note_id"] == "chord-ding" and chord_tone["note_id"] == "chord-tone" and chord_pipeline.records().size() == 2, "simultaneous chord notes are judged and consumed independently", failures)
+	var partial_chord_pipeline := JudgementPipeline.new(chord_built["chart"], {"schema_version":"1.0.0","rule_id":"chord-test","clock_domain":"song_time","perfect_max_abs_delta_us":30_000,"great_max_abs_delta_us":60_000,"good_max_abs_delta_us":100_000,"miss_window_us":100_000})
+	partial_chord_pipeline.process_input({"kind":"normalized_input","input_event_id":"partial-hit","technique":"ding","target_id":"ding"}, 1_000_000)
+	var partial_misses := partial_chord_pipeline.sweep_misses(1_100_001)
+	_check(partial_misses.size() == 1 and partial_misses[0]["note_id"] == "chord-tone" and partial_chord_pipeline.records()[0]["grade"] == "perfect", "one successful chord note does not hide another chord note miss", failures)
 	_check(built.get("ok") == true and built["chart"].notes_between(999_999, 1_000_000).size() == 1, "runtime chart binary search", failures)
 	var duplicate: Dictionary = chart.duplicate(true)
 	duplicate["notes"].append(duplicate["notes"][0].duplicate(true))
@@ -141,7 +165,7 @@ func _initialize() -> void:
 	_check(hud == {"current_score":3250,"current_combo":0,"current_accuracy":3.25 / 6.0,"latest_grade":"extra_hit","latest_direction":"late"}, "HUD score combo accuracy grade and direction model", failures)
 	_check(InputMode.from_arguments(PackedStringArray(["--input-mode", "midi"]))["mode"] == "midi" and InputMode.from_arguments(PackedStringArray(["--input-mode=replay"]))["mode"] == "replay", "exclusive MIDI or replay startup selection", failures)
 	_check(InputMode.from_arguments(PackedStringArray(["--input-mode", "mixed"])).get("ok") == false, "mixed or unknown input mode rejected", failures)
-	_finish(failures, 44)
+	_finish(failures, 49)
 
 func _check(condition: bool, label: String, failures: Array[String]) -> void:
 	if not condition:

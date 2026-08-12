@@ -14,9 +14,13 @@ func _initialize() -> void:
 		_check(score.notes[0]["tie_types"] == ["start"] and score.notes[1]["tie_types"] == ["stop", "start"] and score.notes[2]["tie_types"] == ["stop"], "tie information preserved", failures)
 		_check(score.tempo_events.size() == 2 and score.tempo_events[0]["tick"] == 0 and score.tempo_events[1]["tick"] == 8, "metronome and sound tempo changes preserved", failures)
 		_check(score.time_signatures.size() == 1 and score.time_signatures[0]["beats"] == 4, "time signature preserved", failures)
+	var chord := Reader.read_file(ProjectSettings.globalize_path("res://../shared/fixtures/musicxml/chord.musicxml"))
+	_check(chord.get("ok") and chord["score"].notes.size() == 4 and chord["score"].notes[0]["tick"] == 0 and chord["score"].notes[1]["tick"] == 0 and chord["score"].notes[2]["tick"] == 4, "MusicXML chord members share the base-note onset without advancing the cursor", failures)
+	var notepan := Reader.read_file(ProjectSettings.globalize_path("res://../shared/fixtures/musicxml/notepan-unpitched.musicxml"))
+	_check(notepan.get("ok") and notepan["score"].notes.size() == 7 and notepan["score"].notes[0]["is_ignored"] and notepan["score"].notes[1]["authoring_technique"] == "slap" and notepan["score"].notes[2]["authoring_technique"] == "slap" and notepan["score"].notes[3]["is_ignored"] and notepan["score"].notes[3]["tick"] == notepan["score"].notes[4]["tick"] and notepan["score"].notes[5]["is_ignored"] and notepan["score"].notes[5]["tick"] == notepan["score"].notes[6]["tick"], "NotePan g is ignored, standalone S/T become Slap, and S/T chord technique members are ignored", failures)
 	var unsupported := Reader.read_file(ProjectSettings.globalize_path("res://../shared/fixtures/musicxml/unsupported.musicxml"))
 	var unsupported_codes := _codes(unsupported)
-	_check("unsupported_chord" in unsupported_codes and "unsupported_tuplet" in unsupported_codes and "unsupported_grace_note" in unsupported_codes and "unsupported_backup_forward" in unsupported_codes and "unsupported_repeat" in unsupported_codes, "unsupported notation is explicit", failures)
+	_check("chord_without_preceding_note" in unsupported_codes and "unsupported_tuplet" in unsupported_codes and "unsupported_grace_note" in unsupported_codes and "unsupported_backup_forward" in unsupported_codes and "unsupported_repeat" in unsupported_codes, "unsupported notation and malformed chord placement are explicit", failures)
 	_check(_first_diagnostic_has_location(unsupported), "unsupported diagnostics include source location", failures)
 	var doctype := Reader.read_file(ProjectSettings.globalize_path("res://../shared/fixtures/musicxml/security-doctype.musicxml"))
 	_check(_codes(doctype) == ["xml_dtd_forbidden"], "DTD and external entity rejected before parsing", failures)
@@ -35,7 +39,7 @@ func _initialize() -> void:
 	_check("xml_element_limit" in _codes(Reader.read_text(many_elements)), "excessive element count rejected", failures)
 	var oversized := PackedByteArray(); oversized.resize(Reader.MAX_SOURCE_BYTES + 1)
 	_check("source_too_large" in _codes(Reader.read_bytes(oversized)), "oversized source rejected before decoding", failures)
-	_finish(failures, 17)
+	_finish(failures, 19)
 
 func _single_note_xml(version: String = "4.0") -> String:
 	return "<score-partwise version=\"%s\"><part-list><score-part id=\"P1\"><part-name>Test</part-name></score-part></part-list><part id=\"P1\"><measure number=\"1\"><attributes><divisions>1</divisions><time><beats>4</beats><beat-type>4</beat-type></time></attributes><note><pitch><step>D</step><octave>4</octave></pitch><duration>1</duration><voice>1</voice></note></measure></part></score-partwise>" % version

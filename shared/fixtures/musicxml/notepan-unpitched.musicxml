@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<score-partwise version="4.0">
+  <part-list><score-part id="P1"><part-name>NotePan techniques</part-name></score-part></part-list>
+  <part id="P1"><measure number="1">
+    <attributes><divisions>4</divisions></attributes>
+    <note><unpitched><display-step>G</display-step><display-octave>5</display-octave></unpitched><duration>4</duration><voice>1</voice><lyric name="NotePan"><text>g</text></lyric></note>
+    <note><unpitched><display-step>G</display-step><display-octave>5</display-octave></unpitched><duration>4</duration><voice>1</voice><lyric name="NotePan"><text>S</text></lyric></note>
+    <note><unpitched><display-step>G</display-step><display-octave>5</display-octave></unpitched><duration>4</duration><voice>1</voice><lyric name="NotePan"><text>T</text></lyric></note>
+    <note><unpitched><display-step>A</display-step><display-octave>5</display-octave></unpitched><duration>4</duration><voice>1</voice><lyric name="NotePan"><text>T+1</text></lyric></note>
+    <note><chord/><pitch><step>A</step><octave>4</octave></pitch><duration>4</duration><voice>1</voice></note>
+    <note><unpitched><display-step>B</display-step><display-octave>5</display-octave></unpitched><duration>4</duration><voice>1</voice><lyric name="NotePan"><text>S+6</text></lyric></note>
+    <note><chord/><pitch><step>F</step><octave>5</octave></pitch><duration>4</duration><voice>1</voice></note>
+  </measure></part>
+</score-partwise>

@@ -65,6 +65,9 @@ func active_count() -> int:
 			count += 1
 	return count
 
+func lookahead_us() -> int:
+	return _lookahead_us
+
 func visual_state(slot: Dictionary, song_time_us: int) -> Vector3:
 	var note: Dictionary = slot["note"]
 	var technique: int = _technique_value(note["technique"])

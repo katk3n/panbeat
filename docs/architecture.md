@@ -45,7 +45,7 @@ PanBeat は一般的なデスクトップ業務アプリではなく、次の性
 | MIDI（デスクトップ） | Godot標準`InputEventMIDI`。OS timestamp/切断状態の非公開を診断へ明記 |
 | MIDI（Web） | Godot Web MIDI入力（MVP対象外） |
 | MusicXML | エンジンの安全なストリーミングXML APIでMVP範囲を明示実装 |
-| データ形式 | MusicXML 4.0 + PanBeat JSON Schema + 音源ファイル |
+| データ形式 | MusicXML 4.0 + PanBeat JSON Schema + 任意の伴奏音源ファイル |
 | JSON | Godot JSON API + schema/semantic validation |
 | テスト | 共通golden fixture + fake clock + MIDI trace replay。engine別headless/integration test |
 | CI | 初期はmacOS build、headless test、JSON Schema検証、screenshot比較 |
@@ -419,7 +419,11 @@ progress = 1 - (expectedTime - currentTime) / approachDuration
 
 初期値の例は Perfect ±30 ms、Great ±60 ms、Good ±100 ms とし、値はScriptableObjectではなくバージョン付きルール設定として保存する。実プレイテスト前に固定しない。
 
-同時刻ノートは将来のChord対応を妨げないよう、同じ`groupId`を持てるデータ構造にする。MVPでは単音制約をimport validationで検出する。
+MusicXMLのChordは、base noteと`<chord/>` memberを同じtimestampに持つ独立したRuntime Noteへ変換する。判定、Miss、Combo、scoreはgroup単位に集約せず、各note IDを個別に消費する。物理入力の微小な時刻差は既存の各note判定窓で扱い、一打で複数noteを消費しない。
+
+実音より1オクターブ高いハンドパン記譜は曲importの明示option `notation_octave_shift=-1` で扱う。通常記譜と音域が重なるため自動検出せず、source pitchとnote IDは原譜どおり保持し、Instrument Profileへのpitch-to-target解決時だけMIDI noteを12下げる。このoptionはcache keyとpackage metadataに含める。
+
+NotePan lyricを持つMusicXML `<unpitched>`は、primary label（`+`より前）をauthoring techniqueへ変換する。`g`はGhostとしてscore cursorを進めるがRuntime Noteを作らない。`S`は`slap:outer-hit-radius`、`T`はMood Pan代替の`ding:ding`とする。複合ラベルの追加Toneは後続のMusicXML `<chord/>` noteから独立Runtime Noteとして得るため、lyric文字列からToneを二重生成しない。未知labelは位置付きdiagnosticで拒否する。
 
 ### 6.5 Pause / Resume / Seek
 
@@ -437,7 +441,7 @@ Phase 2のユーザーimportではMP3等を入力として許可してもよい�
 
 P206の6分素材比較により、Phase 2 import曲のcanonical runtime形式は48 kHz stereo Ogg Vorbis（FFmpeg 8.1 built-in Vorbis encoder、quality 5、bitexact metadata/mux設定）に決定した。同条件WAVは69,120,078 bytes、OGGは1,960,462 bytesで、OGGは3回のfull decodeが約198.5〜200.6 ms、Godot loadが約4.0〜4.9 msだった。WAVはfull decode約83.5〜84.8 ms、Godot load約184.1〜195.3 msだった。両形式とも3回のstart、pause/resume、180秒seek、loop、終了遷移を通過し、reported durationは360秒、seek観測誤差はDummy driver上で約2.67 msだった。これはheadless lifecycle baselineであり、CoreAudio出力同期や聴感上のloop seamを合格させる証拠ではない。Phase 1固定曲WAVは回帰fixtureとして変更しない。詳細は[`adr-002-runtime-audio.md`](./adr-002-runtime-audio.md)を参照する。
 
-import packageの`duration_us`とaudio-backed transportの終了時刻は、変換後audioをffprobeした実時間とする。譜面の`duration_us`はnote範囲の検証用に保持し、譜面がbacking audioより短くてもaudio再生中にGameplayを完了させない。逆に譜面がaudioより長いimportは診断付きで拒否する。
+伴奏audioを含むimport packageの`duration_us`とaudio-backed transportの終了時刻は、変換後audioをffprobeした実時間とする。譜面の`duration_us`はnote範囲の検証用に保持し、譜面がbacking audioより短くてもaudio再生中にGameplayを完了させない。逆に譜面がaudioより長いimportは診断付きで拒否する。伴奏audioを指定しない曲は、Mood Pan本体の発音だけで演奏できるよう譜面の`duration_us`をpackage durationとし、pauseを差し引くmonotonic clockを時刻基準にする。いずれもframe countを時刻基準にしない。
 
 ---
 
@@ -576,13 +580,13 @@ flowchart TD
 パーサーはMusicXML全仕様を曖昧に受け入れず、MVP対応範囲を明示する。
 
 - `score-partwise`をMVP対象とする
-- 単一part / 単一voice / 単音
+- 単一part / 単一voice / 単音および和音
 - divisionsを基準に整数tickでonsetとdurationを保持
 - tempo mapとtime signature mapを別オブジェクトにする
 - restはcursorを進めるがruntime noteを作らない
 - tie chainは一つのsustain eventへ正規化する
 - `<backup>` / `<forward>`を検出し、MVP制約外なら具体的な診断を返す
-- chord、tuplet、grace、repeat等は無視せず「未対応」として位置付きエラーまたは警告にする
+- tuplet、grace、repeat等は無視せず「未対応」として位置付きエラーまたは警告にする。`<chord/>`は直前のpitched base noteと同じonsetへ正規化し、不正な配置は位置付きエラーにする
 - DOCTYPEと外部entity解決を禁止し、XXEや意図しないネットワークアクセスを防ぐ
 - MusicXML 4.0 XSDは開発時のfixtures検証に使えるが、実行時は対応機能のsemantic validationも行う
 
@@ -951,3 +955,10 @@ Input OffsetとAudio Offsetは、この分解結果と利用者のキャリブ�
 - **Context:** 完走後のResultsに終了操作しかないと、日常的な反復練習のたびにアプリを再起動する必要がある。一方、終了済みtransport、MIDI port、score、判定recordを再利用すると二重入力や状態混入を起こす。
 - **Decision:** 完走直後のResultsは`Play Again`をprimary action、`Song Library`をsecondary actionとして表示する。再プレイ時は結果履歴を保存したまま、旧AudioPlayer、MIDI adapter、HUD、transport、judgement pipelineを破棄し、Product Flowを`Results → Gameplay`へ遷移させて同じpackageから新しいsessionを構築する。曲選択時は旧runtimeを破棄して同じProduct FlowのSong Libraryへ戻す。CLI受け入れの`--quit-on-complete`は維持する。
 - **Consequences:** 製品利用ではprocess再起動なしに同じ曲または別の曲を繰り返し演奏できる。各runのscore、combo、replay index、MIDI記録は独立し、二重session開始の拒否契約も維持する。
+
+### ADR-008: ノーツ速度はvisual lookaheadだけを変更する
+
+- **Status:** Accepted（2026-08-12）
+- **Context:** 高密度の譜面では、固定2秒のlookaheadに多数のノートが滞在して重なり、対象と順序を読み取りにくい。一方、表示速度を判定や音声時刻へ結合するとGameplayの決定性を損なう。
+- **Decision:** `slow`（0.75× / 2,666,667µs）、`normal`（1.0× / 2,000,000µs）、`fast`（1.5× / 1,333,333µs）、`very_fast`（2.0× / 1,000,000µs）を安定IDとする。`NoteScrollSpeedCatalog`がCLI override、settingsの曲別map、global defaultの順で解決し、schedulerの生成時lookaheadへだけ渡す。Song Libraryで曲ごとに保存する。
+- **Consequences:** 高速設定はノートの画面内滞在時間と同時表示数を減らすが、Runtime Chart、audio-backed transport、judgement pipeline、score recordは変更しない。再生中ではなく曲開始前に速度を確定するため、既にactiveなノートの巻き戻し処理は不要となる。

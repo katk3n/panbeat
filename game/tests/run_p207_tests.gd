@@ -44,6 +44,18 @@ func _initialize() -> void:
 	var changed := request.duplicate(true); changed["pitch_mapping"] = {"D4":{"technique":"tone", "target_id":"tone-1"}}
 	var updated := importer.import_song(changed, root.path_join("library"), repositories.songs)
 	_check(updated.get("ok") and int(updated["song"]["import_version"]) == 2 and repositories.songs.load()["document"]["songs"].size() == 1, "changed cache contract increments stable song version", failures)
+	var silent_request := {"score_path":ProjectSettings.globalize_path("res://../shared/fixtures/musicxml/chord.musicxml"), "profile":profile, "song_id":"p207-silent", "title":"P207 Chord Without Backing Audio"}
+	var silent_imported := importer.import_song(silent_request, root.path_join("library"), repositories.songs)
+	var silent_package: Dictionary = silent_imported.get("package", {})
+	var silent_chart_result: Dictionary = files.read_json(str(silent_imported.get("published_path", "")).path_join("chart.json"), 1024 * 1024) if silent_imported.get("ok") else {}
+	var silent_notes: Array = silent_chart_result.get("document", {}).get("notes", [])
+	_check(silent_imported.get("ok") and not FileAccess.file_exists(str(silent_imported.get("published_path", "")).path_join("runtime.ogg")) and not silent_package.get("audio", {}).get("present", true) and silent_notes.size() == 3 and silent_notes[0]["timestamp_us"] == silent_notes[1]["timestamp_us"], "MusicXML chord imports as simultaneous notes without optional backing audio", failures)
+	var octave_request := {"score_path":xml, "profile":profile, "notation_octave_shift":-1, "song_id":"p207-octave-high", "title":"P207 Written Octave High"}
+	var octave_imported := importer.import_song(octave_request, root.path_join("library"), repositories.songs)
+	var octave_chart_result: Dictionary = files.read_json(str(octave_imported.get("published_path", "")).path_join("chart.json"), 1024 * 1024) if octave_imported.get("ok") else {}
+	_check(octave_imported.get("ok") and octave_imported.get("package", {}).get("notation_octave_shift") == -1 and octave_chart_result.get("document", {}).get("notes", [])[0]["target_id"] == "ding", "one-octave-high notation imports against sounding pitches one octave lower", failures)
+	var invalid_octave_request := octave_request.duplicate(true); invalid_octave_request["song_id"] = "invalid-octave"; invalid_octave_request["notation_octave_shift"] = -2
+	_check(_code(importer.import_song(invalid_octave_request, root.path_join("invalid-octave-root"), repositories.songs)) == "invalid_notation_octave_shift", "unsupported notation octave shift is diagnosed", failures)
 	var cancelled := CancelCounter.new(); cancelled.cancel_at = 1
 	_check(_code(importer.import_song(request, root.path_join("cancelled"), repositories.songs, cancelled.check)) == "import_cancelled", "early cancellation publishes nothing", failures)
 	var late_cancel := CancelCounter.new(); late_cancel.cancel_at = 4
@@ -79,7 +91,7 @@ func _initialize() -> void:
 	var audio_request := request.duplicate(true); audio_request["song_id"] = "bad-audio"; audio_request["audio_path"] = corrupt_audio
 	_check(_code(importer.import_song(audio_request, root.path_join("bad-audio-root"), repositories.songs)) == "corrupt_or_unreadable_audio", "corrupt audio rejected before publication", failures)
 	files.remove_tree(root)
-	_finish(failures, 20)
+	_finish(failures, 23)
 
 func _create_mxl(path: String, score: PackedByteArray, include_container: bool) -> void:
 	var packer := ZIPPacker.new(); packer.open(path)

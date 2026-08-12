@@ -263,6 +263,8 @@ P302とP303はP301後に並行してよい。P304とP305もP303後に並行で�
 - Miss表現が次ノーツを隠さず、誤ったtargetへ成功演出を出さない
 - Combo演出は段階的で、判定窓、score、audio、transportへ影響しない
 - 同時Tone / Ding / Slap、連打、最大active note fixtureで重なりとpool overflowを検証する
+- ノーツ速度はSlow 0.75×、Normal 1.0×、Fast 1.5×、Very Fast 2.0×から選択でき、高速設定ほどvisual lookaheadと同時表示数が減る
+- ノーツ速度の変更は判定時刻、判定窓、score、audio、transportへ影響しない
 - Glow無効でもTechniqueと判定情報を失わない
 - deterministic replayのjudgement recordがPhase 2 baselineと一致する
 
@@ -296,6 +298,7 @@ P302とP303はP301後に並行してよい。P304とP305もP303後に並行で�
 **受け入れ条件:**
 
 - Song Libraryでは曲選択とPlayをprimary actionとし、import、reimport、deleteを二次操作として区別する
+- Song Libraryでノーツ速度を曲ごとに選択・保存でき、再起動後のGameplayへ反映される
 - import diagnostics、profile compatibility、invalid songの修復案へ到達できる
 - Device Setupではselected port、profile、MIDI ready / no ports / relaunch案内、入力monitorを区別して表示する
 - CalibrationではStart、cue入力、Analyze、Apply & Saveを段階として示し、5 valid hits未満やvariation過大の理由と再試行方法を日本語で説明する

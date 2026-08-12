@@ -2,6 +2,14 @@
 .DS_Store
 .AppleDouble
 .LSOverride
+.Trash-*/
+
+# Local crash reports and native debug bundles
+*.crash
+/*.core
+/core
+/core.[0-9]*
+*.dSYM/
 
 # Editors and local workspace state
 .idea/

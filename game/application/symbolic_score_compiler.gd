@@ -74,7 +74,7 @@ static func _build_sustain_notes(notes: Array[Dictionary]) -> Dictionary:
 	var result: Array[Dictionary] = []
 	var active: Dictionary = {}
 	for note: Dictionary in notes:
-		if note.get("is_rest", false): continue
+		if note.get("is_rest", false) or note.get("is_ignored", false): continue
 		var key := _pitch_key(note)
 		var ties: Array = note.get("tie_types", [])
 		var has_start := "start" in ties
@@ -95,13 +95,23 @@ static func _build_sustain_notes(notes: Array[Dictionary]) -> Dictionary:
 			active[key] = chain
 		else: result.append(_runtime_note(note))
 	if not active.is_empty(): return _failed("unclosed_tie", "tie start has no matching stop")
+	_assign_unique_note_ids(result)
 	result.sort_custom(func(left: Dictionary, right: Dictionary) -> bool: return int(left["tick"]) < int(right["tick"]) if int(left["tick"]) != int(right["tick"]) else str(left["note_id"]) < str(right["note_id"]))
 	return {"ok":true, "notes":result}
 
+static func _assign_unique_note_ids(notes: Array[Dictionary]) -> void:
+	var counts: Dictionary = {}
+	for note: Dictionary in notes:
+		var base := str(note["note_id"])
+		counts[base] = int(counts.get(base, 0)) + 1
+		if int(counts[base]) > 1: note["note_id"] = "%s:#%d" % [base, counts[base]]
+
 static func _runtime_note(note: Dictionary) -> Dictionary:
 	var voice := str(note.get("voice", "1"))
-	var pitch := {"step":str(note.get("step", "")), "alter":int(note.get("alter", 0)), "octave":int(note.get("octave", 0))}
 	var source := {"part":str(note.get("part", "")), "measure":str(note.get("measure", "")), "tick":int(note["tick"]), "voice":voice, "line":int(note.get("line", 0))}
+	if note.get("is_unpitched", false):
+		return {"note_id":"%s:m%s:t%d:v%s:unpitched:%s" % [source.part, source.measure, source.tick, voice, note.get("authoring_technique", "unknown")], "tick":int(note["tick"]), "duration_ticks":int(note["duration_ticks"]), "pitch":{}, "source":source, "authoring_technique":str(note.get("authoring_technique", "")), "authoring_target_id":str(note.get("authoring_target_id", "")), "notepan_label":str(note.get("notepan_label", ""))}
+	var pitch := {"step":str(note.get("step", "")), "alter":int(note.get("alter", 0)), "octave":int(note.get("octave", 0))}
 	return {"note_id":"%s:m%s:t%d:v%s:%s%d:%d" % [source.part, source.measure, source.tick, voice, pitch.step, pitch.octave, pitch.alter], "tick":int(note["tick"]), "duration_ticks":int(note["duration_ticks"]), "pitch":pitch, "source":source}
 
 static func _pitch_key(note: Dictionary) -> String:

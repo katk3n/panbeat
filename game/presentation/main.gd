@@ -7,6 +7,7 @@ const ChartSource := preload("res://infrastructure/json_chart_source.gd")
 const ChartFactory := preload("res://application/runtime_chart_factory.gd")
 const Session := preload("res://application/game_session.gd")
 const AudioBackend := preload("res://infrastructure/godot_audio_backend.gd")
+const SilentClockBackend := preload("res://infrastructure/silent_clock_backend.gd")
 const AudioTransport := preload("res://application/audio_transport_service.gd")
 const Pipeline := preload("res://application/judgement_pipeline.gd")
 const InputMode := preload("res://application/input_mode_selection.gd")
@@ -24,6 +25,7 @@ const Repositories := preload("res://infrastructure/user_data_repositories.gd")
 const CalibrationLogic := preload("res://application/calibration_service.gd")
 const GameplayHudView := preload("res://presentation/gameplay_hud.gd")
 const Accessibility := preload("res://presentation/accessibility_presenter.gd")
+const NoteScrollSpeeds := preload("res://application/note_scroll_speed_catalog.gd")
 
 var midi_adapter: Node
 var audio_player: AudioStreamPlayer
@@ -140,6 +142,8 @@ func _initialize_gameplay(imported_package_path: String = "") -> void:
 		var persisted_background: Dictionary = Repositories.new(_repository_root_override).settings.load()
 		if persisted_background.get("ok", false): persisted_settings = persisted_background["document"]
 	set_background_preset(BackgroundPresets.resolve(package, persisted_settings, _argument("--background-preset=")))
+	var note_scroll_speed_id := NoteScrollSpeeds.resolve(package, persisted_settings, _argument("--note-scroll-speed="))
+	var note_scroll_speed: Dictionary = NoteScrollSpeeds.preset(note_scroll_speed_id)
 	var package_root: String = "res://content/phase1-fixed-song-v1/" if imported_package_path.is_empty() else imported_package_path.path_join("")
 	var chart_name: String = str(package.get("chart_file", package.get("chart_path", "")))
 	var loaded_chart: Dictionary = ChartSource.load_chart(ProjectSettings.globalize_path(package_root + chart_name) if imported_package_path.is_empty() else package_root.path_join(chart_name))
@@ -151,8 +155,9 @@ func _initialize_gameplay(imported_package_path: String = "") -> void:
 		_fail("chart validation failed: %s" % JSON.stringify(runtime_result.get("errors", [])))
 		return
 	var audio_name: String = str(package.get("audio_file", package.get("audio", {}).get("runtime_path", "")))
-	var audio: AudioStream = load(package_root + audio_name) as AudioStream if imported_package_path.is_empty() else AudioStreamOggVorbis.load_from_file(package_root.path_join(audio_name))
-	if audio == null:
+	var has_audio := not audio_name.is_empty()
+	var audio: AudioStream = (load(package_root + audio_name) as AudioStream if imported_package_path.is_empty() else AudioStreamOggVorbis.load_from_file(package_root.path_join(audio_name))) if has_audio else null
+	if has_audio and audio == null:
 		_fail("audio load failed: %s" % package.get("audio_file", ""))
 		return
 	if input_mode == InputMode.REPLAY:
@@ -173,12 +178,12 @@ func _initialize_gameplay(imported_package_path: String = "") -> void:
 		if not lifecycle.get("ok", false):
 			_fail("MIDI initialization failed: %s" % lifecycle.get("code", lifecycle.get("error", "unknown")))
 			return
-	audio_player = AudioStreamPlayer.new()
-	audio_player.stream = audio
-	audio_player.pitch_scale = _replay_speed
-	if not _measurement_output.is_empty():
-		audio_player.volume_db = -60.0
-	add_child(audio_player)
+	if has_audio:
+		audio_player = AudioStreamPlayer.new()
+		audio_player.stream = audio
+		audio_player.pitch_scale = _replay_speed
+		if not _measurement_output.is_empty(): audio_player.volume_db = -60.0
+		add_child(audio_player)
 	_effective_input_offset_sec = float(settings["input_offset_sec"]) if _input_offset_override == null else float(_input_offset_override)
 	_effective_audio_offset_sec = float(settings["audio_offset_sec"]) if _audio_offset_override == null else float(_audio_offset_override)
 	if _imported_product_session:
@@ -189,7 +194,7 @@ func _initialize_gameplay(imported_package_path: String = "") -> void:
 	var offsets: Dictionary = TimingOffsets.from_seconds(_effective_input_offset_sec, _effective_audio_offset_sec)
 	judgement_pipeline = Pipeline.new(runtime_result["chart"], judgement_rules, offsets)
 	_active_result_metadata = {"song_id":_package_id, "importer_version":str(package.get("importer_version", "phase1-fixed-package-v1")), "chart_version":str(package.get("chart_schema_version", loaded_chart["chart"].get("schema_version", "1.0.0"))), "profile_id":str(profile.get("profile_id", "")), "judgement_rule_id":str(judgement_rules.get("rule_id", "")), "score_rule_id":str(_score_rules.get("rule_id", ""))}
-	configure(runtime_result["chart"], profile)
+	configure(runtime_result["chart"], profile, 64, int(note_scroll_speed["lookahead_us"]))
 	var accessibility_defaults := _load_json("res://config/accessibility-settings-v1.json")
 	var accessibility := Accessibility.resolve(accessibility_defaults, OS.get_cmdline_user_args())
 	glow_enabled = accessibility["glow_enabled"]
@@ -202,7 +207,8 @@ func _initialize_gameplay(imported_package_path: String = "") -> void:
 	_gameplay_hud.visible = not OS.get_cmdline_user_args().has("--hide-hud")
 	_gameplay_hud.configure(_song_title, _song_duration_us)
 	add_child(_gameplay_hud)
-	transport = AudioTransport.new(AudioBackend.new(audio_player), int(package["duration_us"]), session)
+	var transport_backend: RefCounted = AudioBackend.new(audio_player) if has_audio else SilentClockBackend.new(int(package["duration_us"]), null, _replay_speed)
+	transport = AudioTransport.new(transport_backend, int(package["duration_us"]), session)
 	if not _measurement_output.is_empty():
 		_metrics = MetricsRecorder.new(_measurement_output, _replay_speed, {"input_mode":input_mode,"profile_id":profile["profile_id"],"package_id":package["package_id"],"stall_at_seconds":_stall_at_seconds})
 	if not session.transition(Session.READY).get("ok", false):
@@ -213,7 +219,7 @@ func _initialize_gameplay(imported_package_path: String = "") -> void:
 		_fail("audio schedule failed: %s" % scheduled.get("error", "unknown"))
 		return
 	_record_session_event("scheduled")
-	developer_diagnostics.append("ready input_mode=%s replay_speed=%.2f chart_notes=%d audio_us=%d" % [input_mode, _replay_speed, runtime_result["chart"].note_count(), package["duration_us"]])
+	developer_diagnostics.append("ready input_mode=%s replay_speed=%.2f chart_notes=%d duration_us=%d clock=%s note_scroll_speed=%s" % [input_mode, _replay_speed, runtime_result["chart"].note_count(), package["duration_us"], "audio" if has_audio else "monotonic", note_scroll_speed_id])
 	queue_redraw()
 
 func _open_device_setup() -> void:

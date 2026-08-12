@@ -95,6 +95,8 @@ PanBeatへの入力にはMIDIを利用する。
 
 入力タイミングと譜面上のノート時刻との差によって判定を行う。
 
+ノーツのスクロール速度は曲ごとに調節できるものとする。速度変更は画面へ出現してから判定位置へ到達するまでの表示時間だけを変更し、譜面時刻、判定窓、音声、transportには影響させない。高密度の譜面では高速設定により画面内の同時表示数を減らせるものとする。
+
 基本判定は以下とする。
 
 - Perfect
@@ -637,12 +639,16 @@ Game Engineは `type` と `target` から、
 song/
 ├── score.musicxml
 ├── chart.json
-└── audio.mp3
+└── audio.mp3               # 任意の伴奏音源
 ```
 
-MusicXMLは音楽的な原譜、`chart.json` はPanBeat固有情報、`audio.mp3` は伴奏音源を保持する。
+MusicXMLは音楽的な原譜、`chart.json` はPanBeat固有情報、`audio.mp3` は任意の伴奏音源を保持する。Mood Pan本体の発音だけで演奏する曲はaudioなしでimport・再生でき、その場合は譜面の時間を再生時間とする。
 
 MusicXMLでSlapをどのように表現・識別するかについては、MusicXMLのパーカッション記譜またはPanBeat固有のメタデータとの組み合わせを含め、実装設計時に決定する。
+
+ハンドパン譜が実音より1オクターブ高く記譜されている場合、import時に明示的なoctave-down mappingを選択できる。自動推測は通常記譜との音域重複で誤mappingを起こすため行わず、MusicXMLの原音高は保持したままtarget解決時だけ12 semitone下げる。
+
+NotePan由来の`<unpitched>`は、NotePan lyricのprimary labelを使用する。`g`（Ghost）はMood Panで再現できないため時刻だけ保持してRuntime Noteを生成せず、`S`はSlap、`T`はDingへ変換する。`T+1`や`S+6`の`+`以降はMusicXMLの直後の`<chord/>` pitched noteとして個別にimport・判定する。
 
 ---
 
@@ -651,7 +657,7 @@ MusicXMLでSlapをどのように表現・識別するかについては、Music
 ## MVP
 
 - 単一パート
-- 単音
+- 単音および和音（同時ノートを個別判定）
 - 基本的な音価
 - 休符
 - 拍子
@@ -661,7 +667,6 @@ MusicXMLでSlapをどのように表現・識別するかについては、Music
 
 ## 将来
 
-- Chord
 - Tuplet
 - Grace Note
 - Repeat

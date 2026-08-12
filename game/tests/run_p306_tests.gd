@@ -4,6 +4,7 @@ const View := preload("res://presentation/radial_view.gd")
 const ChartFactory := preload("res://application/runtime_chart_factory.gd")
 const Scheduler := preload("res://application/gameplay_note_scheduler.gd")
 const RichBackground := preload("res://presentation/rich_ui_background.gd")
+const NoteScrollSpeeds := preload("res://application/note_scroll_speed_catalog.gd")
 
 func _initialize() -> void:
 	var failures: Array[String] = []
@@ -31,6 +32,11 @@ func _initialize() -> void:
 		var scheduler := Scheduler.new(built["chart"], profile, 64)
 		scheduler.update(0)
 		_check(scheduler.active_count() == 64 and scheduler.overflow_count == 0, "maximum active fixture fits fixed pool", failures)
+		var very_fast := Scheduler.new(built["chart"], profile, 64, NoteScrollSpeeds.preset("very_fast")["lookahead_us"])
+		very_fast.update(0)
+		_check(very_fast.active_count() == 0, "very fast speed keeps notes outside its shorter initial lookahead", failures)
+		very_fast.update(1_000_000)
+		_check(very_fast.active_count() == 64 and very_fast.lookahead_us() == 1_000_000, "very fast speed activates the same notes one second before judgement", failures)
 		notes.append({"note_id":"overflow","timestamp_us":2_000_000,"technique":"ding","target_id":"ding"})
 		var overflow_built := ChartFactory.build({"schema_version":"1.0.0","chart_id":"p306-overflow","duration_us":4_000_000,"notes":notes}, profile, 4_000_000)
 		var overflow_scheduler := Scheduler.new(overflow_built["chart"], profile, 64); overflow_scheduler.update(0)
@@ -44,7 +50,17 @@ func _initialize() -> void:
 	_check(quality["background_presets"].size() == 3 and quality["background_motion"] == "visible_audio_time" and quality["background_motion_strength"] == "dramatic" and quality["deep_resonance_identity"] == "jade_mist_caustics" and not quality["cyber_grid"] and not quality["static_outer_gold_ring"] and not quality["legacy_highlight_arc"] and quality["stretch_aspect"] == "expand", "three dramatically animated meditative backgrounds retain Deep Resonance identity and omit misleading decoration", failures)
 	var main_source := FileAccess.get_file_as_string("res://presentation/main.gd")
 	_check(main_source.contains("func _ready() -> void:\n\tsuper._ready()"), "application startup initializes the inherited gameplay field shader", failures)
-	_finish(failures, 18)
+	var speed_presets := NoteScrollSpeeds.all()
+	_check(speed_presets.size() == 4 and speed_presets.map(func(value: Dictionary) -> String: return value["id"]) == ["slow", "normal", "fast", "very_fast"], "four stable scroll speed presets are exposed", failures)
+	_check(NoteScrollSpeeds.preset("slow")["lookahead_us"] > NoteScrollSpeeds.preset("normal")["lookahead_us"] and NoteScrollSpeeds.preset("very_fast")["lookahead_us"] < NoteScrollSpeeds.preset("fast")["lookahead_us"], "faster presets use shorter visual lookahead", failures)
+	var speed_settings := {"note_scroll_speed_id":"slow", "song_note_scroll_speeds":{"dense-song":"very_fast"}}
+	_check(NoteScrollSpeeds.resolve({"song_id":"dense-song"}, speed_settings) == "very_fast" and NoteScrollSpeeds.resolve({"song_id":"other"}, speed_settings) == "slow", "per-song speed overrides the global preference", failures)
+	_check(NoteScrollSpeeds.resolve({"song_id":"dense-song"}, speed_settings, "fast") == "fast" and NoteScrollSpeeds.resolve({}, {}) == "normal", "CLI override and safe default resolve", failures)
+	var assigned_speed := NoteScrollSpeeds.assign_to_song(speed_settings, "new-song", "fast")
+	_check(assigned_speed["song_note_scroll_speeds"]["new-song"] == "fast" and not speed_settings["song_note_scroll_speeds"].has("new-song"), "per-song speed assignment preserves the input settings", failures)
+	var library_source := FileAccess.get_file_as_string("res://presentation/song_library_view.gd")
+	_check(library_source.contains("NOTE SPEED") and library_source.contains("_on_note_scroll_speed_selected"), "Song Library exposes and persists note speed", failures)
+	_finish(failures, 26)
 
 func _check(condition: bool, label: String, failures: Array[String]) -> void:
 	if not condition: failures.append(label)

@@ -37,9 +37,9 @@ func _ready() -> void:
 	add_child(_field_shader_rect)
 	_sync_field_shader()
 
-func configure(chart: RefCounted, profile: Dictionary, note_capacity: int = 64) -> void:
+func configure(chart: RefCounted, profile: Dictionary, note_capacity: int = 64, note_lookahead_us: int = 2_000_000) -> void:
 	_profile = profile.duplicate(true)
-	scheduler = Scheduler.new(chart, _profile, note_capacity)
+	scheduler = Scheduler.new(chart, _profile, note_capacity, note_lookahead_us)
 	queue_redraw()
 
 func set_preview_song_time_us(value: int) -> void:

@@ -6,7 +6,7 @@ const MAX_SOURCE_BYTES := 16 * 1024 * 1024
 const MAX_DEPTH := 64
 const MAX_ELEMENTS := 250_000
 const UNSUPPORTED_ELEMENTS: Dictionary = {
-	"chord":"chord", "time-modification":"tuplet", "tuplet":"tuplet", "grace":"grace_note",
+	"time-modification":"tuplet", "tuplet":"tuplet", "grace":"grace_note",
 	"repeat":"repeat", "ending":"volta", "backup":"backup_forward", "forward":"backup_forward"
 }
 
@@ -48,6 +48,8 @@ static func read_bytes(bytes: PackedByteArray, source: String = "memory") -> Dic
 	var measures_raw: Array[Dictionary] = []
 	var measure_position := {"n":0, "d":1}
 	var score_position := {"n":0, "d":1}
+	var previous_note_start: Dictionary = {}
+	var previous_note_was_pitched := false
 	var current_note: Dictionary = {}
 	var current_time: Dictionary = {}
 	var current_metronome: Dictionary = {}
@@ -88,11 +90,23 @@ static func read_bytes(bytes: PackedByteArray, source: String = "memory") -> Dic
 				measure_index += 1
 				measure_number = parser.get_named_attribute_value_safe("number")
 				measure_position = {"n":0, "d":1}
+				previous_note_start = {}
+				previous_note_was_pitched = false
 				measures_raw.append({"number":measure_number, "index":measure_index, "start":score_position.duplicate(), "line":parser.get_current_line()})
 			elif name == "note":
 				current_note = {"part":part_id, "measure":measure_number, "measure_index":measure_index, "start":_fraction_add(score_position, measure_position), "line":parser.get_current_line(), "is_rest":false, "tie_types":[]}
 			elif name == "rest" and not current_note.is_empty():
 				current_note["is_rest"] = true
+			elif name == "unpitched" and not current_note.is_empty():
+				current_note["is_unpitched"] = true
+			elif name == "lyric" and not current_note.is_empty():
+				current_note["_active_lyric_name"] = parser.get_named_attribute_value_safe("name")
+			elif name == "chord" and not current_note.is_empty():
+				current_note["is_chord"] = true
+				if previous_note_start.is_empty() or not previous_note_was_pitched:
+					diagnostics.append(_diagnostic("error", "chord_without_preceding_note", source, part_id, measure_number, name, parser.get_current_line(), "A chord member must follow a pitched note in the same measure", "Place the chord base note immediately before its <chord/> members."))
+				else:
+					current_note["start"] = previous_note_start.duplicate()
 			elif name == "time":
 				current_time = {"part":part_id, "measure":measure_number, "position":_fraction_add(score_position, measure_position), "line":parser.get_current_line()}
 			elif name == "metronome":
@@ -134,14 +148,33 @@ static func read_bytes(bytes: PackedByteArray, source: String = "memory") -> Dic
 				else:
 					var voice: String = str(current_note.get("voice", "1")); voices[voice] = true
 					if voices.size() > 1: diagnostics.append(_diagnostic("error", "unsupported_multiple_voices", source, part_id, measure_number, "voice", parser.get_current_line(), "Only one voice is supported", "Export a single-voice score."))
-					if not current_note.get("is_rest", false) and (not current_note.has("step") or not current_note.has("octave") or str(current_note.get("step", "")) not in ["A", "B", "C", "D", "E", "F", "G"]):
+					if current_note.get("is_unpitched", false):
+						var notepan_label := str(current_note.get("notepan_label", "")).strip_edges()
+						var primary_label := notepan_label.get_slice("+", 0).strip_edges()
+						var is_technique_chord := notepan_label.contains("+") and primary_label in ["S", "T"]
+						match primary_label:
+							"g": current_note["is_ignored"] = true
+							"S", "T":
+								if is_technique_chord:
+									current_note["is_ignored"] = true
+									current_note["anchors_pitched_chord"] = true
+								else:
+									current_note["authoring_technique"] = "slap"
+									current_note["authoring_target_id"] = "outer-hit-radius"
+							_: diagnostics.append(_diagnostic("error", "unsupported_unpitched_notepan_label", source, part_id, measure_number, "unpitched", parser.get_current_line(), "Unpitched NotePan label is unsupported: %s" % notepan_label, "Use g, S, or T as the primary NotePan label."))
+					if not current_note.get("is_rest", false) and not current_note.get("is_unpitched", false) and (not current_note.has("step") or not current_note.has("octave") or str(current_note.get("step", "")) not in ["A", "B", "C", "D", "E", "F", "G"]):
 						diagnostics.append(_diagnostic("error", "invalid_pitch", source, part_id, measure_number, "pitch", parser.get_current_line(), "Pitched notes require step A-G and octave", "Provide a complete pitch or rest."))
 					var duration_fraction := _fraction(int(duration_text), maxi(current_divisions, 1))
 					current_note["duration"] = duration_fraction
 					current_note["divisions"] = current_divisions
 					notes_raw.append(current_note.duplicate(true))
-					measure_position = _fraction_add(measure_position, duration_fraction)
+					if not current_note.get("is_chord", false):
+						previous_note_start = current_note["start"].duplicate()
+						previous_note_was_pitched = not current_note.get("is_rest", false) and (not current_note.get("is_ignored", false) or current_note.get("anchors_pitched_chord", false))
+						measure_position = _fraction_add(measure_position, duration_fraction)
 				current_note = {}
+			elif name == "lyric" and not current_note.is_empty():
+				current_note.erase("_active_lyric_name")
 			elif name == "time":
 				if current_time.has("beats") and current_time.has("beat_type"): time_raw.append(current_time.duplicate(true))
 				else: diagnostics.append(_diagnostic("error", "invalid_time_signature", source, part_id, measure_number, name, parser.get_current_line(), "time requires beats and beat-type", "Add a complete time signature."))
@@ -188,6 +221,8 @@ static func _assign_text(stack: Array[String], value: String, note: Dictionary, 
 			"alter": note["alter"] = value.to_int() if value.is_valid_int() else value
 			"octave": note["octave"] = value.to_int() if value.is_valid_int() else value
 			"rest": note["is_rest"] = true
+			"text":
+				if note.get("_active_lyric_name", "") == "NotePan": note["notepan_label"] = value
 	if name == "divisions": time["_divisions_text"] = value
 	elif name == "beats": time["beats"] = value.to_int() if value.is_valid_int() else value
 	elif name == "beat-type": time["beat_type"] = value.to_int() if value.is_valid_int() else value

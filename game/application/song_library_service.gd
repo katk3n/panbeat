@@ -20,7 +20,7 @@ func query(repository_root: String, song_repository: RefCounted, selected_profil
 		var left_key := "%s|%s" % [str(left.get("title", "")).to_lower(), left.get("song_id", "")]
 		var right_key := "%s|%s" % [str(right.get("title", "")).to_lower(), right.get("song_id", "")]
 		return left_key < right_key)
-	return {"ok":true, "state":"empty" if songs.is_empty() else "ready", "label":"EMPTY — Import a MusicXML score and audio file." if songs.is_empty() else "%d song(s)" % songs.size(), "songs":songs, "diagnostics":[]}
+	return {"ok":true, "state":"empty" if songs.is_empty() else "ready", "label":"EMPTY — Import a MusicXML score to begin." if songs.is_empty() else "%d song(s)" % songs.size(), "songs":songs, "diagnostics":[]}
 
 func delete_preview(repository_root: String, song_repository: RefCounted, song_id: String) -> Dictionary:
 	var loaded: Dictionary = song_repository.load()
@@ -63,7 +63,10 @@ func _inspect_entry(repository_root: String, entry: Dictionary, selected_profile
 	var package: Dictionary = package_result["document"]
 	if package.get("schema_version") != "1.0.0" or package.get("song_id") != entry.get("song_id") or int(package.get("import_version", 0)) != int(entry.get("import_version", -1)):
 		return _invalid(view, [_diagnostic("package_metadata_mismatch", entry.get("package_path", ""), "Package identity/version does not match the song index.", "Re-import or delete this song.")])
-	for asset: String in [str(package.get("chart_path", "")), str(package.get("audio", {}).get("runtime_path", ""))]:
+	var required_assets: Array[String] = [str(package.get("chart_path", ""))]
+	var runtime_audio_path := str(package.get("audio", {}).get("runtime_path", ""))
+	if not runtime_audio_path.is_empty(): required_assets.append(runtime_audio_path)
+	for asset: String in required_assets:
 		var asset_result: Dictionary = _files.resolve_relative(package_path, asset)
 		if not asset_result.get("ok", false) or not _files.file_exists(str(asset_result.get("path", ""))): return _invalid(view, [_diagnostic("package_asset_missing", asset, "An imported package asset is missing.", "Re-import or delete this song.")])
 	view["title"] = package.get("title", entry.get("title", entry.get("song_id", "")))

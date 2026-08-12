@@ -25,6 +25,9 @@ func _initialize() -> void:
 	var boundary_score := _score([{ "tick":0, "bpm":120.0 }, { "tick":4, "bpm":60.0 }], [_note(4, 4)])
 	var boundary := Compiler.compile(boundary_score, "boundary")
 	_check(boundary.get("ok") and boundary["chart"].notes[0]["timestamp_us"] == 500000 and boundary["chart"].notes[0]["duration_us"] == 1000000, "tempo boundary conversion", failures)
+	var chord_parsed := Reader.read_file(ProjectSettings.globalize_path("res://../shared/fixtures/musicxml/chord.musicxml"))
+	var chord_compiled := Compiler.compile(chord_parsed.get("score"), "chord") if chord_parsed.get("ok") else chord_parsed
+	_check(chord_compiled.get("ok") and chord_compiled["chart"].notes.size() == 3 and chord_compiled["chart"].notes[0]["timestamp_us"] == 0 and chord_compiled["chart"].notes[1]["timestamp_us"] == 0 and chord_compiled["chart"].notes[2]["timestamp_us"] == 500_000, "chord compiles as independently identified simultaneous runtime notes", failures)
 	var long_score := _score([{ "tick":0, "bpm":123.456 }], [_note(1_000_000_000, 4)])
 	var long_run_a := Compiler.compile(long_score, "long")
 	var long_run_b := Compiler.compile(long_score, "long")
@@ -37,7 +40,7 @@ func _initialize() -> void:
 	_check(_code(Compiler.compile(gap, "gap")) == "tie_gap_or_overlap", "tie gap rejected", failures)
 	var conflicting := _score([{ "tick":0, "bpm":120.0 }, { "tick":0, "bpm":90.0 }], [_note(0, 4)])
 	_check(_code(Compiler.compile(conflicting, "tempo")) == "conflicting_tempo", "conflicting tempo rejected", failures)
-	_finish(failures, 14)
+	_finish(failures, 15)
 
 func _score(tempos: Array[Dictionary], notes: Array[Dictionary]) -> RefCounted:
 	var tempo_events: Array[Dictionary] = []

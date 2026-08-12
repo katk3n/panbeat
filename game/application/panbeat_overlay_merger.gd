@@ -4,7 +4,7 @@ extends RefCounted
 const Canonical := preload("res://application/canonical_json.gd")
 const OVERLAY_VERSION := "1.0.0"
 
-static func merge(timed_chart: RefCounted, overlay: Dictionary, source_sha256: String, profile: Dictionary, explicit_pitch_mapping: Dictionary = {}) -> Dictionary:
+static func merge(timed_chart: RefCounted, overlay: Dictionary, source_sha256: String, profile: Dictionary, explicit_pitch_mapping: Dictionary = {}, notation_octave_shift: int = 0) -> Dictionary:
 	var diagnostics: Array[Dictionary] = []
 	var annotations: Array = []
 	if not overlay.is_empty():
@@ -47,19 +47,23 @@ static func merge(timed_chart: RefCounted, overlay: Dictionary, source_sha256: S
 	var gameplay_notes: Array[Dictionary] = []
 	for note: Dictionary in timed_chart.notes:
 		var mapping: Dictionary = selected.get(note["note_id"], {})
+		if mapping.is_empty() and not str(note.get("authoring_technique", "")).is_empty():
+			mapping = {"technique":str(note["authoring_technique"]), "target_id":str(note.get("authoring_target_id", ""))}
+			if not _profile_has_pair(profile, mapping["technique"], mapping["target_id"]):
+				diagnostics.append(_diagnostic("unknown_target", "profile has no %s:%s target" % [mapping["technique"], mapping["target_id"]], -1, note.get("source", {}))); continue
 		if mapping.is_empty():
-			mapping = _resolve_pitch(note["pitch"], profile, explicit_pitch_mapping)
+			mapping = _resolve_pitch(note["pitch"], profile, explicit_pitch_mapping, notation_octave_shift)
 			if not mapping.get("ok", false):
 				diagnostics.append(_diagnostic(mapping.get("code", "unsupported_pitch"), mapping.get("error", "pitch is not mapped"), -1, note.get("source", {}))); continue
 			mapping.erase("ok")
-		if mapping.get("technique") == "slap" and not selected.has(note["note_id"]):
+		if mapping.get("technique") == "slap" and not selected.has(note["note_id"]) and note.get("authoring_technique") != "slap":
 			diagnostics.append(_diagnostic("slap_requires_overlay", "Slap must be explicitly annotated in the PanBeat overlay", -1, note.get("source", {}))); continue
 		gameplay_notes.append({"note_id":note["note_id"], "timestamp_us":note["timestamp_us"], "duration_us":note["duration_us"], "technique":mapping["technique"], "target_id":mapping["target_id"], "source":note["source"], "pitch":note["pitch"]})
 	if not diagnostics.is_empty(): return {"ok":false, "diagnostics":diagnostics}
 	var chart := {"schema_version":"1.0.0", "chart_id":timed_chart.chart_id, "importer_version":timed_chart.importer_version, "overlay_id":overlay.get("overlay_id", "none"), "profile_id":profile.get("profile_id", ""), "duration_us":timed_chart.duration_us, "tempo_map":timed_chart.tempo_map.duplicate(true), "notes":gameplay_notes}
 	return {"ok":true, "chart":chart, "canonical_json":Canonical.encode(chart) + "\n", "diagnostics":[]}
 
-static func _resolve_pitch(pitch: Dictionary, profile: Dictionary, explicit: Dictionary) -> Dictionary:
+static func _resolve_pitch(pitch: Dictionary, profile: Dictionary, explicit: Dictionary, notation_octave_shift: int) -> Dictionary:
 	var key := "%s%s%s" % [pitch.get("step", ""), "#" if int(pitch.get("alter", 0)) == 1 else "b" if int(pitch.get("alter", 0)) == -1 else "", pitch.get("octave", "")]
 	if explicit.has(key):
 		var mapping: Variant = explicit[key]
@@ -67,12 +71,13 @@ static func _resolve_pitch(pitch: Dictionary, profile: Dictionary, explicit: Dic
 		return {"ok":false, "code":"invalid_explicit_mapping", "error":"explicit pitch mapping is not available in profile: %s" % key}
 	var midi := _pitch_to_midi(pitch)
 	if midi < 0: return {"ok":false, "code":"invalid_pitch", "error":"invalid pitch: %s" % key}
+	midi += notation_octave_shift * 12
 	var matches: Array[Dictionary] = []
 	for value: Variant in profile.get("mappings", []):
 		if value is Dictionary:
 			var mapping := value as Dictionary
 			if int(mapping.get("note", -1)) == midi and ["tone", "ding"].has(str(mapping.get("technique", ""))): matches.append(mapping)
-	if matches.is_empty(): return {"ok":false, "code":"unsupported_pitch", "error":"pitch %s (MIDI %d) is not mapped by profile" % [key, midi]}
+	if matches.is_empty(): return {"ok":false, "code":"unsupported_pitch", "error":"pitch %s resolves to MIDI %d after notation octave shift %d and is not mapped by profile" % [key, midi, notation_octave_shift]}
 	var first: Dictionary = matches[0]
 	for mapping: Dictionary in matches:
 		if mapping.get("technique") != first.get("technique") or mapping.get("target_id") != first.get("target_id"): return {"ok":false, "code":"ambiguous_pitch", "error":"pitch %s has multiple profile targets" % key}
