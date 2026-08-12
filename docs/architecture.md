@@ -801,12 +801,17 @@ Input OffsetとAudio Offsetは、この分解結果と利用者のキャリブ�
 - device reconnect、設定保存、エラーUX
 - 性能・end-to-end latency検証
 
-### Phase 3: 学習機能
+### Phase 3: UI / Visual Polish
 
-- Practice Mode: BPM変更、loop、metronome
-- 左右手ガイド、苦手箇所分析
-- Free Play
-- Pressure / dynamics等をprofileと譜面schemaへ追加
+詳細な実行単位、依存関係、各storyの受け入れ条件は[`phase3-stories.md`](./phase3-stories.md)を参照する。
+
+- Dingを要件どおりSpawn Ringから中央Ding判定リングへ収束する全周リングに修正
+- 共通Theme、アプリシェル、navigation、error UXを統一
+- ハンドパン本体、Tone / Ding / Slap、HIT feedback、Gameplay HUDの視覚品質を改善
+- Device Setup、Song Library、Calibration、Resultsの情報設計と状態表現を改善
+- Reduced Effects、Glowなし、monochrome、resize、keyboard操作、描画性能を検証
+
+従来候補だったPractice Mode、左右手ガイド、苦手箇所分析、Free Play、Pressure / dynamicsは、2026-08-12の製品判断により発展的な学習機能として本Phaseでは実施しない。Final Phaseの必須作業にも含めない。
 
 ### Phase 4: Web評価
 
