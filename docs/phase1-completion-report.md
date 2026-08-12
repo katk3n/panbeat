@@ -1,5 +1,7 @@
 # Phase 1 Completion Report
 
+> Evidence retention: 本書に記載した`artifacts/raw/`のrun IDはローカル／CI出力であり、Gitにはcommitしない。完了状態は本書、versioned test、再現commandを正とする。
+
 ## Gate decision
 
 **Decision: Complete with deferred release-gate items（2026-08-12）**

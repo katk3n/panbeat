@@ -1,0 +1,35 @@
+#!/bin/sh
+set -eu
+script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+repository_root=$(CDPATH= cd -- "$script_dir/.." && pwd)
+run_id=${1:-phase3-p310-automated-latest}
+case "$run_id" in ''|*[!A-Za-z0-9._-]*) printf '%s\n' 'check-phase3-p310: invalid run ID' >&2; exit 64 ;; esac
+raw_dir="$repository_root/artifacts/raw/$run_id"
+build_run="$run_id-build"
+build_path="$repository_root/artifacts/builds/$build_run/PanBeat.zip"
+if test -e "$raw_dir"; then printf 'check-phase3-p310: evidence directory already exists: %s\n' "$raw_dir" >&2; exit 73; fi
+mkdir -p "$raw_dir"
+"$script_dir/check-game" --mode test --run-id "$run_id-tests"
+"$script_dir/check-game" --mode build --run-id "$build_run"
+temporary=$(mktemp -d /tmp/panbeat-p310-inspect.XXXXXX)
+trap 'rm -rf "$temporary"' EXIT HUP INT TERM
+unzip -q "$build_path" -d "$temporary"
+(cd "$temporary" && find PanBeat.app -type f -print | LC_ALL=C sort) > "$raw_dir/build-contents.txt"
+strings "$temporary/PanBeat.app/Contents/Resources/PanBeat.pck" > "$temporary/pck-strings.txt"
+if rg -q 'PANBEAT_.*TESTS_OK|artifacts/raw|/Users/' "$temporary/pck-strings.txt" || rg -q 'ファイルの保存中: res://tests/' "$repository_root/artifacts/reports/$build_run/build.log"; then printf '%s\n' 'check-phase3-p310: build contains test bytecode, raw evidence, or personal path data' >&2; exit 1; fi
+for run in a b; do
+  "$script_dir/godot" --path "$repository_root/game" --resolution 1600x900 --script res://tests/capture_p309.gd --log-file "$raw_dir/gameplay-normal-$run.log" -- --mode normal --size 1600x900 --output "$raw_dir/gameplay-normal-$run.png"
+  "$script_dir/godot" --headless --path "$repository_root/game" --log-file "$raw_dir/run-$run-replay.log" -- --input-mode replay --replay-speed=4 --records-output="$raw_dir/run-$run-replay.json" --quit-on-complete
+done
+cmp "$raw_dir/gameplay-normal-a.png" "$raw_dir/gameplay-normal-b.png"
+cmp "$raw_dir/run-a-replay.json" "$raw_dir/run-b-replay.json"
+cmp "$raw_dir/run-a-replay.json" "$repository_root/artifacts/raw/phase2-p212-product-flow-20260812/release-replay.json"
+for fixture in 'device:device' 'songs:songs' 'calibration:calibration' 'results:results'; do
+  mode=${fixture%%:*}; name=${fixture##*:}
+  "$script_dir/godot" --path "$repository_root/game" --resolution 1600x900 --script res://tests/capture_p308.gd --log-file "$raw_dir/$name.log" -- --mode "$mode" --output "$raw_dir/$name.png"
+done
+"$script_dir/godot" --path "$repository_root/game" --resolution 1600x900 --script res://tests/capture_p304.gd --log-file "$raw_dir/recoverable-error.log" -- --mode error --output "$raw_dir/recoverable-error.png"
+"$script_dir/godot" --path "$repository_root/game" --resolution 1600x900 --script res://tests/measure_p309_performance.gd --log-file "$raw_dir/performance.log" -- --output "$raw_dir/performance.json" --image "$raw_dir/maximum-load.png"
+if rg -n 'SCRIPT ERROR|ERROR:' "$raw_dir"/*.log; then printf '%s\n' 'check-phase3-p310: acceptance log contains an error' >&2; exit 1; fi
+node "$script_dir/summarize-phase3-p310.mjs" "$run_id" "$raw_dir" "$build_path"
+printf '%s\n' 'check-phase3-p310: automated gate passed; manifest references the accepted real-device session and later visual spot checks'

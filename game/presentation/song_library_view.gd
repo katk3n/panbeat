@@ -1,6 +1,9 @@
 class_name SongLibraryView
 extends Control
 
+const AppTheme := preload("res://presentation/panbeat_theme.gd")
+const RichBackground := preload("res://presentation/rich_ui_background.gd")
+
 signal play_requested(package_path: String)
 
 const Repositories := preload("res://infrastructure/user_data_repositories.gd")
@@ -8,6 +11,7 @@ const Files := preload("res://infrastructure/native_song_package_backend.gd")
 const Library := preload("res://application/song_library_service.gd")
 const Importer := preload("res://application/song_import_service.gd")
 const AudioConverter := preload("res://infrastructure/ffmpeg_audio_converter.gd")
+const BackgroundPresets := preload("res://application/background_preset_catalog.gd")
 
 var repository_root := ""
 var repositories: RefCounted
@@ -26,8 +30,10 @@ var _score_button: Button
 var _audio_button: Button
 var _overlay_button: Button
 var _play: Button
+var _background_picker: OptionButton
 
 func _ready() -> void:
+	theme = AppTheme.shared()
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	repository_root = OS.get_user_data_dir().path_join("v1/songs") if repository_root.is_empty() else repository_root
 	if repositories == null: repositories = Repositories.new()
@@ -35,13 +41,26 @@ func _ready() -> void:
 	_build_ui(); refresh.call_deferred()
 
 func _build_ui() -> void:
-	var background := ColorRect.new(); background.color = Color("101620"); background.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT); add_child(background)
+	var background := RichBackground.new(); background.intensity = 1.18; add_child(background)
 	var margin := MarginContainer.new(); margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	for key: String in ["margin_left", "margin_right", "margin_top", "margin_bottom"]: margin.add_theme_constant_override(key, 40)
 	add_child(margin)
 	var layout := VBoxContainer.new(); layout.add_theme_constant_override("separation", 12); margin.add_child(layout)
-	var title := Label.new(); title.text = "SONG LIBRARY"; title.add_theme_font_size_override("font_size", 30); layout.add_child(title)
+	var title := Label.new(); title.text = "SONG LIBRARY"; title.add_theme_font_size_override("font_size", 38); layout.add_child(title)
 	_status = Label.new(); _status.text = library.loading_state()["label"]; _status.add_theme_font_size_override("font_size", 18); layout.add_child(_status)
+	var primary_actions := HBoxContainer.new(); layout.add_child(primary_actions)
+	_play = Button.new(); _play.text = "▶  Play Selected"; _play.theme_type_variation = "PrimaryButton"; _play.custom_minimum_size = Vector2(190, 48); _play.disabled = true; _play.pressed.connect(_play_selected); primary_actions.add_child(_play)
+	var primary_hint := Label.new(); primary_hint.text = "Select a compatible song below, then play."; primary_actions.add_child(primary_hint)
+	var refresh_button := Button.new(); refresh_button.text = "Refresh"; refresh_button.pressed.connect(refresh); primary_actions.add_child(refresh_button)
+	var background_row := HBoxContainer.new(); background_row.add_theme_constant_override("separation", 12); layout.add_child(background_row)
+	var background_label := Label.new(); background_label.text = "GAMEPLAY BACKGROUND"; background_label.add_theme_color_override("font_color", Color("d6b66d")); background_row.add_child(background_label)
+	_background_picker = OptionButton.new(); _background_picker.custom_minimum_size.x = 260
+	for preset: Dictionary in BackgroundPresets.all():
+		_background_picker.add_item(str(preset["label"])); _background_picker.set_item_metadata(_background_picker.item_count - 1, preset["id"])
+	_background_picker.item_selected.connect(_on_background_selected); background_row.add_child(_background_picker)
+	var background_hint := Label.new(); background_hint.text = "Saved per song; applied when gameplay starts."; background_row.add_child(background_hint)
+	_select_background_id(_global_background_id())
+	var manage_label := Label.new(); manage_label.text = "LIBRARY MANAGEMENT — IMPORT / RE-IMPORT / DELETE"; manage_label.add_theme_color_override("font_color", Color("aaa79f")); layout.add_child(manage_label)
 	var actions := HBoxContainer.new(); layout.add_child(actions)
 	_title_input = LineEdit.new(); _title_input.placeholder_text = "Song title"; _title_input.custom_minimum_size.x = 190; actions.add_child(_title_input)
 	_score_button = Button.new(); _score_button.text = "Choose Score…"; _score_button.pressed.connect(func() -> void: _choose_file("score")); actions.add_child(_score_button)
@@ -50,8 +69,6 @@ func _build_ui() -> void:
 	var import_button := Button.new(); import_button.text = "Import"; import_button.tooltip_text = "Validate and import selected MusicXML and audio"; import_button.pressed.connect(func() -> void: _run_import(false)); actions.add_child(import_button)
 	var reimport := Button.new(); reimport.text = "Re-import"; reimport.pressed.connect(func() -> void: _run_import(true)); actions.add_child(reimport)
 	_delete = Button.new(); _delete.text = "Delete…"; _delete.pressed.connect(_on_delete); actions.add_child(_delete)
-	var refresh_button := Button.new(); refresh_button.text = "Refresh"; refresh_button.pressed.connect(refresh); actions.add_child(refresh_button)
-	_play = Button.new(); _play.text = "Play Selected"; _play.disabled = true; _play.pressed.connect(_play_selected); actions.add_child(_play)
 	_list = ItemList.new(); _list.custom_minimum_size.y = 240; _list.item_selected.connect(_on_selected); layout.add_child(_list)
 	_details = RichTextLabel.new(); _details.fit_content = true; _details.custom_minimum_size.y = 170; _details.text = "Select a song to view validation diagnostics."; layout.add_child(_details)
 	import_button.grab_focus()
@@ -94,7 +111,11 @@ func _portable_id(source: String) -> String:
 
 func refresh() -> void:
 	var queried: Dictionary = library.query(repository_root, repositories.songs, "roland-mn10-handpan-minor-v1")
-	_status.text = str(queried.get("label", "LIBRARY ERROR")); _songs = queried.get("songs", []); _list.clear(); _pending_delete = ""; _play.disabled = true
+	_status.text = str(queried.get("label", "LIBRARY ERROR")); _songs.clear()
+	for value: Variant in queried.get("songs", []):
+		if value is Dictionary: _songs.append((value as Dictionary).duplicate(true))
+	_list.clear(); _pending_delete = ""; _play.disabled = true
+	_select_background_id(_global_background_id())
 	for song: Dictionary in _songs:
 		var marker: String = str({"valid":"VALID", "warning":"WARNING", "invalid":"INVALID"}.get(song.get("display_status", "invalid"), "INVALID"))
 		var duration := float(song.get("duration_us", 0)) / 1000000.0
@@ -104,6 +125,7 @@ func refresh() -> void:
 func _on_selected(index: int) -> void:
 	if index < 0 or index >= _songs.size(): return
 	var song := _songs[index]; _pending_delete = str(song.get("song_id", "")); _play.disabled = song.get("display_status") != "valid"; var lines: Array[String] = ["%s — import v%s" % [song.get("title", _pending_delete), song.get("import_version", "?")]]
+	var selected_background := _resolved_background_id(_pending_delete); _select_background_id(selected_background); lines.append("BACKGROUND — %s" % BackgroundPresets.preset(selected_background).get("label", selected_background))
 	for diagnostic: Dictionary in song.get("diagnostics", []): lines.append("%s %s: %s\nFix: %s" % [str(diagnostic.get("severity", "error")).to_upper(), diagnostic.get("code", "unknown"), diagnostic.get("message", ""), diagnostic.get("remediation", "")])
 	if song.get("diagnostics", []).is_empty(): lines.append("VALID — No import diagnostics.")
 	_details.text = "\n".join(lines)
@@ -113,6 +135,30 @@ func _play_selected() -> void:
 	for song: Dictionary in _songs:
 		if song.get("song_id") == _pending_delete and song.get("display_status") == "valid": play_requested.emit(repository_root.path_join(str(song["package_path"]))); return
 	_details.text = "PLAY UNAVAILABLE — Re-import the selected song or choose a compatible valid package."
+
+func _on_background_selected(index: int) -> void:
+	if index < 0 or index >= _background_picker.item_count: return
+	var preset_id := str(_background_picker.get_item_metadata(index))
+	var loaded: Dictionary = repositories.settings.load()
+	if not loaded.get("ok", false): _status.text = "BACKGROUND SAVE FAILED — Settings unavailable."; return
+	var settings: Dictionary = loaded["document"]
+	if _pending_delete.is_empty(): settings["background_preset_id"] = preset_id
+	else: settings = BackgroundPresets.assign_to_song(settings, _pending_delete, preset_id)
+	var saved: Dictionary = repositories.settings.save(settings)
+	_status.text = "BACKGROUND SAVED — %s%s" % [BackgroundPresets.preset(preset_id).get("label", preset_id), " for %s" % _pending_delete if not _pending_delete.is_empty() else " as default"] if saved.get("ok", false) else "BACKGROUND SAVE FAILED — %s" % saved.get("error", "storage error")
+
+func _global_background_id() -> String:
+	var loaded: Dictionary = repositories.settings.load()
+	return BackgroundPresets.resolve({}, loaded.get("document", {}) if loaded.get("ok", false) else {})
+
+func _resolved_background_id(song_id: String) -> String:
+	var loaded: Dictionary = repositories.settings.load()
+	return BackgroundPresets.resolve({"song_id":song_id}, loaded.get("document", {}) if loaded.get("ok", false) else {})
+
+func _select_background_id(preset_id: String) -> void:
+	if _background_picker == null: return
+	for index: int in _background_picker.item_count:
+		if str(_background_picker.get_item_metadata(index)) == preset_id: _background_picker.select(index); return
 
 func _on_delete() -> void:
 	if _pending_delete.is_empty(): _details.text = "Select a song before deleting."; return

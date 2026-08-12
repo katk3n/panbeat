@@ -1,5 +1,7 @@
 # PanBeat Phase 2 completion report
 
+> Evidence retention: 本書から参照する`artifacts/raw/`はローカル／CI出力であり、Gitにはcommitしない。checkoutに存在しない場合はstory固有commandから再生成する。
+
 ## Gate decision
 
 Phase 2 MVP is **complete** as of 2026-08-12. The requirement in [`requirement.md`](./requirement.md) is supported by automated import/replay evidence and Mood Pan real-device evidence: a MusicXML score with explicit PanBeat overlay annotations was imported through the product UI, then Tone, Ding, and Slap were played through the audio-backed Gameplay flow and saved to Results.

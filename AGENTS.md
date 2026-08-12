@@ -32,9 +32,10 @@
 ## Verification and evidence
 
 - 完了判定には、対象ストーリーの受け入れ条件と共通Definition of Doneを使用する。
-- MIDI trace、benchmark、drift/jitter log、screenshot、run manifestなど、判断に使ったraw evidenceを上書きせず保存する。
+- MIDI trace、benchmark、drift/jitter log、screenshot、run manifestなど、判断に使ったraw evidenceを同一run内で上書きせず、ローカルまたはCI artifactとして保存する。`artifacts/raw/`はGitへcommitしない。
 - 計測値には、可能な範囲で実行環境、version、設定、入力fixture、実行時刻を紐付ける。
 - 実行できなかった検証を、成功したものとして報告しない。未実施項目、理由、必要な次の操作を明記する。
+- completion reportにはrun ID、再現command、主要結果、必要なchecksumを記録し、Git checkoutだけでraw evidenceが存在するとは仮定しない。
 - 作業完了時には、変更内容、実行した検証、その結果、残る制約またはblockerを簡潔に報告する。
 
 ## Mood Pan real-device work

@@ -1,3 +1,0 @@
-{"schema_version":"1.0.0","record_type":"session","duration_seconds":5,"queue_capacity":1024,"timestamp_domain":"core_midi_host_time_microseconds"}
-{"schema_version":"1.0.0","record_type":"lifecycle","elapsed_us":0,"state":"present","port_name":"MN-10","connected":true}
-{"schema_version":"1.0.0","record_type":"summary","dropped_count":0}

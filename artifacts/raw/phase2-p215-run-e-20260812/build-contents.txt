@@ -1,7 +1,0 @@
-PanBeat.app/Contents/Info.plist
-PanBeat.app/Contents/MacOS/PanBeat
-PanBeat.app/Contents/PkgInfo
-PanBeat.app/Contents/Resources/PanBeat.pck
-PanBeat.app/Contents/Resources/PrivacyInfo.xcprivacy
-PanBeat.app/Contents/Resources/icon.icns
-PanBeat.app/Contents/_CodeSignature/CodeResources

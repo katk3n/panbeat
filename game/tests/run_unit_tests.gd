@@ -53,7 +53,7 @@ func _initialize() -> void:
 	var pool := ObjectPool.new(2)
 	_check(pool.available() == 2 and pool.rent() != null, "fixed object pool", failures)
 	var visual: Vector3 = Kinematics.evaluate(InputTechnique.Value.DING, 0.0, 0, 1_000_000, 1_000_000)
-	_check(is_equal_approx(visual.x, 0.0), "ding converges to center", failures)
+	_check(is_equal_approx(visual.x, Kinematics.DING_HIT_RADIUS), "ding converges to its central judgement ring", failures)
 	var backend := FakeAudioBackend.new()
 	backend.monotonic = 10.0
 	var transport := AudioTransport.new(backend, 2_000_000)
@@ -138,7 +138,7 @@ func _initialize() -> void:
 	_check(score_summary["score"] == 3250 and score_summary["max_combo"] == 3 and score_summary["combo"] == 0, "pure score and combo recomputation", failures)
 	_check(is_equal_approx(score_summary["accuracy"], 3.25 / 6.0) and score_summary["breakdown"]["perfect"] == 2 and score_summary["breakdown"]["extra_hit"] == 1, "pure accuracy and breakdown recomputation", failures)
 	var hud: Dictionary = ScoreEngine.hud_model(score_records, score_rules)
-	_check(hud == {"current_score":3250,"current_combo":0,"latest_grade":"extra_hit","latest_direction":"late"}, "HUD score combo grade and direction model", failures)
+	_check(hud == {"current_score":3250,"current_combo":0,"current_accuracy":3.25 / 6.0,"latest_grade":"extra_hit","latest_direction":"late"}, "HUD score combo accuracy grade and direction model", failures)
 	_check(InputMode.from_arguments(PackedStringArray(["--input-mode", "midi"]))["mode"] == "midi" and InputMode.from_arguments(PackedStringArray(["--input-mode=replay"]))["mode"] == "replay", "exclusive MIDI or replay startup selection", failures)
 	_check(InputMode.from_arguments(PackedStringArray(["--input-mode", "mixed"])).get("ok") == false, "mixed or unknown input mode rejected", failures)
 	_finish(failures, 44)

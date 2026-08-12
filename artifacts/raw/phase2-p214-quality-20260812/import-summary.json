@@ -1,9 +1,0 @@
-{
-  "cold_import_us": 245878,
-  "duplicate_cache_lookup_us": 9025,
-  "duplicate_detected": true,
-  "index_records": 1,
-  "package_bytes": 203273,
-  "schema_version": "1.0.0",
-  "source_audio_bytes": 3456044
-}

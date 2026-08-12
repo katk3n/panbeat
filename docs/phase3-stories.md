@@ -19,24 +19,24 @@ Phase 3はrelease許可ではない。長時間driftとMIDI dispatch p95を含�
 - 現行画面と代表状態のvisual baseline、UI token、デザイン仕様
 - Dingノーツを全周リング＋内向き収束へ直す要件適合修正
 - Tone / Ding / Slapの形状、方向、移動、HIT位置による視覚的識別
-- 暗いステージに金属的なハンドパンが浮かぶゲームフィールド
+- 幻想的な瞑想背景に半透明の銅色ハンドパンが浮かぶゲームフィールド
 - 共通Theme、font、color、spacing、focus、button、panel、status表現
 - PanBeat共通アプリシェルとnavigation
 - ハンドパン本体、Ding、Tone Field、Spawn Ring、Outer Hit Radiusの描画刷新
 - Spawn、HIT、Perfect / Great / Good / Miss、Comboの局所演出
 - Gameplay HUD、count-in、pause、complete、failure状態
 - Device Setup、Song Library、Calibration、Results、error UXの情報設計と外観改善
-- Reduced Effects、Glow無効、monochrome、高コントラスト、キーボード操作
-- 1280×720を下限基準とするresize対応、screenshot regression、frame time / allocation確認
+- Glow無効、monochrome、高コントラスト、キーボード操作
+- 起動時maximized、1600×900をreference、1280×720を下限基準とするresize対応、screenshot regression、frame time / allocation確認
 - macOS buildとMood Pan実機による一曲通しの視認性確認
 
 ### 2.2 デザイン方向
 
-- 背景は黒に近い濃紺を基調とし、控えめなgradientと奥行きを与える
-- ハンドパンはガンメタル、同心円、弱い金属光沢で表現する
-- Toneは局所的な円またはリング、Dingは収束する全周リング、Slapは拡大する全周リングとする
+- 背景はハンドパンの瞑想性に合う幻想的なshaderとし、曲時刻に同期した穏やかだが認識可能な動きを与える
+- ハンドパンは半透明の銅色、同心円、弱い金属光沢で表現し、背景を透過させる
+- Toneは局所的な発光オーブ、Dingは収束する全周リング、Slapは拡大する全周リングとする
 - Techniqueと判定は色だけに依存せず、形状、移動方向、線種、局所feedbackでも識別可能にする
-- 発光、残像、particle、Rippleは次のノーツとHIT時刻の理解を妨げない強さにする
+- 発光とBloomは次のノーツとHIT時刻の理解を妨げない強さにし、Toneの追従trail、HIT時の放射線、Missの×印は使用しない
 - 全画面flashと恒常的なcamera shakeを使わない
 - Score、Combo、Accuracy等のGameplay情報は短く大きく表示し、技術情報は詳細表示へ分離する
 - 装飾を無効化してもゲームに必要な情報を失わない
@@ -86,10 +86,10 @@ P301を開始する前に、少なくとも次を確認する。
 - 新規の描画計算と状態変換に正常系、境界値、失敗系の自動testを追加し、目視だけで完了させない
 - 1280×720と代表的なwide windowで、切れ、重なり、楕円化、読めない文字がないことを確認する
 - 色だけに依存せず、keyboard focus、disabled、error、loading、empty状態を識別可能にする
-- Reduced Effectsまたは同等設定で強いGlow、particle、flashを軽減または無効化できる
+- Glow無効設定で発光を無効化でき、flashを使用しない
 - assetの出典、license、加工条件を記録し、権利不明assetと個人環境だけのfontをcommitしない
 - GUIでしか再現できない設定を残さず、`.tscn`、`.tres`、shader、versioned config、CLI、文書へ保存する
-- deterministic screenshotと必要なraw計測を`artifacts/raw/phase3-*`へ一意のrun IDで保存する
+- deterministic screenshotと必要なraw計測を`artifacts/raw/phase3-*`へ一意のrun IDで保存する。これはローカル／CI証跡でありGitへcommitしない
 - cache、credential、個人固有path、再生成可能な大型buildをcommitしない
 - 未実施検証、視認性上の懸念、性能risk、Final Phaseへの引き継ぎを成功扱いせず明記する
 - story範囲外で見つけた課題を同じタスクへ抱き合わせない
@@ -152,7 +152,7 @@ P302とP303はP301後に並行してよい。P304とP305もP303後に並行で�
 | P303 | UI tokenと共通Theme基盤を実装する | palette / typography / StyleBox / focus / asset manifest | デザイン共同 | P301 |
 | P304 | 共通アプリシェルとnavigationを刷新する | app shell / MIDI status / error presentation | Codex完結 | P303 |
 | P305 | ハンドパン本体とゲームフィールドを刷新する | layered field / metal styling / judgement-decoration separation | Codex完結 | P303 |
-| P306 | ノーツ、判定feedback、Combo演出を刷新する | technique visuals / ripple / reduced effects | Codex完結 | P302, P305 |
+| P306 | ノーツ、判定feedback、Combo演出を刷新する | technique visuals / bloom / accessibility fallback | Codex完結 | P302, P305 |
 | P307 | Gameplay HUDと状態overlayを刷新する | HUD / count-in / pause / complete / failure | Codex完結 | P304, P306 |
 | P308 | Device、Songs、Calibration、ResultsのUXを刷新する | product screens / empty-loading-error states | Codex完結 | P304 |
 | P309 | Accessibility、resize、描画性能を統合検証する | accessibility matrix / screenshot suite / performance evidence | Codex完結 | P307, P308 |
@@ -190,7 +190,7 @@ P302とP303はP301後に並行してよい。P304とP305もP303後に並行で�
 - Dingノーツは全周リングとしてSpawn Ringから始まり、内向きに収束する
 - Dingのtimestampで、ノーツリング半径が中央Dingの判定リング半径と一致する
 - Dingノーツの通常表現にダイヤ、多角形、局所マーカーを使わない
-- Slapは全周リング＋外向き、Toneは局所リング＋対象Tone Fieldへの外向きを維持する
+- Slapは全周リング＋外向き、Toneは局所発光オーブ＋対象Tone Fieldへの外向きを維持する
 - Spawn、中間、HIT、retire直前の半径をpureな計算testで検証する
 - DingとSlap、DingとToneの同時刻表示をscreenshotで識別できる
 - 既存のaudio-backed timestamp、judgement record、score結果を変更しない
@@ -236,7 +236,7 @@ P302とP303はP301後に並行してよい。P304とP305もP303後に並行で�
 
 **ストーリー:** プレイヤーとして、画面中央を実際のハンドパンと対応する演奏面として直感的に認識したい。単純な線画から、位置を損なわない魅力的なゲームフィールドへ改善するためである。
 
-**実施内容:** 正規化極座標と短辺基準safe areaを維持し、背景、ハンドパン円盤、中央Ding、Tone Field、Spawn Ring、Outer Hit Radiusをレイヤー分離して描画する。ガンメタル、同心円、控えめな光沢を用い、判定guideと装飾を独立させる。
+**実施内容:** 正規化極座標と短辺基準safe areaを維持し、背景、ハンドパン円盤、中央Ding、Tone Field、Spawn Ring、Outer Hit Radiusをレイヤー分離して描画する。幻想的な瞑想shader、半透明の銅色、同心円、控えめな光沢を用い、判定guideと装飾を独立させる。
 
 **受け入れ条件:**
 
@@ -253,17 +253,17 @@ P302とP303はP301後に並行してよい。P304とP305もP303後に並行で�
 
 **ストーリー:** プレイヤーとして、奏法、対象、到達時刻、判定を短い視線移動で理解し、演奏の成功を気持ちよく感じたい。装飾によって可読性や同期を損なわず、音ゲームとしての手応えを高めるためである。
 
-**実施内容:** Tone / Ding / Slapの形状と移動をP302の視覚文法で描画し、Spawn pulse、局所Ripple、Perfect / Great / Good / Miss、Combo段階演出を追加する。演出は判定recordから派生し、object poolまたは同等のallocation抑制を用いる。
+**実施内容:** Tone / Ding / Slapの形状と移動をP302の視覚文法で描画し、局所Bloom、Perfect / Great / Good / Miss、Combo段階演出を追加する。演出は判定recordから派生し、object poolまたは同等のallocation抑制を用いる。
 
 **受け入れ条件:**
 
-- Toneは局所リング＋対象Tone Fieldへの外向き、Dingは全周リング＋内向き、Slapは全周リング＋外向きである
-- Tone HITは対象Tone Fieldの局所Ripple、Ding HITは中央の比較的大きなRipple、Slap HITはOuter Hit Radius全体の短いPulseとなる
+- Toneは局所発光オーブ＋対象Tone Fieldへの外向き、Dingは全周リング＋内向き、Slapは全周リング＋外向きである
+- Tone HITは対象Tone FieldでBloomが強まり、Ding HITは中央リング、Slap HITはOuter Hit Radius全体のリングが短く強く発光する
 - Perfect / Great / Good / Missは強さ、線種、motion、短いtextの組み合わせで識別できる
 - Miss表現が次ノーツを隠さず、誤ったtargetへ成功演出を出さない
 - Combo演出は段階的で、判定窓、score、audio、transportへ影響しない
 - 同時Tone / Ding / Slap、連打、最大active note fixtureで重なりとpool overflowを検証する
-- Reduced Effectsでparticle、残像、強いGlowを抑えてもTechniqueと判定情報を失わない
+- Glow無効でもTechniqueと判定情報を失わない
 - deterministic replayのjudgement recordがPhase 2 baselineと一致する
 
 ---
@@ -313,12 +313,12 @@ P302とP303はP301後に並行してよい。P304とP305もP303後に並行で�
 
 **ストーリー:** 利用者として、画面サイズ、色覚、発光設定にかかわらずノーツと操作を読み取れ、演出による処理落ちなしに演奏したい。見栄えを性能と利用可能性の犠牲にしないためである。
 
-**実施内容:** 全画面とGameplay fixtureを通常、Reduced Effects、Glowなし、monochrome、高コントラスト、複数window sizeで検証する。frame time、allocation、active visual数を測定し、screenshot regressionとcomponent state matrixを自動化する。
+**実施内容:** 全画面とGameplay fixtureを通常、Glowなし、monochrome、高コントラスト、複数window sizeで検証する。frame time、allocation、active visual数を測定し、screenshot regressionとcomponent state matrixを自動化する。
 
 **受け入れ条件:**
 
 - Tone / Ding / Slap、Perfect / Great / Good / Missを色なしでも識別できる
-- 全画面flashがなく、Reduced Effectsで強い発光、particle、残像を無効または大幅軽減できる
+- 全画面flashがなく、Glow無効設定で発光を無効化できる
 - body text、重要status、focus indicatorのcontrastを記録し、読めない組み合わせを残さない
 - keyboardだけでnavigation、選択、primary action、Back、Retry、Cancelへ到達できる
 - 1280×720、16:10、ultrawide相当で円形維持、文字切れ、操作重なりを検査する
@@ -331,7 +331,7 @@ P302とP303はP301後に並行してよい。P304とP305もP303後に並行で�
 
 **ストーリー:** プロダクト責任者として、刷新したUIが自動試験だけでなく実際のMood Pan演奏でも読みやすく安定し、Final Phaseへ渡せることを確認したい。静止画の見栄えと演奏時の利用可能性を混同しないためである。
 
-**実施内容:** test、build、package inspection、deterministic replay、全画面screenshot、performance、accessibility matrixを一つのdocumented runへまとめる。release相当macOS buildでMood Panを接続し、Tone / Ding / Slapを含む一曲を通常とReduced Effectsで演奏して、Phase 3 completion reportを作る。
+**実施内容:** test、build、package inspection、deterministic replay、全画面screenshot、performance、accessibility matrixを一つのdocumented runへまとめる。release相当macOS buildでMood Panを接続し、Tone / Ding / Slapを含む一曲を通常表示で演奏して、Phase 3 completion reportを作る。
 
 **受け入れ条件:**
 
@@ -340,14 +340,14 @@ P302とP303はP301後に並行してよい。P304とP305もP303後に並行で�
 - build archive、log、screenshot、manifestを一意のrun IDで保存し、失敗を成功扱いしない
 - macOS buildでDevice Setup、Song Library、Calibration、Gameplay、Resultsを最後まで操作できる
 - Mood Pan実機でTone / Ding / Slapを識別し、Dingが収束リング、Slapが拡大リングとして読める
-- 通常とReduced Effectsで各1 session以上を実施し、ノーツ可読性、HUD、feedback、疲労または眩しさの所見を保存する
+- 通常表示で1 session以上を実施し、ノーツ可読性、HUD、feedback、疲労または眩しさの所見を保存する
 - 演奏中の画面消失、重複Results遷移、MIDI入力によるUI停止がない
 - Phase 2 baselineと同じreplay入力から同じjudgement recordとscoreを得る
 - P301からP309までの受け入れ証拠をmanifestから辿れる
 - 学習機能を未実装blockerとして扱わず、Final Phaseのrelease blockerとUI残存riskを区別して引き継ぐ
 - Final Phase完了前に正式release、署名、公証、配布可能と表現しない
 
-**人間の作業:** Mood Pan接続、Calibration、Tone / Ding / Slapを含む曲の演奏、通常／Reduced Effectsの視認性比較、眩しさ・読み間違い・HUD重なりの所見記録。
+**人間の作業:** Mood Pan接続、Calibration、Tone / Ding / Slapを含む曲の演奏、眩しさ・読み間違い・HUD重なりの所見記録。
 
 ---
 
@@ -371,20 +371,20 @@ P301では承認された方向を証拠として固定するが、実装詳細�
 
 ## 11. Phase 3完了チェックリスト
 
-- [ ] Phase 2の判定record、score、audio-backed transport、製品flowが回帰していない
-- [ ] Phase 3のvisual baseline、design token、asset/license方針が固定されている
-- [ ] Dingがダイヤではなく、Spawn RingからDing判定リングへ収束する全周リングである
-- [ ] Tone、Ding、Slapを形状と移動方向だけでも識別できる
-- [ ] ハンドパン、Ding、Tone Field、Spawn Ring、Outer Hit Radiusが実機配置と一致する
-- [ ] judgement layerとdecoration layerが分離され、装飾なしでも演奏情報を失わない
-- [ ] 共通Theme、navigation、MIDI status、error UXが全製品画面へ適用されている
-- [ ] Gameplay HUD、count-in、pause、complete、failure状態が明確である
-- [ ] Song Library、Device Setup、Calibration、Resultsのprimary actionと詳細情報が整理されている
-- [ ] Reduced Effects、Glowなし、monochrome、高コントラスト、keyboard操作を確認している
-- [ ] 720pと代表wide windowで円形維持、文字切れ、重なりがない
-- [ ] 最大active noteと同時feedbackでframe time / allocationの証拠がある
-- [ ] clean checkout相当からtest、build、replay、screenshot、性能確認を再現できる
-- [ ] Mood Pan実機で通常／Reduced Effectsの一曲通しを確認している
-- [ ] Practice Mode等の学習機能をPhase 3またはFinal Phaseの必須条件として扱っていない
-- [ ] R-P1-001/R-P1-003を含むrelease blockerがFinal Phaseへ維持されている
-- [ ] Phase 3完了と正式release許可を混同していない
+- [x] Phase 2の判定record、score、audio-backed transport、製品flowが回帰していない
+- [x] Phase 3のvisual baseline、design token、asset/license方針が固定されている
+- [x] Dingがダイヤではなく、Spawn RingからDing判定リングへ収束する全周リングである
+- [x] Tone、Ding、Slapを形状と移動方向だけでも識別できる
+- [x] ハンドパン、Ding、Tone Field、Spawn Ring、Outer Hit Radiusが実機配置と一致する
+- [x] judgement layerとdecoration layerが分離され、装飾なしでも演奏情報を失わない
+- [x] 共通Theme、navigation、MIDI status、error UXが全製品画面へ適用されている
+- [x] Gameplay HUD、count-in、pause、complete、failure状態が明確である
+- [x] Song Library、Device Setup、Calibration、Resultsのprimary actionと詳細情報が整理されている
+- [x] Glowなし、monochrome、高コントラスト、keyboard操作を確認している
+- [x] 起動時maximized、reference 1600×900、下限720p、代表wide windowで円形維持、文字切れ、重なりがない
+- [x] 最大active noteと同時feedbackでframe time / allocationの証拠がある
+- [x] clean checkout相当からtest、build、replay、screenshot、性能確認を再現できる
+- [x] Mood Pan実機で通常表示の一曲通しを確認している
+- [x] Practice Mode等の学習機能をPhase 3またはFinal Phaseの必須条件として扱っていない
+- [x] R-P1-001/R-P1-003を含むrelease blockerがFinal Phaseへ維持されている
+- [x] Phase 3完了と正式release許可を混同していない

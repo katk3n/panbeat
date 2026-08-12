@@ -55,18 +55,10 @@ coverage/
 TestResults/
 
 # Generated artifacts
-# Structured, canonical raw evidence belongs in artifacts/raw. Reproducible
-# application archives, exploratory runs, and superseded capacity-limited logs
-# remain local; their canonical manifests retain checksums and commands.
+# Raw verification evidence, reports, builds, previews, and scratch runs are
+# local/CI outputs. Completion documents retain run IDs, commands, and summaries.
+/artifacts/raw/
 /artifacts/reports/
 /artifacts/builds/
 /artifacts/tmp/
 /shared/generated/
-/artifacts/raw/phase1-p112-acceptance-*/PanBeat.zip
-/artifacts/raw/phase1-p112-acceptance-[a-i]-*/
-/artifacts/raw/phase1-p113-preparation-*/
-/artifacts/raw/phase1-p111-smoke/
-/artifacts/raw/phase1-p111-performance/attempt-capacity-truncated/*.jsonl
-/artifacts/raw/phase2-p206-*/comparison-6m.wav
-/artifacts/raw/phase2-p206-*/comparison-6m.ogg
-/artifacts/raw/phase2-p215-*/PanBeat.zip

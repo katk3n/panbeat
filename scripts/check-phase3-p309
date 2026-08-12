@@ -1,0 +1,30 @@
+#!/bin/sh
+set -eu
+script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+repository_root=$(CDPATH= cd -- "$script_dir/.." && pwd)
+run_id=${1:-phase3-p309-accessibility-latest}
+case "$run_id" in ''|*[!A-Za-z0-9._-]*) printf '%s\n' 'check-phase3-p309: invalid run ID' >&2; exit 64 ;; esac
+raw_dir="$repository_root/artifacts/raw/$run_id"
+build_run="$run_id-build"
+build_path="$repository_root/artifacts/builds/$build_run/PanBeat.zip"
+if test -e "$raw_dir"; then printf 'check-phase3-p309: evidence directory already exists: %s\n' "$raw_dir" >&2; exit 73; fi
+mkdir -p "$raw_dir"
+"$script_dir/check-game" --mode test --run-id "$run_id-tests"
+for fixture in 'normal:1600x900:normal-default' 'normal:1280x720:normal-minimum' 'normal:1920x900:normal-ultrawide' 'glow-off:1600x900:glow-off' 'monochrome:1600x900:monochrome' 'high-contrast:1600x900:high-contrast'; do
+  mode=${fixture%%:*}; remainder=${fixture#*:}; size=${remainder%%:*}; name=${fixture##*:}; width=${size%x*}; height=${size#*x}
+  "$script_dir/godot" --path "$repository_root/game" --resolution "${width}x${height}" --script res://tests/capture_p309.gd --log-file "$raw_dir/$name.log" -- --mode "$mode" --size "$size" --output "$raw_dir/$name.png"
+done
+"$script_dir/godot" --path "$repository_root/game" --resolution 1600x900 --script res://tests/measure_p309_performance.gd --log-file "$raw_dir/performance.log" -- --output "$raw_dir/performance.json" --image "$raw_dir/maximum-load.png"
+if rg -n 'SCRIPT ERROR|ERROR:' "$raw_dir"/*.log; then printf '%s\n' 'check-phase3-p309: visual or performance log contains an error' >&2; exit 1; fi
+for mode in normal glow-off monochrome high-contrast; do
+  flags=
+  case "$mode" in glow-off) flags='--disable-glow' ;; monochrome) flags='--monochrome' ;; high-contrast) flags='--high-contrast' ;; esac
+  # shellcheck disable=SC2086
+  "$script_dir/godot" --headless --path "$repository_root/game" --log-file "$raw_dir/replay-$mode.log" -- --input-mode replay --replay-speed=4 $flags --records-output="$raw_dir/replay-$mode.json" --quit-on-complete
+done
+cmp "$raw_dir/replay-normal.json" "$raw_dir/replay-glow-off.json"
+cmp "$raw_dir/replay-normal.json" "$raw_dir/replay-monochrome.json"
+cmp "$raw_dir/replay-normal.json" "$raw_dir/replay-high-contrast.json"
+"$script_dir/check-game" --mode build --run-id "$build_run"
+node "$script_dir/summarize-phase3-p309.mjs" "$run_id" "$raw_dir" "$build_path"
+printf '%s\n' 'check-phase3-p309: passed'

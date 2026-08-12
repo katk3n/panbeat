@@ -37,5 +37,6 @@ static func hud_model(records: Array[Dictionary], rules: Dictionary) -> Dictiona
 	var summary: Dictionary = summarize(records, rules)
 	return {
 		"current_score":summary["score"], "current_combo":summary["combo"],
+		"current_accuracy":summary["accuracy"],
 		"latest_grade":summary["latest_grade"], "latest_direction":summary["latest_direction"]
 	}

@@ -1,0 +1,39 @@
+{
+  "schema_version": "1.0.0",
+  "story": "P303",
+  "theme_version": "phase3-quiet-forge-v3",
+  "assets": [
+    {
+      "kind": "font",
+      "name": "Godot/OS fallback font",
+      "source": "Godot ThemeDB.fallback_font and operating-system fallback",
+      "bundled_file": null,
+      "license": "not redistributed by PanBeat",
+      "redistribution": "No external font binary is committed or packaged by this story."
+    },
+    {
+      "kind": "icon",
+      "name": "Status text glyphs",
+      "source": "Unicode glyphs rendered by the fallback font",
+      "bundled_file": null,
+      "license": "not a separately bundled asset",
+      "redistribution": "Success, warning, error, and info retain text labels and shapes when glyph fallback differs."
+    },
+    {
+      "kind": "shader",
+      "name": "Quiet Forge radial field",
+      "source": "PanBeat-authored audio-time-driven deterministic canvas_item shader",
+      "bundled_file": "game/presentation/radial_field.gdshader",
+      "license": "repository source code",
+      "redistribution": "No external texture is committed; translucent forged copper, judgement rings, cyan orbs, and smooth diffuse bloom are procedural."
+    },
+    {
+      "kind": "shader",
+      "name": "Quiet Forge rich UI background",
+      "source": "PanBeat-authored animated canvas_item shader",
+      "bundled_file": "game/presentation/rich_ui_background.gdshader",
+      "license": "repository source code",
+      "redistribution": "No external texture is committed; three meditative presets (Silent Resonance, Breath of Dawn, and Deep Resonance), mist, caustic light, halo motion, and vignette are procedural."
+    }
+  ]
+}

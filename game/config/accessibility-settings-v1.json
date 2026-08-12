@@ -1,0 +1,8 @@
+{
+  "schema_version": "1.0.0",
+  "settings_id": "panbeat-accessibility-v1",
+  "glow_enabled": true,
+  "monochrome": false,
+  "high_contrast": false,
+  "lightweight_fallback": {"glow_enabled": false, "monochrome": true}
+}

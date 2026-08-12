@@ -351,7 +351,7 @@ PanBeat/
     └── engine-evaluation.md
 ```
 
-採用したGodot sourceはrootの`game/`へ昇格し、`scripts/check-game`をPhase 1のtest/build入口とする。Phase 0の両PoCとraw evidenceは`pocs/`と`artifacts/raw/`へ凍結してdecision historyを再現可能に保つ。repositoryに最初のGit checkpointを作る際にPhase 0完了tagを付ける。
+採用したGodot sourceはrootの`game/`へ昇格し、`scripts/check-game`をPhase 1のtest/build入口とする。Phase 0の両PoCは`pocs/`へ保持し、raw evidenceは`artifacts/raw/`またはCI artifactへrun ID単位で保存する。raw evidenceはGitへcommitせず、decision historyは文書化したcommand、run ID、結果summaryから追跡する。repositoryに最初のGit checkpointを作る際にPhase 0完了tagを付ける。
 
 ---
 
@@ -808,8 +808,9 @@ Input OffsetとAudio Offsetは、この分解結果と利用者のキャリブ�
 - Dingを要件どおりSpawn Ringから中央Ding判定リングへ収束する全周リングに修正
 - 共通Theme、アプリシェル、navigation、error UXを統一
 - ハンドパン本体、Tone / Ding / Slap、HIT feedback、Gameplay HUDの視覚品質を改善
+- `silent_resonance`、`breath_of_dawn`、`deep_resonance`の瞑想的な背景を曲ごとに選択し、半透明の銅色ハンドパンと局所発光Toneオーブを前景へ描画
 - Device Setup、Song Library、Calibration、Resultsの情報設計と状態表現を改善
-- Reduced Effects、Glowなし、monochrome、resize、keyboard操作、描画性能を検証
+- Glowなし、monochrome、resize、keyboard操作、描画性能を検証。通常起動はmaximized、reference captureは1600×900、下限検証は1280×720とする
 
 従来候補だったPractice Mode、左右手ガイド、苦手箇所分析、Free Play、Pressure / dynamicsは、2026-08-12の製品判断により発展的な学習機能として本Phaseでは実施しない。Final Phaseの必須作業にも含めない。
 
@@ -936,3 +937,17 @@ Input OffsetとAudio Offsetは、この分解結果と利用者のキャリブ�
 - **Context:** MusicXML、MXL、overlay、audioのいずれかが不正でも既存Libraryを壊さず、process中断やdisk errorで半端な曲を表示してはならない。
 - **Decision:** sourceを変更せず検査し、隠しstaging directoryでRuntime Chartとcanonical Oggを生成・検証する。immutable package directoryへのrename後、atomic song indexを最後に保存する。cache keyはimporter/source/overlay/profile/explicit mapping/audioを含む。
 - **Consequences:** indexにないorphan packageはLibraryから不可視であり、index保存失敗時は直ちに削除する。active versionと同一contentはduplicate、同一song IDの変更はimport versionを増加する。詳細は`docs/song-import.md`を正とする。
+
+### ADR-006: Gameplay背景を安定IDのプリセットとして解決する
+
+- **Status:** Accepted（2026-08-12）
+- **Context:** サイバー調の単一背景から、ハンドパンの瞑想性に合う複数の幻想的背景へ切り替えたい。将来は曲ごとの背景指定が必要だが、描画コードを曲メタデータやUIへ結合してはならない。
+- **Decision:** `silent_resonance`、`breath_of_dawn`、`deep_resonance`を安定IDとし、`BackgroundPresetCatalog`がCLI preview、package metadata、settingsの曲別map、global defaultの順で解決する。Song Libraryは曲別mapを保存する。shaderは同じIDを整数uniformへ変換し、動きをframe countや`TIME`ではなくaudio-backed transportの曲時刻で駆動する。
+- **Consequences:** 現在の曲でも選択内容が曲ごとに切り替わる。将来import packageへ`background_preset_id`を追加すれば、既存shaderと画面遷移を変更せず配布側の指定を優先できる。不明IDは`deep_resonance`へ安全にfallbackする。
+
+### ADR-007: 完走後の再プレイは同一プロセス内で新しいGameplay sessionとして開始する
+
+- **Status:** Accepted（2026-08-12）
+- **Context:** 完走後のResultsに終了操作しかないと、日常的な反復練習のたびにアプリを再起動する必要がある。一方、終了済みtransport、MIDI port、score、判定recordを再利用すると二重入力や状態混入を起こす。
+- **Decision:** 完走直後のResultsは`Play Again`をprimary action、`Song Library`をsecondary actionとして表示する。再プレイ時は結果履歴を保存したまま、旧AudioPlayer、MIDI adapter、HUD、transport、judgement pipelineを破棄し、Product Flowを`Results → Gameplay`へ遷移させて同じpackageから新しいsessionを構築する。曲選択時は旧runtimeを破棄して同じProduct FlowのSong Libraryへ戻す。CLI受け入れの`--quit-on-complete`は維持する。
+- **Consequences:** 製品利用ではprocess再起動なしに同じ曲または別の曲を繰り返し演奏できる。各runのscore、combo、replay index、MIDI記録は独立し、二重session開始の拒否契約も維持する。

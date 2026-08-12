@@ -1,0 +1,24 @@
+#!/bin/sh
+set -eu
+script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+repository_root=$(CDPATH= cd -- "$script_dir/.." && pwd)
+run_id=${1:-phase3-p301-baseline-20260812}
+case "$run_id" in ''|*[!A-Za-z0-9._-]*) printf '%s\n' 'check-phase3-p301: invalid run ID' >&2; exit 64 ;; esac
+raw_dir="$repository_root/artifacts/raw/$run_id"
+if test -e "$raw_dir"; then printf 'check-phase3-p301: evidence directory already exists: %s\n' "$raw_dir" >&2; exit 73; fi
+mkdir -p "$raw_dir"
+"$script_dir/check-game" --mode test --run-id "$run_id-tests"
+node --test "$script_dir/check-phase3-p301.test.mjs"
+"$script_dir/godot" --path "$repository_root/game" --resolution 1280x720 --script res://tests/capture_p209.gd --log-file "$raw_dir/device-setup.log" -- --output "$raw_dir/device-setup.png"
+"$script_dir/godot" --path "$repository_root/game" --resolution 1280x720 --script res://tests/capture_p208.gd --log-file "$raw_dir/song-library.log" -- --output "$raw_dir/song-library.png"
+"$script_dir/godot" --path "$repository_root/game" --resolution 1280x720 --script res://tests/capture_p210.gd --log-file "$raw_dir/calibration.log" -- --output "$raw_dir/calibration.png"
+"$script_dir/godot" --path "$repository_root/game" --resolution 1280x720 --script res://tests/capture_p211.gd --log-file "$raw_dir/results.log" -- --output "$raw_dir/results.png"
+"$script_dir/godot" --path "$repository_root/game" --resolution 1280x720 --script res://tests/capture_p212.gd --log-file "$raw_dir/product-flow.log" -- --output "$raw_dir/product-flow.png" --error-output "$raw_dir/recoverable-error.png"
+"$script_dir/godot" --path "$repository_root/game" --resolution 1280x720 --script res://tests/capture_p301_gameplay.gd --log-file "$raw_dir/gameplay-1280-normal.log" -- --output "$raw_dir/gameplay-1280x720-normal.png" --width 1280 --height 720
+"$script_dir/godot" --path "$repository_root/game" --resolution 1280x720 --script res://tests/capture_p301_gameplay.gd --log-file "$raw_dir/gameplay-1280-monochrome.log" -- --output "$raw_dir/gameplay-1280x720-monochrome.png" --width 1280 --height 720 --monochrome
+"$script_dir/godot" --path "$repository_root/game" --resolution 1728x720 --script res://tests/capture_p301_gameplay.gd --log-file "$raw_dir/gameplay-1728-normal.log" -- --output "$raw_dir/gameplay-1728x720-normal.png" --width 1728 --height 720
+"$script_dir/godot" --path "$repository_root/game" --resolution 1728x720 --script res://tests/capture_p301_gameplay.gd --log-file "$raw_dir/gameplay-1728-monochrome.log" -- --output "$raw_dir/gameplay-1728x720-monochrome.png" --width 1728 --height 720 --monochrome
+"$script_dir/godot" --path "$repository_root/game" --resolution 1280x720 --script res://tests/capture_p301_design.gd --log-file "$raw_dir/design-a.log" -- --option quiet_forge --output "$raw_dir/design-option-a-quiet-forge.png"
+"$script_dir/godot" --path "$repository_root/game" --resolution 1280x720 --script res://tests/capture_p301_design.gd --log-file "$raw_dir/design-b.log" -- --option polar_resonance --output "$raw_dir/design-option-b-polar-resonance.png"
+node "$script_dir/summarize-phase3-p301.mjs" "$run_id"
+printf '%s\n' 'check-phase3-p301: prepared; user design approval remains required'

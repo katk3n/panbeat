@@ -1,0 +1,16 @@
+#!/bin/sh
+set -eu
+script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+repository_root=$(CDPATH= cd -- "$script_dir/.." && pwd)
+run_id=${1:-phase3-p302-ding-latest}
+case "$run_id" in ''|*[!A-Za-z0-9._-]*) printf '%s\n' 'check-phase3-p302: invalid run ID' >&2; exit 64 ;; esac
+raw_dir="$repository_root/artifacts/raw/$run_id"
+if test -e "$raw_dir"; then printf 'check-phase3-p302: evidence directory already exists: %s\n' "$raw_dir" >&2; exit 73; fi
+mkdir -p "$raw_dir"
+"$script_dir/check-game" --mode test --run-id "$run_id-tests"
+"$script_dir/godot" --path "$repository_root/game" --resolution 1280x720 --script res://tests/capture_p302.gd --log-file "$raw_dir/screenshot.log" -- --output "$raw_dir/ding-tone-slap.png"
+test -s "$raw_dir/ding-tone-slap.png"
+node "$script_dir/summarize-phase3-p302.mjs" "$run_id" "$raw_dir" prepare
+"$script_dir/check-game" --mode build --run-id "$run_id-build"
+node "$script_dir/summarize-phase3-p302.mjs" "$run_id" "$raw_dir" complete
+printf '%s\n' 'check-phase3-p302: passed'

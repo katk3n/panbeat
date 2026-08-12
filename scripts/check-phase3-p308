@@ -1,0 +1,23 @@
+#!/bin/sh
+set -eu
+script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+repository_root=$(CDPATH= cd -- "$script_dir/.." && pwd)
+run_id=${1:-phase3-p308-product-ux-latest}
+case "$run_id" in ''|*[!A-Za-z0-9._-]*) printf '%s\n' 'check-phase3-p308: invalid run ID' >&2; exit 64 ;; esac
+raw_dir="$repository_root/artifacts/raw/$run_id"
+build_run="$run_id-build"
+build_path="$repository_root/artifacts/builds/$build_run/PanBeat.zip"
+if test -e "$raw_dir"; then printf 'check-phase3-p308: evidence directory already exists: %s\n' "$raw_dir" >&2; exit 73; fi
+mkdir -p "$raw_dir"
+"$script_dir/check-game" --mode test --run-id "$run_id-tests"
+for fixture in 'songs:songs' 'device:device-no-ports' 'calibration:calibration-retry' 'results:results' 'results-confirm:results-confirm' 'states:state-fixtures'; do
+  mode=${fixture%%:*}; name=${fixture##*:}
+  "$script_dir/godot" --path "$repository_root/game" --resolution 1280x720 --script res://tests/capture_p308.gd --log-file "$raw_dir/$name.log" -- --mode "$mode" --output "$raw_dir/$name.png"
+done
+if rg -n 'SCRIPT ERROR|ERROR:' "$raw_dir"/*.log; then
+  printf '%s\n' 'check-phase3-p308: screenshot log contains an error' >&2
+  exit 1
+fi
+"$script_dir/check-game" --mode build --run-id "$build_run"
+node "$script_dir/summarize-phase3-p308.mjs" "$run_id" "$raw_dir" "$build_path"
+printf '%s\n' 'check-phase3-p308: passed'

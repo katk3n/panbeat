@@ -1,0 +1,47 @@
+{
+  "schema_version": "1.0.0",
+  "story": "P301",
+  "status": "approved",
+  "selected_option": "quiet_forge",
+  "fixture_contract": {
+    "chart": "game/content/phase1-fixed-song-v1/chart.json",
+    "profile": "game/config/default-instrument-profile.json",
+    "song_time_us": 10000000,
+    "count_in_capture_us": -1000000,
+    "pause_capture_us": 12000000,
+    "window": [1280, 720],
+    "score": 45000,
+    "combo": 27,
+    "latest_grade": "perfect",
+    "latest_delta_us": -12000,
+    "techniques": ["tone", "ding", "slap"]
+  },
+  "shared_tokens": {
+    "spacing_px": [4, 8, 12, 16, 24, 32, 48],
+    "font_sizes_px": {"caption": 13, "body": 16, "label": 18, "title": 28, "score": 42, "combo": 52},
+    "corners_px": {"control": 8, "panel": 14, "status": 17},
+    "strokes_px": {"hairline": 1, "guide": 2, "focus": 3, "note": 5},
+    "motion_ms": {"hover": 90, "status": 140, "hit": 180, "overlay": 220},
+    "reduced_effects": {"glow_multiplier": 0.0, "particle_count": 0, "motion_multiplier": 0.35}
+  },
+  "options": {
+    "quiet_forge": {
+      "label": "Quiet Forge",
+      "direction": "Warm restrained gunmetal with amber resonance accents and low persistent glow.",
+      "palette": {"background": "#0b0e16", "surface": "#171b24", "primary": "#f4f1e8", "accent": "#e4b45f", "success": "#8ed3a7", "warning": "#e8bd72", "error": "#e78072", "muted": "#aaa79f", "focus": "#ffe29b"},
+      "glow": {"idle": 0.08, "active": 0.28, "hit": 0.5}
+    },
+    "polar_resonance": {
+      "label": "Polar Resonance",
+      "direction": "Cool satin steel with cyan/violet resonance accents and slightly deeper luminous layering.",
+      "palette": {"background": "#080d18", "surface": "#111a2b", "primary": "#f3f7ff", "accent": "#6de7f2", "success": "#79efbd", "warning": "#f0c96b", "error": "#ff817d", "muted": "#9eabc0", "focus": "#b49cff"},
+      "glow": {"idle": 0.12, "active": 0.38, "hit": 0.62}
+    }
+  },
+  "assets": {
+    "bundled_external_assets": [],
+    "font": {"selection": "Godot/OS fallback until a licensed font is explicitly approved", "license_check": "Record upstream URL, exact version, SPDX identifier, license text, and redistribution/embedding terms before commit."},
+    "icons": {"selection": "Code-drawn geometry and text labels for P301", "license_check": "For any later icon pack, record upstream URL, version, SPDX identifier, attribution requirement, and modification terms."},
+    "textures": {"selection": "Procedural drawing only for P301", "license_check": "Do not add a texture without source URL, author, license, version/hash, modification notes, and redistribution confirmation."}
+  }
+}

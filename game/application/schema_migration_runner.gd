@@ -33,6 +33,10 @@ static func validate(document_type: String, document: Dictionary) -> Dictionary:
 		"settings":
 			if document.get("profile_id") is not String or document.get("offsets") is not Array:
 				return _failure("invalid_settings", "settings require profile_id and offsets")
+			if document.has("background_preset_id") and document.get("background_preset_id") is not String:
+				return _failure("invalid_settings_background", "background_preset_id must be a string")
+			if document.has("song_background_presets") and document.get("song_background_presets") is not Dictionary:
+				return _failure("invalid_settings_background_map", "song_background_presets must be an object")
 		"song_index":
 			if document.get("songs") is not Array:
 				return _failure("invalid_song_index", "song index requires songs")
@@ -46,7 +50,7 @@ static func validate(document_type: String, document: Dictionary) -> Dictionary:
 static func empty_document(document_type: String) -> Dictionary:
 	match document_type:
 		"settings":
-			return {"schema_version": CURRENT_VERSION, "selected_midi_port": "", "profile_id": "roland-mn10-handpan-minor-v1", "offsets": []}
+			return {"schema_version": CURRENT_VERSION, "selected_midi_port": "", "profile_id": "roland-mn10-handpan-minor-v1", "offsets": [], "background_preset_id":"deep_resonance", "song_background_presets":{}}
 		"song_index":
 			return {"schema_version": CURRENT_VERSION, "songs": []}
 		"result_history":
@@ -61,6 +65,8 @@ static func _migrate_0_1_to_1_0(document_type: String, source: Dictionary) -> Di
 			migrated["selected_midi_port"] = migrated.get("selected_port", "")
 			migrated.erase("selected_port")
 			if not migrated.has("offsets"): migrated["offsets"] = []
+			if not migrated.has("background_preset_id"): migrated["background_preset_id"] = "deep_resonance"
+			if not migrated.has("song_background_presets"): migrated["song_background_presets"] = {}
 		"song_index":
 			if not migrated.has("songs"): migrated["songs"] = []
 		"result_history":

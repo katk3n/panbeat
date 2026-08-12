@@ -1,0 +1,24 @@
+#!/bin/sh
+set -eu
+script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+repository_root=$(CDPATH= cd -- "$script_dir/.." && pwd)
+run_id=${1:-phase3-p307-hud-latest}
+case "$run_id" in ''|*[!A-Za-z0-9._-]*) printf '%s\n' 'check-phase3-p307: invalid run ID' >&2; exit 64 ;; esac
+raw_dir="$repository_root/artifacts/raw/$run_id"
+build_run="$run_id-build"
+build_path="$repository_root/artifacts/builds/$build_run/PanBeat.zip"
+if test -e "$raw_dir"; then printf 'check-phase3-p307: evidence directory already exists: %s\n' "$raw_dir" >&2; exit 73; fi
+mkdir -p "$raw_dir"
+"$script_dir/check-game" --mode test --run-id "$run_id-tests"
+for fixture in 'playing:1280x720:playing-720p' 'playing:1600x720:playing-wide-long-title' 'scheduled:1280x720:count-in' 'paused:1280x720:paused' 'completed:1280x720:complete' 'failed:1280x720:failure'; do
+  state=${fixture%%:*}; remainder=${fixture#*:}; size=${remainder%%:*}; name=${fixture##*:}
+  width=${size%x*}; height=${size#*x}
+  "$script_dir/godot" --path "$repository_root/game" --resolution "${width}x${height}" --script res://tests/capture_p307.gd --log-file "$raw_dir/$name.log" -- --state "$state" --size "$size" --output "$raw_dir/$name.png"
+done
+! rg -n 'SCRIPT ERROR|ERROR:' "$raw_dir"/*.log
+"$script_dir/godot" --headless --path "$repository_root/game" --log-file "$raw_dir/replay-hud-on.log" -- --input-mode replay --replay-speed=4 --records-output="$raw_dir/replay-hud-on.json" --quit-on-complete
+"$script_dir/godot" --headless --path "$repository_root/game" --log-file "$raw_dir/replay-hud-off.log" -- --input-mode replay --replay-speed=4 --hide-hud --records-output="$raw_dir/replay-hud-off.json" --quit-on-complete
+cmp "$raw_dir/replay-hud-on.json" "$raw_dir/replay-hud-off.json"
+"$script_dir/check-game" --mode build --run-id "$build_run"
+node "$script_dir/summarize-phase3-p307.mjs" "$run_id" "$raw_dir" "$build_path"
+printf '%s\n' 'check-phase3-p307: passed'

@@ -1,0 +1,13 @@
+{
+  "schema_version": "1.0.0",
+  "overlay_id": "p310-real-device-slap-v1",
+  "source_musicxml_sha256": "e77c9e1cae6af4a71890e81618567f5e98be953bc5a86cc5fb28264f617b6aee",
+  "difficulty": {"id": "normal", "label": "Normal"},
+  "annotations": [
+    {"selector": {"part": "P1", "measure": "4", "tick": 56, "voice": "1"}, "technique": "slap", "target_id": "outer-hit-radius"},
+    {"selector": {"part": "P1", "measure": "7", "tick": 104, "voice": "1"}, "technique": "slap", "target_id": "outer-hit-radius"},
+    {"selector": {"part": "P1", "measure": "10", "tick": 152, "voice": "1"}, "technique": "slap", "target_id": "outer-hit-radius"},
+    {"selector": {"part": "P1", "measure": "13", "tick": 192, "voice": "1"}, "technique": "slap", "target_id": "outer-hit-radius"},
+    {"selector": {"part": "P1", "measure": "16", "tick": 248, "voice": "1"}, "technique": "slap", "target_id": "outer-hit-radius"}
+  ]
+}

@@ -1,6 +1,9 @@
 class_name DeviceSetupView
 extends Control
 
+const AppTheme := preload("res://presentation/panbeat_theme.gd")
+const RichBackground := preload("res://presentation/rich_ui_background.gd")
+
 const MidiAdapter := preload("res://infrastructure/godot_midi_adapter.gd")
 const DeviceModel := preload("res://application/device_setup_model.gd")
 const Repositories := preload("res://infrastructure/user_data_repositories.gd")
@@ -17,13 +20,14 @@ var _monitor_records: Array[Dictionary] = []
 var repositories: RefCounted
 
 func _ready() -> void:
+	theme = AppTheme.shared()
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_diagnostics_output = _argument("--device-diagnostics-output=")
 	_profile = _load_json("res://config/default-instrument-profile.json")
 	repositories = Repositories.new() if repositories == null else repositories
 	var loaded_settings: Dictionary = repositories.settings.load()
 	_build_ui()
-	_adapter = MidiAdapter.new()
+	_adapter = MidiAdapter.new() if _adapter == null else _adapter
 	_adapter.profile = _profile
 	_adapter.preferred_port = str(loaded_settings.get("document", {}).get("selected_midi_port", "")) if loaded_settings.get("ok", false) else ""
 	_adapter.record_received.connect(_on_record)
@@ -38,11 +42,12 @@ func _auto_quit_after_ready() -> void:
 	get_tree().quit(0)
 
 func _build_ui() -> void:
-	var background := ColorRect.new(); background.color = Color("101620"); background.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT); add_child(background)
+	var background := RichBackground.new(); background.intensity = 1.12; add_child(background)
 	var margin := MarginContainer.new(); margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT); margin.add_theme_constant_override("margin_left", 48); margin.add_theme_constant_override("margin_right", 48); margin.add_theme_constant_override("margin_top", 36); margin.add_theme_constant_override("margin_bottom", 36); add_child(margin)
 	var layout := VBoxContainer.new(); layout.add_theme_constant_override("separation", 14); margin.add_child(layout)
-	var title := Label.new(); title.text = "DEVICE SETUP"; title.add_theme_font_size_override("font_size", 30); layout.add_child(title)
+	var title := Label.new(); title.text = "DEVICE SETUP"; title.add_theme_font_size_override("font_size", 38); layout.add_child(title)
 	var intro := Label.new(); intro.text = "1. Connect Mood Pan by USB  2. Select the MN-10 port  3. Confirm Tone / Ding / Slap below"; intro.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART; layout.add_child(intro)
+	var connection_heading := Label.new(); connection_heading.text = "CONNECTION STATUS"; connection_heading.add_theme_color_override("font_color", Color("e4b45f")); layout.add_child(connection_heading)
 	_status = Label.new(); _status.text = "OPENING MIDI…"; _status.add_theme_font_size_override("font_size", 22); layout.add_child(_status)
 	var port_row := HBoxContainer.new(); layout.add_child(port_row)
 	var port_label := Label.new(); port_label.text = "MIDI Port"; port_label.custom_minimum_size.x = 130; port_row.add_child(port_label)
@@ -54,9 +59,10 @@ func _build_ui() -> void:
 	var reopen := Button.new(); reopen.text = "Reopen MIDI"; reopen.tooltip_text = "Close and open MIDI once, without duplicate registration"; reopen.pressed.connect(_on_reopen); actions.add_child(reopen)
 	var save := Button.new(); save.text = "Save Diagnostics"; save.pressed.connect(_save_diagnostics); actions.add_child(save)
 	var quit := Button.new(); quit.text = "Quit"; quit.pressed.connect(func() -> void: get_tree().quit(0)); actions.add_child(quit)
-	_monitor = Label.new(); _monitor.text = "INPUT MONITOR: strike Tone, Ding, and Slap"; _monitor.add_theme_font_size_override("font_size", 24); layout.add_child(_monitor)
+	var monitor_heading := Label.new(); monitor_heading.text = "LIVE INPUT MONITOR"; monitor_heading.add_theme_color_override("font_color", Color("e4b45f")); layout.add_child(monitor_heading)
+	_monitor = Label.new(); _monitor.text = "Strike Tone, Ding, and Slap"; _monitor.add_theme_font_size_override("font_size", 24); layout.add_child(_monitor)
 	_history = RichTextLabel.new(); _history.fit_content = true; _history.custom_minimum_size.y = 170; _history.text = "No MIDI events yet."; layout.add_child(_history)
-	var limitation := Label.new(); limitation.text = "LIMITATION: Godot does not expose physical disconnect state or the OS receive timestamp. Silence alone does not prove disconnection. Use Reopen MIDI; if input does not return, quit and relaunch PanBeat after reconnecting the USB cable."; limitation.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART; layout.add_child(limitation)
+	var limitation := Label.new(); limitation.text = "TECHNICAL DETAILS — Godot does not expose physical disconnect state or the OS receive timestamp. Silence alone does not prove disconnection. Use Reopen MIDI; if input does not return, quit and relaunch PanBeat after reconnecting the USB cable."; limitation.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART; layout.add_child(limitation)
 	_save_status = Label.new(); _save_status.text = "Diagnostics are saved only when requested."; layout.add_child(_save_status)
 
 func _refresh_ui() -> void:

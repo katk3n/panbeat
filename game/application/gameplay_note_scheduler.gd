@@ -24,7 +24,7 @@ func _init(chart: RefCounted, profile: Dictionary, capacity: int = 64, lookahead
 		var tone: Dictionary = tone_value as Dictionary
 		_angle_by_target[tone["target_id"]] = float(tone["angle_degrees"])
 	for _index: int in capacity:
-		_slots.append({"active":false, "note":{}, "angle_degrees":0.0, "feedback":"", "feedback_expires_us":0})
+		_slots.append({"active":false, "note":{}, "angle_degrees":0.0, "feedback":"", "feedback_started_us":0, "feedback_expires_us":0})
 
 func update(song_time_us: int) -> void:
 	for slot: Dictionary in _slots:
@@ -50,6 +50,7 @@ func mark_feedback(note_id: String, grade: String, song_time_us: int, duration_u
 	for slot: Dictionary in _slots:
 		if slot["active"] and (slot["note"] as Dictionary).get("note_id") == note_id:
 			slot["feedback"] = grade
+			slot["feedback_started_us"] = song_time_us
 			slot["feedback_expires_us"] = song_time_us + duration_us
 			return true
 	return false
