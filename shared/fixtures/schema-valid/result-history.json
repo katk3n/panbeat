@@ -1,0 +1,12 @@
+{
+  "schema_version": "1.0.0",
+  "max_records": 100,
+  "records": [{
+    "schema_version": "1.0.0", "result_id": "result-1", "completed_at": "2026-08-12T01:00:00Z",
+    "metadata": {"song_id": "song-1", "importer_version": "v1", "chart_version": "1.0.0", "profile_id": "profile-1", "judgement_rule_id": "judgement-v1", "score_rule_id": "score-v1"},
+    "summary": {"score": 1000, "accuracy": 1, "max_combo": 1, "breakdown": {"perfect": 1, "great": 0, "good": 0, "miss": 0, "extra_hit": 0}},
+    "timing_distribution": {"sample_count": 1, "median_delta_us": -10000, "early_count": 1, "on_time_count": 0, "late_count": 0},
+    "error_breakdown": {"wrong_target": 0, "wrong_technique": 0, "no_candidate": 0},
+    "judgements": []
+  }]
+}

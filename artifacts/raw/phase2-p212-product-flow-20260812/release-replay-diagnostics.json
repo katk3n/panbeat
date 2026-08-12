@@ -1,0 +1,43 @@
+{
+  "audio_offset_overridden": false,
+  "audio_offset_sec": 0.0,
+  "developer_diagnostics": [
+    "ready input_mode=replay replay_speed=4.00 chart_notes=45 audio_us=36000000",
+    "completed {\"accuracy\":1.0,\"breakdown\":{\"extra_hit\":0,\"good\":0,\"great\":0,\"miss\":0,\"perfect\":45},\"combo\":45,\"latest_direction\":\"on_time\",\"latest_grade\":\"perfect\",\"max_combo\":45,\"score\":45000}"
+  ],
+  "failure_reason": "",
+  "input_mode": "replay",
+  "input_offset_overridden": false,
+  "input_offset_sec": 0.0,
+  "midi_lifecycle": [],
+  "midi_records": [],
+  "package_id": "phase1-fixed-song-v1",
+  "profile_id": "roland-mn10-handpan-minor-v1",
+  "schema_version": "1.0.0",
+  "session_events": [
+    {
+      "event": "scheduled",
+      "monotonic_timestamp_us": 103736,
+      "transport_timestamp_us": -999985
+    },
+    {
+      "event": "completed",
+      "monotonic_timestamp_us": 10487836,
+      "transport_timestamp_us": 36000000
+    }
+  ],
+  "session_state": "completed",
+  "status": "completed",
+  "transport": {
+    "actual_start_monotonic_seconds": 1.110349,
+    "audio_duration_us": 36000000,
+    "buffer_frames_estimate": 0,
+    "failure_reason": "",
+    "output_latency_seconds": 0.0,
+    "sample_rate_hz": 44100,
+    "scheduled_monotonic_seconds": 1.103723,
+    "start_lateness_us": 6626,
+    "start_lead_seconds": 1.0,
+    "state": "completed"
+  }
+}

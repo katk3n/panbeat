@@ -1,0 +1,34 @@
+#!/bin/sh
+set -eu
+script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+repository_root=$(CDPATH= cd -- "$script_dir/.." && pwd)
+run_id=${1:-phase2-p215-acceptance-latest}
+case "$run_id" in ''|*[!A-Za-z0-9._-]*) printf '%s\n' 'check-phase2-p215: invalid run ID' >&2; exit 64 ;; esac
+run_dir="$repository_root/artifacts/raw/$run_id"
+build_dir="$repository_root/artifacts/builds/$run_id"
+mkdir -p "$run_dir" "$build_dir"
+"$script_dir/check-game" --mode test --run-id "$run_id-tests"
+"$script_dir/godot" --headless --editor --path "$repository_root/game" --quit --log-file "$run_dir/import.log"
+"$script_dir/godot" --headless --path "$repository_root/game" --script res://tests/prepare_p215_acceptance.gd --log-file "$run_dir/package.log" -- --root "$run_dir"
+"$script_dir/check-game" --mode build --run-id "$run_id"
+cp "$build_dir/PanBeat.zip" "$run_dir/PanBeat.zip"
+app_dir=$(mktemp -d /tmp/panbeat-p215.XXXXXX)
+trap 'rm -rf "$app_dir"' EXIT HUP INT TERM
+unzip -q "$run_dir/PanBeat.zip" -d "$app_dir"
+(cd "$app_dir" && find PanBeat.app -type f -print | LC_ALL=C sort) > "$run_dir/build-contents.txt"
+strings "$app_dir/PanBeat.app/Contents/Resources/PanBeat.pck" > "$app_dir/pck-strings.txt"
+if rg -q 'res://tests/' "$repository_root/artifacts/reports/$run_id/build.log"; then
+  printf '%s\n' 'check-phase2-p215: export included test resources' >&2
+  exit 1
+fi
+if rg -q 'artifacts/raw|/Users/' "$app_dir/pck-strings.txt"; then
+  printf '%s\n' 'check-phase2-p215: build contains raw-evidence or personal-path data' >&2
+  exit 1
+fi
+package_relative_path=$(node -e "console.log(JSON.parse(require('fs').readFileSync(process.argv[1])).package_relative_path)" "$run_dir/prepared.json")
+package_path="$run_dir/$package_relative_path"
+"$app_dir/PanBeat.app/Contents/MacOS/PanBeat" --headless --log-file "$run_dir/release.log" -- --input-mode replay --imported-package="$package_path" --replay-inputs="$run_dir/replay-inputs.json" --repository-root="$run_dir/repository" --records-output="$run_dir/release-replay.json" --quit-on-complete
+"$script_dir/godot" --path "$repository_root/game" --script res://tests/capture_p213.gd --log-file "$app_dir/screenshot.log" -- --output "$run_dir/acceptance.png"
+cp "$app_dir/screenshot.log" "$run_dir/screenshot.log"
+node "$script_dir/summarize-phase2-p215.mjs" "$run_dir" "$run_id"
+printf '%s\n' 'check-phase2-p215: passed'

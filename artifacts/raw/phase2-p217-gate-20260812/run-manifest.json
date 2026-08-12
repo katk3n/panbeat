@@ -1,0 +1,49 @@
+{
+  "schema_version": "1.0.0",
+  "run_id": "phase2-p217-gate-20260812",
+  "story": "P217",
+  "status": "complete",
+  "gate": {
+    "phase2_mvp_feature_complete": true,
+    "release_allowed": false,
+    "signed_or_notarized": false,
+    "final_release_hardening_required": true
+  },
+  "audit": {
+    "stories_complete": ["P201", "P202", "P203", "P204", "P205", "P206", "P207", "P208", "P209", "P210", "P211", "P212", "P213", "P214", "P215", "P216", "P217"],
+    "latest_build_manifest": "artifacts/raw/phase2-p215-audio-duration-fix-20260812/run-manifest.json",
+    "real_device_manifest": "artifacts/raw/phase2-p216-real-device-20260812/run-manifest.json",
+    "completion_report": "docs/phase2-completion-report.md",
+    "machine_readable_contract": "docs/phase2-acceptance.json",
+    "requirement_mvp_completion": "pass-by-automated-and-real-device-evidence",
+    "phase0_phase1_raw_evidence_changed": false
+  },
+  "versions": {
+    "godot": "4.6.stable.official.89cea1439",
+    "musicxml": "4.0 score-partwise MVP subset",
+    "importer": "panbeat-musicxml-importer-v1",
+    "schemas": "1.0.0",
+    "profile": "roland-mn10-handpan-minor-v1",
+    "judgement_rule": "panbeat-phase1-standard-v1",
+    "score_rule": "panbeat-phase1-score-v1",
+    "runtime_audio": "48 kHz stereo Ogg Vorbis"
+  },
+  "release_blockers": [
+    {"id": "R-P1-001", "status": "deferred-release-gate-blocker", "owner": "FH01/FH02/FH04"},
+    {"id": "R-P1-003", "status": "deferred-release-gate-blocker", "owner": "FH01/FH03/FH04"},
+    {"id": "R-P2-001", "status": "release-hardening-required", "summary": "External allocation profiling remains required because release heap monitoring returned zero.", "owner": "FH04"}
+  ],
+  "known_limitations": [
+    {"id": "L-P2-001", "summary": "Godot 4.6 did not hot-plug MN-10 in-process; documented full app relaunch recovered it.", "owner": "FH03 native CoreMIDI adoption evaluation"},
+    {"id": "L-P2-002", "summary": "External physical end-to-end latency measurement is not performed or planned by product decision; software timing is not claimed as physical latency.", "owner": "product decision"}
+  ],
+  "verification": {
+    "json_parse": "pass",
+    "evidence_paths": "pass",
+    "markdown_links": "pass",
+    "story_status_consistency": "pass",
+    "git_diff_check": "pass",
+    "product_test_and_build": "not-rerun-for-documentation-only-P217; latest P215 full regression and release build referenced"
+  },
+  "result": "phase2-complete-release-not-authorized"
+}

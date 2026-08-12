@@ -1,0 +1,32 @@
+{
+  "schema_version": "1.0.0",
+  "run_id": "phase2-p213-imported-gameplay-20260812",
+  "story": "P213",
+  "status": "complete",
+  "verification": [
+    {"command": "scripts/check-phase2-p213 phase2-p213-imported-gameplay-20260812", "result": "pass", "tests": "14/14"},
+    {"command": "scripts/check-game --mode test --run-id phase2-p213-regression-20260812", "result": "pass", "suites": ["unit 44/44", "P202 15/15", "P203 17/17", "P204 14/14", "P205 13/13", "P207 20/20", "P208 12/12", "P209 10/10", "P210 16/16", "P211 16/16", "P212 16/16", "P213 14/14", "integration 35/35", "replay 7/7"]},
+    {"command": "Godot capture_p213.gd 1280x720", "result": "pass", "screenshot": "imported-gameplay.png"},
+    {"command": "scripts/check-game --mode build --run-id phase2-p213-imported-gameplay-20260812", "result": "pass", "build_sha256": "0f8adf482c5fec6aa061396767fe1d3ba118a99f11af7da7299688edde0e151e", "build_bytes": 63104749},
+    {"command": "git diff --check", "result": "pass"}
+  ],
+  "acceptance": {
+    "musicxml_overlay_audio_library_to_gameplay": "pass",
+    "tone_ding_slap_profile_and_radial_rendering": "pass",
+    "tempo_change_tie_golden_timestamps": "pass",
+    "audio_backed_transport_pause_resume": "pass",
+    "single_results_transition_and_history_save": "pass",
+    "phase1_fixed_replay_regression": "pass"
+  },
+  "definition_of_done": {
+    "implementation_fixture_tests_documentation": "pass",
+    "story_and_full_tests": "pass",
+    "product_build": "pass",
+    "audio_transport_only_clock": true,
+    "source_assets_unchanged": true,
+    "raw_evidence_preserved": true,
+    "unexecuted_checks": [],
+    "remaining_risks": ["Mood Pan end-to-end imported-song play is accepted later in P216 after P214/P215 gates."]
+  },
+  "result": "pass"
+}

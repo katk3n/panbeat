@@ -1,0 +1,15 @@
+extends SceneTree
+
+const Files := preload("res://infrastructure/native_song_package_backend.gd")
+const Library := preload("res://application/song_library_service.gd")
+const Repositories := preload("res://infrastructure/user_data_repositories.gd")
+
+func _initialize() -> void:
+	var arguments := OS.get_cmdline_user_args(); var output_index := arguments.find("--output"); if output_index < 0: quit(64); return
+	var root := "/tmp/panbeat-p214-library"; var files := Files.new(); files.remove_tree(root); var repository_root := root.path_join("songs"); var repositories := Repositories.new(root.path_join("documents")); var songs: Array = []
+	for index: int in 100:
+		var song_id := "quality-%03d" % index; var relative := "packages/%s/v1-000000000000" % song_id; var package_root := repository_root.path_join(relative); DirAccess.make_dir_recursive_absolute(package_root)
+		var chart := {"schema_version":"1.0.0", "chart_id":song_id, "importer_version":"panbeat-musicxml-importer-v1", "overlay_id":"none", "profile_id":"roland-mn10-handpan-minor-v1", "duration_us":1000000, "tempo_map":[], "notes":[{"note_id":"n", "timestamp_us":0, "duration_us":100000, "technique":"tone", "target_id":"tone-1", "source":{}, "pitch":{"step":"A", "octave":4, "alter":0}}]}
+		files.write_text(package_root.path_join("chart.json"), JSON.stringify(chart)); files.write_bytes(package_root.path_join("runtime.ogg"), PackedByteArray([79,103,103,83])); var package := {"schema_version":"1.0.0", "song_id":song_id, "import_version":1, "title":"Quality %03d" % index, "artist":"PanBeat", "duration_us":1000000, "chart_schema_version":"1.0.0", "artwork_path":"", "status":"valid", "importer_version":"panbeat-musicxml-importer-v1", "profile_id":"roland-mn10-handpan-minor-v1", "cache_key":"0".repeat(64), "source":{}, "overlay_sha256":"none", "audio":{"source_sha256":"0".repeat(64), "runtime_path":"runtime.ogg"}, "chart_path":"chart.json"}; files.write_text(package_root.path_join("package.json"), JSON.stringify(package))
+		songs.append({"song_id":song_id, "import_version":1, "status":"valid", "title":package["title"], "artist":"PanBeat", "duration_us":1000000, "chart_schema_version":"1.0.0", "artwork_path":"", "profile_id":"roland-mn10-handpan-minor-v1", "cache_key":"0".repeat(64), "package_path":relative})
+	repositories.songs.save({"schema_version":"1.0.0", "songs":songs}); var started := Time.get_ticks_usec(); var queried := Library.new(files).query(repository_root, repositories.songs, "roland-mn10-handpan-minor-v1"); var elapsed := Time.get_ticks_usec() - started; var output := FileAccess.open(arguments[output_index + 1], FileAccess.WRITE); output.store_string(JSON.stringify({"schema_version":"1.0.0", "songs":100, "query_elapsed_us":elapsed, "returned":queried.get("songs", []).size(), "invalid":queried.get("songs", []).filter(func(value: Dictionary) -> bool: return value.get("display_status") == "invalid").size()}, "  ") + "\n"); files.remove_tree(root); quit(0 if queried.get("songs", []).size() == 100 else 1)

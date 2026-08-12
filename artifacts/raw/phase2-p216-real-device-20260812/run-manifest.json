@@ -1,0 +1,77 @@
+{
+  "schema_version": "1.0.0",
+  "run_id": "phase2-p216-real-device-20260812",
+  "story": "P216",
+  "status": "complete",
+  "environment": {
+    "device": "Mood Pan MN-10",
+    "profile_id": "roland-mn10-handpan-minor-v1",
+    "platform": "macOS 26.5.2 (25F84)",
+    "architecture": "arm64",
+    "godot": "4.6.stable.official.89cea1439",
+    "audio_output_id": "Default",
+    "audio_sample_rate_hz": 44100
+  },
+  "build": {
+    "path": "artifacts/raw/phase2-p215-audio-duration-fix-20260812/PanBeat.zip",
+    "sha256": "2ba8dd9fc809f635a82ba59e9862074650ec11e6fc40e432bbbc47c56b114d08",
+    "bytes": 63015124
+  },
+  "sessions": [
+    {
+      "id": "session-1-retry",
+      "result": "pass",
+      "diagnostics": "session-1-retry-gameplay.json",
+      "audio_duration_us": 36000000,
+      "input_offset_us": 37000,
+      "audio_offset_us": 0,
+      "result_saved": true
+    },
+    {
+      "id": "session-2",
+      "result": "pass",
+      "diagnostics": "session-2-gameplay.json",
+      "audio_duration_us": 36000000,
+      "saved_offsets_restored": true,
+      "pause_resume_observed": true,
+      "result_saved": true
+    },
+    {
+      "id": "session-3",
+      "result": "pass",
+      "device_diagnostics": "session-3-recovery-device.json",
+      "gameplay_diagnostics": "session-3-gameplay.json",
+      "audio_duration_us": 36000000,
+      "mapped_techniques": ["tone", "ding", "slap"],
+      "recovery_route": "relaunch-after-reconnect",
+      "result_saved": true
+    }
+  ],
+  "acceptance": {
+    "device_port_profile_build_checksum_recorded": "pass",
+    "clean_launch_tone_ding_slap_monitor": "pass",
+    "product_ui_import_and_library": "pass",
+    "calibration_saved_and_restart_restored": "pass",
+    "minimum_three_completed_sessions": "pass",
+    "pause_resume_results_and_history": "pass",
+    "disconnect_recovery": "pass-by-documented-relaunch-route",
+    "evidence_categories_separated": "pass"
+  },
+  "definition_of_done": {
+    "story_tests": "covered by P209/P210/P213 and P215 regression",
+    "full_regression": "pass",
+    "release_build": "pass",
+    "raw_evidence_preserved": true,
+    "unexecuted_checks": ["External end-to-end latency measurement is not planned by product decision."],
+    "remaining_risks": [
+      "Godot 4.6 CoreMIDI does not discover the hot-plugged MN-10 in this environment; full app relaunch is required.",
+      "Native CoreMIDI backend adoption will be evaluated, not presumed, in Final Phase FH03."
+    ]
+  },
+  "results_history": {
+    "p216_records_observed": 4,
+    "minimum_required": 3,
+    "corrupt_records_observed": 0
+  },
+  "result": "pass"
+}

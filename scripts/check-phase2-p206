@@ -1,0 +1,11 @@
+#!/bin/sh
+set -eu
+script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+repository_root=$(CDPATH= cd -- "$script_dir/.." && pwd)
+run_id=${1:-phase2-p206-audio-latest}
+node "$script_dir/audio-contract.test.mjs"
+node "$script_dir/prepare-phase2-audio.mjs" "$run_id"
+raw_dir="$repository_root/artifacts/raw/$run_id"
+"$script_dir/godot" --headless --path "$repository_root/game" --script res://tests/measure_p206_audio.gd --log-file "$raw_dir/godot-audio.log" -- --wav "$raw_dir/comparison-6m.wav" --ogg "$raw_dir/comparison-6m.ogg" --output "$raw_dir/godot-lifecycle.json"
+rg -q PANBEAT_P206_AUDIO_OK "$raw_dir/godot-audio.log"
+printf '%s\n' 'check-phase2-p206: passed'

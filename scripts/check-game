@@ -31,7 +31,7 @@ run_suite() {
   "$script_dir/godot" --headless --path "$project" --script "res://tests/run_${suite}_tests.gd" --log-file "$report_dir/${suite}.log"
   rg -q "$marker" "$report_dir/${suite}.log" || { printf 'check-game: %s success marker missing\n' "$suite" >&2; exit 1; }
 }
-run_unit() { run_suite unit PANBEAT_UNIT_TESTS_OK; }
+run_unit() { run_suite unit PANBEAT_UNIT_TESTS_OK; run_suite p202 PANBEAT_P202_TESTS_OK; run_suite p203 PANBEAT_P203_TESTS_OK; run_suite p204 PANBEAT_P204_TESTS_OK; run_suite p205 PANBEAT_P205_TESTS_OK; run_suite p207 PANBEAT_P207_TESTS_OK; run_suite p208 PANBEAT_P208_TESTS_OK; run_suite p209 PANBEAT_P209_TESTS_OK; run_suite p210 PANBEAT_P210_TESTS_OK; run_suite p211 PANBEAT_P211_TESTS_OK; run_suite p212 PANBEAT_P212_TESTS_OK; run_suite p213 PANBEAT_P213_TESTS_OK; }
 run_integration() { run_suite integration PANBEAT_INTEGRATION_TESTS_OK; }
 run_replay() { run_suite replay PANBEAT_REPLAY_TESTS_OK; }
 run_test() { run_unit; run_integration; run_replay; }

@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://panbeat.local/schemas/settings.schema.json",
+  "title": "PanBeat Settings",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "selected_midi_port", "profile_id", "offsets"],
+  "properties": {
+    "schema_version": {"const": "1.0.0"},
+    "selected_midi_port": {"type": "string"},
+    "profile_id": {"type": "string", "minLength": 1},
+    "offsets": {"type": "array", "items": {"type": "object", "additionalProperties": false, "required": ["profile_id", "audio_output_id", "input_offset_us", "audio_offset_us"], "properties": {"profile_id": {"type": "string", "minLength": 1}, "audio_output_id": {"type": "string", "minLength": 1}, "input_offset_us": {"type": "integer"}, "audio_offset_us": {"type": "integer"}, "calibration_samples": {"type": "array", "items": {"type": "object", "required": ["stimulus_timestamp_us", "input_timestamp_us", "delta_us", "status", "included", "profile_id", "audio_output_id", "technique"], "properties": {"stimulus_timestamp_us": {"type": "integer"}, "input_timestamp_us": {"type": ["integer", "null"]}, "delta_us": {"type": ["integer", "null"]}, "status": {"enum": ["hit", "extra_hit", "miss"]}, "included": {"type": "boolean"}, "profile_id": {"type": "string"}, "audio_output_id": {"type": "string"}, "technique": {"enum": ["tone", "ding"]}}}}}}}
+  }
+}

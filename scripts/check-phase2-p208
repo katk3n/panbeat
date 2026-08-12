@@ -1,0 +1,14 @@
+#!/bin/sh
+set -eu
+script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+repository_root=$(CDPATH= cd -- "$script_dir/.." && pwd)
+run_id=${1:-phase2-p208-library-latest}
+case "$run_id" in ''|*[!A-Za-z0-9._-]*) printf '%s\n' 'check-phase2-p208: invalid run ID' >&2; exit 64 ;; esac
+raw_dir="$repository_root/artifacts/raw/$run_id"
+mkdir -p "$raw_dir"
+"$script_dir/godot" --headless --editor --path "$repository_root/game" --quit --log-file "$raw_dir/import.log"
+"$script_dir/godot" --headless --path "$repository_root/game" --script res://tests/run_p208_tests.gd --log-file "$raw_dir/p208.log"
+rg -q PANBEAT_P208_TESTS_OK "$raw_dir/p208.log"
+"$script_dir/godot" --path "$repository_root/game" --resolution 1280x720 --script res://tests/capture_p208.gd --log-file "$raw_dir/screenshot.log" -- --output "$raw_dir/song-library.png"
+test -s "$raw_dir/song-library.png"
+printf '%s\n' 'check-phase2-p208: passed'

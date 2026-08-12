@@ -1,0 +1,66 @@
+{
+  "godot_limitations": {
+    "os_receive_timestamp_available": false,
+    "physical_disconnect_observable": false
+  },
+  "lifecycle": [
+    {
+      "code": "opened",
+      "ok": true,
+      "physical_disconnect_observable": false,
+      "ports": [
+        "MN-10"
+      ],
+      "preferred_port": "",
+      "timestamp_us": 406517
+    }
+  ],
+  "monitor_records": [
+    {
+      "message": "Unmapped MIDI note 81 (control_change)",
+      "note": 81,
+      "status": "DIAGNOSTIC",
+      "target": "",
+      "technique": "",
+      "timestamp_us": 12348677,
+      "velocity": 0
+    },
+    {
+      "message": "Unmapped MIDI note 50 (aftertouch)",
+      "note": 50,
+      "status": "DIAGNOSTIC",
+      "target": "",
+      "technique": "",
+      "timestamp_us": 12348782,
+      "velocity": 0
+    },
+    {
+      "message": "DING → ding",
+      "note": 50,
+      "status": "MAPPED",
+      "target": "ding",
+      "technique": "DING",
+      "timestamp_us": 12348839,
+      "velocity": 127
+    },
+    {
+      "message": "Unmapped MIDI note 50 (note_off)",
+      "note": 50,
+      "status": "DIAGNOSTIC",
+      "target": "",
+      "technique": "",
+      "timestamp_us": 12394898,
+      "velocity": 127
+    }
+  ],
+  "ports": [
+    "MN-10"
+  ],
+  "profile_id": "roland-mn10-handpan-minor-v1",
+  "profile_settings": {
+    "style": "minor",
+    "tone": "handpan"
+  },
+  "schema_version": "1.0.0",
+  "story": "P209"
+}

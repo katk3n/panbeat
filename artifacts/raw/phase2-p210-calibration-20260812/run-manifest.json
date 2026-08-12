@@ -1,0 +1,20 @@
+{
+  "schema_version": "1.0.0",
+  "run_id": "phase2-p210-calibration-20260812",
+  "story": "P210",
+  "status": "complete",
+  "verification": [
+    {"command": "scripts/check-phase2-p210 phase2-p210-early-hit-fix-20260812", "result": "pass", "tests": "16/16", "coverage": "inputs within 400 ms before and after a cue, duplicate early input exclusion"},
+    {"command": "scripts/check-phase2-p210 phase2-p210-pass-label-20260812", "result": "pass", "tests": "16/16", "coverage": "successful analysis is explicitly labeled PASS — PROPOSAL READY"},
+    {"command": "scripts/check-game --mode test --run-id phase2-p210-outlier-fix-20260812", "result": "pass", "suites": ["unit 44/44", "P202 15/15", "P203 17/17", "P204 14/14", "P205 13/13", "P207 20/20", "P208 12/12", "P209 10/10", "P210 13/13", "integration 35/35", "replay 7/7"]},
+    {"command": "scripts/check-game --mode test --run-id phase2-p210-early-hit-regression-20260812", "result": "pass", "suites": ["unit 44/44", "P202 15/15", "P203 17/17", "P204 14/14", "P205 13/13", "P207 20/20", "P208 12/12", "P209 10/10", "P210 16/16", "integration 35/35", "replay 7/7"]},
+    {"command": "Godot capture_p210.gd 1280x720", "result": "pass", "screenshot": "calibration.png"},
+    {"command": "scripts/validate-fixtures", "result": "pass", "schema_cases": "12/12"},
+    {"command": "Godot --export-release macOS (PASS label)", "result": "pass", "build_sha256": "1da7e11d50b2a1e7a2b674c05e9efdad7598774b75535d6d4228197abfaa6df5", "build_bytes": 63064349},
+    {"command": "git diff --check", "result": "pass"}
+  ],
+  "real_device_evidence": "artifacts/raw/phase2-p210-real-device-20260812/run-manifest.json",
+  "pending": [],
+  "runbook": "docs/phase2-p210-runbook.md",
+  "result": "pass"
+}

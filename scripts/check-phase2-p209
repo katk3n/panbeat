@@ -1,0 +1,16 @@
+#!/bin/sh
+set -eu
+script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+repository_root=$(CDPATH= cd -- "$script_dir/.." && pwd)
+run_id=${1:-phase2-p209-device-setup-latest}
+case "$run_id" in ''|*[!A-Za-z0-9._-]*) printf '%s\n' 'check-phase2-p209: invalid run ID' >&2; exit 64 ;; esac
+raw_dir="$repository_root/artifacts/raw/$run_id"
+mkdir -p "$raw_dir"
+"$script_dir/godot" --headless --editor --path "$repository_root/game" --quit --log-file "$raw_dir/import.log"
+"$script_dir/godot" --headless --path "$repository_root/game" --script res://tests/run_p209_tests.gd --log-file "$raw_dir/p209.log"
+rg -q PANBEAT_P209_TESTS_OK "$raw_dir/p209.log"
+"$script_dir/godot" --headless --path "$repository_root/game" --log-file "$raw_dir/product-entry.log" -- --device-setup --device-setup-auto-quit
+rg -q PANBEAT_DEVICE_SETUP_READY "$raw_dir/product-entry.log"
+"$script_dir/godot" --path "$repository_root/game" --resolution 1280x720 --script res://tests/capture_p209.gd --log-file "$raw_dir/screenshot.log" -- --output "$raw_dir/device-setup.png"
+test -s "$raw_dir/device-setup.png"
+printf '%s\n' 'check-phase2-p209: passed'

@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://panbeat.local/schemas/panbeat-overlay.schema.json",
+  "title": "PanBeat MusicXML Overlay",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "overlay_id", "source_musicxml_sha256", "annotations"],
+  "properties": {
+    "schema_version": {"const": "1.0.0"},
+    "overlay_id": {"type": "string", "minLength": 1},
+    "source_musicxml_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "difficulty": {"type": "object"},
+    "annotations": {"type": "array", "items": {"type": "object", "additionalProperties": false, "required": ["selector", "technique", "target_id"], "properties": {
+      "selector": {"oneOf": [
+        {"type": "object", "additionalProperties": false, "required": ["note_id"], "properties": {"note_id": {"type": "string", "minLength": 1}}},
+        {"type": "object", "additionalProperties": false, "required": ["part", "measure", "tick", "voice"], "properties": {"part": {"type": "string", "minLength": 1}, "measure": {"type": "string", "minLength": 1}, "tick": {"type": "integer", "minimum": 0}, "voice": {"type": "string", "minLength": 1}}}
+      ]},
+      "technique": {"enum": ["tone", "ding", "slap"]},
+      "target_id": {"type": "string", "minLength": 1}
+    }}}
+  }
+}

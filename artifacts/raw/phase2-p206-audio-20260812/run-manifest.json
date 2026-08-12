@@ -1,0 +1,12 @@
+{
+  "schema_version":"1.0.0", "run_id":"phase2-p206-audio-20260812", "story":"P206", "executed_at":"2026-08-12",
+  "commands":[
+    {"command":"node --test scripts/audio-contract.test.mjs", "status":"pass", "tests":"6/6"},
+    {"command":"node scripts/prepare-phase2-audio.mjs phase2-p206-audio-20260812", "status":"pass"},
+    {"command":"Godot measure_p206_audio.gd, WAV/OGG x3", "status":"pass", "trials":"6/6"}
+  ],
+  "evidence":["artifacts/raw/phase2-p206-audio-20260812/conversion-manifest.json", "artifacts/raw/phase2-p206-audio-20260812/godot-lifecycle.json", "artifacts/raw/phase2-p206-audio-20260812/godot-audio.log"],
+  "decision":"48 kHz stereo Ogg Vorbis quality 5 is the canonical Phase 2 imported-song runtime format.",
+  "limitations":["Headless Dummy driver is not CoreAudio release timing evidence.", "Loop wrap was automated; audible seam was not externally measured.", "Phase 1 fixed-song mono WAV remains unchanged."],
+  "result":"pass"
+}

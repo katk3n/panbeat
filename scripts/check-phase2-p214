@@ -1,0 +1,14 @@
+#!/bin/sh
+set -eu
+script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+repository_root=$(CDPATH= cd -- "$script_dir/.." && pwd)
+run_id=${1:-phase2-p214-quality-latest}
+case "$run_id" in ''|*[!A-Za-z0-9._-]*) printf '%s\n' 'check-phase2-p214: invalid run ID' >&2; exit 64 ;; esac
+raw_dir="$repository_root/artifacts/raw/$run_id"
+mkdir -p "$raw_dir"
+"$script_dir/godot" --headless --editor --path "$repository_root/game" --quit --log-file "$raw_dir/import.log"
+"$script_dir/godot" --headless --path "$repository_root/game" --script res://tests/measure_p214_quality.gd --log-file "$raw_dir/quality.log" -- --output "$raw_dir/quality-summary.json"
+"$script_dir/godot" --headless --path "$repository_root/game" --script res://tests/measure_p214_import.gd --log-file "$raw_dir/import-measurement.log" -- --output "$raw_dir/import-summary.json"
+"$script_dir/godot" --headless --path "$repository_root/game" --script res://tests/measure_p214_library.gd --log-file "$raw_dir/library-measurement.log" -- --output "$raw_dir/library-summary.json"
+"$script_dir/check-phase2-p207" "$run_id-security"
+printf '%s\n' 'check-phase2-p214: automated quality/security passed'

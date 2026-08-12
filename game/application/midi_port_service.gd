@@ -12,6 +12,9 @@ func _init(backend: RefCounted, preferred_port: String = "") -> void:
 	_preferred_port = preferred_port
 
 func open() -> Dictionary:
+	if _is_open:
+		_backend.close_inputs()
+		_is_open = false
 	var backend_opened: bool = _backend.open_inputs()
 	_ports = _backend.connected_ports()
 	if _ports.is_empty():
@@ -40,6 +43,16 @@ func refresh() -> Dictionary:
 	opened["changed"] = true
 	return opened
 
+func reopen() -> Dictionary:
+	close()
+	var result := open()
+	result["reopened"] = true
+	return result
+
+func select_port(port: String) -> Dictionary:
+	_preferred_port = port
+	return reopen()
+
 func is_open() -> bool:
 	return _is_open
 
@@ -47,6 +60,6 @@ func ports() -> PackedStringArray:
 	return _ports.duplicate()
 
 func _record(code: String, ok: bool) -> Dictionary:
-	var record: Dictionary = {"timestamp_us": _backend.monotonic_us(), "code": code, "ok": ok, "ports": Array(_ports), "preferred_port": _preferred_port}
+	var record: Dictionary = {"timestamp_us": _backend.monotonic_us(), "code": code, "ok": ok, "ports": Array(_ports), "preferred_port": _preferred_port, "physical_disconnect_observable":false}
 	diagnostics.append(record)
 	return record

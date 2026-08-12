@@ -33,6 +33,8 @@
 
 **実施内容:** まずGodot `_input`から同frameで軽量queueへ渡し、60/120 Hzを比較する。必要ならMIDI到着monotonic timestampをsong timeへ変換して判定へ使い、表示feedbackの遅延と判定時刻を分離する。Godot標準APIで不足する場合のみCoreMIDI callbackと固定長queueのnative adapterを採用する。
 
+Phase 2 P216では、起動後にUSB接続したMN-10をGodot 4.6標準CoreMIDI backendが再検出せず、`Reopen MIDI`では`NO MIDI PORTS`のまま、USB接続後のアプリ再起動で復旧した。Phase 2ではdocumented relaunch routeを既知制約として受け入れた。FH03ではnative CoreMIDI adapterの採否を、hot-plug通知・再接続、drop/duplicate、CoreMIDI packet timestamp、Universal 2 build・署名・保守コストをGodot標準経路と比較して判断する。採用済みとは扱わない。
+
 **完了条件:** 定義済みの受付点から判定timestamp確定までのp95が5 ms以下で、drop/duplicateがなく、OS受信timestampの有無が明記される。Mood Pan実機でTone / Ding / SlapとCalibrationを再受け入れする。
 
 ## 5. FH04: Final Release Gate
@@ -44,7 +46,7 @@
 - FH01〜FH03のraw evidenceと再生成commandが揃う
 - 長時間driftとMIDI dispatch p95が目標を満たす
 - 外部profilerで定常allocationを確認する
-- 高速度撮影またはaudio loopbackでend-to-end latencyを計測する
+- 外部end-to-end latencyは2026-08-12の製品判断により計測しない。software timestampを物理end-to-end latencyとして代用せず、この非実施判断をrelease資料にも保持する
 - 自動test、決定的replay、build検査、Mood Pan実機受け入れを再実行する
 - R-P1-001とR-P1-003を、測定値を伴って`resolved`へ更新する
 - 未達項目が一つでもあればrelease candidateを合格扱いしない

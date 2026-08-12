@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://panbeat.local/schemas/song-package.schema.json",
+  "title": "PanBeat Imported Song Package",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "song_id", "import_version", "title", "artist", "duration_us", "chart_schema_version", "artwork_path", "status", "importer_version", "profile_id", "cache_key", "source", "overlay_sha256", "audio", "chart_path"],
+  "properties": {
+    "schema_version": {"const": "1.0.0"},
+    "song_id": {"type": "string", "pattern": "^[A-Za-z0-9._-]+$"},
+    "import_version": {"type": "integer", "minimum": 1},
+    "title": {"type": "string", "minLength": 1},
+    "artist": {"type": "string"},
+    "duration_us": {"type": "integer", "minimum": 0},
+    "chart_schema_version": {"const": "1.0.0"},
+    "artwork_path": {"type": "string"},
+    "status": {"const": "valid"},
+    "importer_version": {"const": "panbeat-musicxml-importer-v1"},
+    "profile_id": {"type": "string", "minLength": 1},
+    "cache_key": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["original_name", "archive_rootfile", "extension", "sha256", "bytes", "archive_entries"],
+      "properties": {
+        "original_name": {"type": "string", "minLength": 1},
+        "archive_rootfile": {"type": "string"},
+        "extension": {"enum": [".musicxml", ".xml", ".mxl"]},
+        "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "bytes": {"type": "integer", "minimum": 1, "maximum": 16777216},
+        "archive_entries": {"type": "array", "maxItems": 256}
+      }
+    },
+    "overlay_sha256": {"anyOf": [{"const": "none"}, {"type": "string", "pattern": "^[0-9a-f]{64}$"}]},
+    "audio": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source_sha256", "runtime_path"],
+      "properties": {
+        "source_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "runtime_path": {"const": "runtime.ogg"}
+      }
+    },
+    "chart_path": {"const": "chart.json"}
+  }
+}

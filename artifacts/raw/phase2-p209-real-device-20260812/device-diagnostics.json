@@ -1,0 +1,120 @@
+{
+  "godot_limitations": {
+    "os_receive_timestamp_available": false,
+    "physical_disconnect_observable": false
+  },
+  "lifecycle": [
+    {
+      "code": "opened",
+      "ok": true,
+      "physical_disconnect_observable": false,
+      "ports": [
+        "MN-10"
+      ],
+      "preferred_port": "",
+      "timestamp_us": 968711
+    }
+  ],
+  "monitor_records": [
+    {
+      "message": "Unmapped MIDI note 81 (control_change)",
+      "note": 81,
+      "status": "DIAGNOSTIC",
+      "target": "",
+      "technique": "",
+      "timestamp_us": 1430581,
+      "velocity": 0
+    },
+    {
+      "message": "Unmapped MIDI note 50 (aftertouch)",
+      "note": 50,
+      "status": "DIAGNOSTIC",
+      "target": "",
+      "technique": "",
+      "timestamp_us": 1430644,
+      "velocity": 0
+    },
+    {
+      "message": "Unmapped MIDI note 81 (control_change)",
+      "note": 81,
+      "status": "DIAGNOSTIC",
+      "target": "",
+      "technique": "",
+      "timestamp_us": 24989276,
+      "velocity": 0
+    },
+    {
+      "message": "Unmapped MIDI note 50 (aftertouch)",
+      "note": 50,
+      "status": "DIAGNOSTIC",
+      "target": "",
+      "technique": "",
+      "timestamp_us": 24989465,
+      "velocity": 0
+    },
+    {
+      "message": "DING → ding",
+      "note": 50,
+      "status": "MAPPED",
+      "target": "ding",
+      "technique": "DING",
+      "timestamp_us": 24989561,
+      "velocity": 127
+    },
+    {
+      "message": "Unmapped MIDI note 50 (note_off)",
+      "note": 50,
+      "status": "DIAGNOSTIC",
+      "target": "",
+      "technique": "",
+      "timestamp_us": 25047339,
+      "velocity": 127
+    },
+    {
+      "message": "SLAP → outer-hit-radius",
+      "note": 93,
+      "status": "MAPPED",
+      "target": "outer-hit-radius",
+      "technique": "SLAP",
+      "timestamp_us": 26672477,
+      "velocity": 80
+    },
+    {
+      "message": "Unmapped MIDI note 93 (note_off)",
+      "note": 93,
+      "status": "DIAGNOSTIC",
+      "target": "",
+      "technique": "",
+      "timestamp_us": 26672660,
+      "velocity": 127
+    },
+    {
+      "message": "SLAP → outer-hit-radius",
+      "note": 95,
+      "status": "MAPPED",
+      "target": "outer-hit-radius",
+      "technique": "SLAP",
+      "timestamp_us": 29380721,
+      "velocity": 127
+    },
+    {
+      "message": "Unmapped MIDI note 95 (note_off)",
+      "note": 95,
+      "status": "DIAGNOSTIC",
+      "target": "",
+      "technique": "",
+      "timestamp_us": 29386175,
+      "velocity": 127
+    }
+  ],
+  "ports": [
+    "MN-10"
+  ],
+  "profile_id": "roland-mn10-handpan-minor-v1",
+  "profile_settings": {
+    "style": "minor",
+    "tone": "handpan"
+  },
+  "schema_version": "1.0.0",
+  "story": "P209"
+}

@@ -46,6 +46,20 @@ func process_queued_events(processed_us: int, processed_frame: int) -> void:
 func queued_event_count() -> int:
 	return _raw_queue.size()
 
+func reopen() -> Dictionary:
+	var result: Dictionary = _port_service.reopen()
+	_record_lifecycle(result)
+	return result
+
+func select_port(port: String) -> Dictionary:
+	preferred_port = port
+	var result: Dictionary = _port_service.select_port(port)
+	_record_lifecycle(result)
+	return result
+
+func ports() -> PackedStringArray:
+	return _port_service.ports() if _port_service != null else PackedStringArray()
+
 func diagnostic_enqueue_raw(raw: Dictionary, enqueued_us: int, frame: int) -> bool:
 	if not diagnostic_mode:
 		return false

@@ -8,6 +8,11 @@ the Unity and Godot PoCs:
 - `raw-midi-trace.schema.json`: one record in a JSON Lines MIDI trace
 - `judgement-record.schema.json`: one expected or observed judgement
 - `run-manifest.schema.json`: reproducibility metadata and artifact links
+- `settings.schema.json`: device, profile, and offset settings
+- `song-index.schema.json`: locally imported song metadata
+- `result-history.schema.json`: bounded local gameplay result history
+- `panbeat-overlay.schema.json`: source-bound explicit gameplay annotations
+- `song-package.schema.json`: immutable imported source/chart/audio package metadata
 
 All instances require `schema_version` with the exact value `1.0.0`. A breaking
 change requires a new schema version and new fixtures; consumers must reject an

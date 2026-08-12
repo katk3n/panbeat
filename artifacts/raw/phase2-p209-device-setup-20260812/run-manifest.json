@@ -1,0 +1,17 @@
+{
+  "schema_version":"1.0.0", "run_id":"phase2-p209-device-setup-20260812", "story":"P209", "status":"prepared-awaiting-real-device",
+  "commands":[
+    {"command":"scripts/check-phase2-p209 automated lifecycle and monitor test", "status":"pass", "tests":"10/10"},
+    {"command":"Godot capture_p209.gd 1280x720", "status":"pass"},
+    {"command":"scripts/check-game --mode test --run-id phase2-p209-regression-20260812", "status":"pass"},
+    {"command":"scripts/check-game --mode build --run-id phase2-p209-device-setup-20260812", "status":"pass"},
+    {"command":"exported PanBeat --headless -- --device-setup --device-setup-auto-quit", "status":"pass", "exit_code":0, "marker":"PANBEAT_DEVICE_SETUP_READY"},
+    {"command":"git diff --check", "status":"pass"}
+  ],
+  "build":{"path":"artifacts/builds/phase2-p209-device-setup-20260812/PanBeat.zip", "sha256":"fa3119c022df16e270fd2fadcce3dd62f23325c8e865e599912a907ff4df136e", "bytes":63001116},
+  "corrections":[{"issue":"Device setup was added to the scene tree while the parent was setting up children.", "fix":"Defer opening the device setup view until the initial ready callback has returned.", "verification":"The replacement exported app reached PANBEAT_DEVICE_SETUP_READY and exited with code 0."}],
+  "screenshot":"artifacts/raw/phase2-p209-device-setup-20260812/device-setup.png",
+  "runbook":"docs/phase2-p209-runbook.md",
+  "pending":["Mood Pan connected at launch", "connected after launch", "Tone/Ding/Slap input monitor", "disconnect and reconnect", "reopen or relaunch recovery", "raw diagnostic save"],
+  "result":"incomplete-until-real-device-evidence"
+}

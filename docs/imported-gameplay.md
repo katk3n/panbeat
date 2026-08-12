@@ -1,0 +1,15 @@
+# Imported song Gameplay (P213)
+
+Song Library enables **Play Selected** only for a valid, profile-compatible imported package. The request passes the resolved package directory through the P212 Application flow and starts the existing Runtime Chart, radial scheduler, judgement pipeline, and audio-backed transport. External `runtime.ogg` is loaded from the atomic package; frame count is not used as musical time. Package and transport duration come from the converted audio, while chart duration remains the score range used to validate note positions. This keeps Gameplay visible until the audio actually ends when the score is shorter than its backing track.
+
+Completion is guarded by the existing one-shot summary flag, creates one P211 result with song/importer/chart/profile/judgement/score provenance, appends it atomically once, and opens Results. Duplicate `result_id` values are rejected. Pause/resume continues to use the same audio playback position and transport logic as the Phase 1 vertical slice.
+
+The repository-authored CC0 fixture `shared/fixtures/musicxml/p213-acceptance.musicxml` and its checksum-bound overlay cover Tone, Ding, Slap, a tie across adjacent notes, and a 120→90 BPM tempo change. Its audio input for automated import is the existing repository-owned Phase 1 practice WAV; the importer creates the runtime Ogg without modifying the source.
+
+Verification:
+
+```sh
+scripts/check-phase2-p213 phase2-p213-imported-gameplay-20260812
+scripts/check-game --mode test --run-id phase2-p213-regression-20260812
+scripts/check-game --mode build --run-id phase2-p213-imported-gameplay-20260812
+```

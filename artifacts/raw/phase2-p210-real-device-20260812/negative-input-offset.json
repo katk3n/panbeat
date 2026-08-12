@@ -1,0 +1,120 @@
+{
+  "analysis": {
+    "before": {
+      "audio_offset_us": 0,
+      "input_offset_us": 37000
+    },
+    "excluded": [],
+    "explanation": "Positive Input Offset moves input logically later; negative moves it earlier. Positive Audio Offset moves the judged note later.",
+    "mad_us": 38800,
+    "median_delta_us": -49777,
+    "ok": true,
+    "outlier_count": 0,
+    "proposed": {
+      "audio_offset_us": 0,
+      "input_offset_us": 49777
+    },
+    "range_us": 108505,
+    "valid_count": 9
+  },
+  "audio_output_id": "Default",
+  "profile_id": "roland-mn10-handpan-minor-v1",
+  "samples": [
+    {
+      "audio_output_id": "Default",
+      "delta_us": 746,
+      "included": true,
+      "input_timestamp_us": 6641425,
+      "profile_id": "roland-mn10-handpan-minor-v1",
+      "status": "hit",
+      "stimulus_timestamp_us": 6640679,
+      "technique": "ding"
+    },
+    {
+      "audio_output_id": "Default",
+      "delta_us": -103728,
+      "included": true,
+      "input_timestamp_us": 8040626,
+      "profile_id": "roland-mn10-handpan-minor-v1",
+      "status": "hit",
+      "stimulus_timestamp_us": 8144354,
+      "technique": "ding"
+    },
+    {
+      "audio_output_id": "Default",
+      "delta_us": -49777,
+      "included": true,
+      "input_timestamp_us": 9607443,
+      "profile_id": "roland-mn10-handpan-minor-v1",
+      "status": "hit",
+      "stimulus_timestamp_us": 9657220,
+      "technique": "ding"
+    },
+    {
+      "audio_output_id": "Default",
+      "delta_us": 4777,
+      "included": true,
+      "input_timestamp_us": 11170495,
+      "profile_id": "roland-mn10-handpan-minor-v1",
+      "status": "hit",
+      "stimulus_timestamp_us": 11165718,
+      "technique": "ding"
+    },
+    {
+      "audio_output_id": "Default",
+      "delta_us": -3314,
+      "included": true,
+      "input_timestamp_us": 12665686,
+      "profile_id": "roland-mn10-handpan-minor-v1",
+      "status": "hit",
+      "stimulus_timestamp_us": 12669000,
+      "technique": "ding"
+    },
+    {
+      "audio_output_id": "Default",
+      "delta_us": -88577,
+      "included": true,
+      "input_timestamp_us": 14093693,
+      "profile_id": "roland-mn10-handpan-minor-v1",
+      "status": "hit",
+      "stimulus_timestamp_us": 14182270,
+      "technique": "ding"
+    },
+    {
+      "audio_output_id": "Default",
+      "delta_us": -49689,
+      "included": true,
+      "input_timestamp_us": 15640688,
+      "profile_id": "roland-mn10-handpan-minor-v1",
+      "status": "hit",
+      "stimulus_timestamp_us": 15690377,
+      "technique": "ding"
+    },
+    {
+      "audio_output_id": "Default",
+      "delta_us": -49830,
+      "included": true,
+      "input_timestamp_us": 17144060,
+      "profile_id": "roland-mn10-handpan-minor-v1",
+      "status": "hit",
+      "stimulus_timestamp_us": 17193890,
+      "technique": "ding"
+    },
+    {
+      "audio_output_id": "Default",
+      "delta_us": -49793,
+      "included": true,
+      "input_timestamp_us": 18657563,
+      "profile_id": "roland-mn10-handpan-minor-v1",
+      "status": "hit",
+      "stimulus_timestamp_us": 18707356,
+      "technique": "ding"
+    }
+  ],
+  "schema_version": "1.0.0",
+  "selected_offsets": {
+    "audio_offset_us": 0,
+    "input_offset_us": 0
+  },
+  "story": "P210"
+}

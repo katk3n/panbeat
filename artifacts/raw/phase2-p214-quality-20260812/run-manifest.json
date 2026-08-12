@@ -1,0 +1,34 @@
+{
+  "schema_version": "1.0.0",
+  "run_id": "phase2-p214-quality-20260812",
+  "story": "P214",
+  "status": "complete-with-external-measurement-not-planned",
+  "environment": {"hardware": "Apple M4", "architecture": "arm64", "os": "macOS 26.5.2 (25F84)", "godot": "4.6.stable.official.89cea1439", "build_sha256": "0f8adf482c5fec6aa061396767fe1d3ba118a99f11af7da7299688edde0e151e", "display_refresh_rate_hz": 120, "gameplay_resolution": [1280, 720], "audio_driver": "CoreAudio", "gameplay_sample_rate_hz": 44100, "tools": ["Godot Performance monitors", "Time.get_ticks_usec", "release RuntimeMetricsRecorder", "FFmpeg converter", "P207 negative-test suite"]},
+  "fixtures": {"generated_musicxml": {"notes": 2000, "bytes": 212203, "duration_us": 1000000000, "trials": 2}, "audio": {"bytes": 3456044, "duration_seconds": 36}, "library_songs": 100, "scheduler_frames": 5000, "release_gameplay_frames": 541},
+  "measurements": {
+    "generated_compile_import_us": 120973,
+    "cold_package_import_us": 236749,
+    "duplicate_cache_lookup_us": 8696,
+    "package_bytes": 203273,
+    "compile_static_memory_delta_bytes": 18820036,
+    "release_memory_peak_bytes": 0,
+    "release_memory_limitation": "Performance.MEMORY_STATIC returned zero in the release export; external allocation profiling remains required by Final Phase.",
+    "library_100_query_us": 7463,
+    "gameplay_frame_p95_us": 16667,
+    "gameplay_frame_p99_us": 16667,
+    "gameplay_frame_max_us": 16667,
+    "scheduler_cost_p95_us": 3,
+    "scheduler_cost_p99_us": 4,
+    "pool_overflow": 0
+  },
+  "security_negative_tests": {"result": "pass", "evidence_run": "artifacts/raw/phase2-p214-quality-20260812-security/run-manifest.json", "cases": ["XXE/DTD", "Zip Slip", "archive path traversal", "zip bomb ratio", "expanded-size limit", "entry-count limit", "symlink/special entry", "giant MusicXML/source limits", "corrupt audio", "broken cache/package isolation"]},
+  "verification": [
+    {"command": "scripts/check-phase2-p214 phase2-p214-quality-20260812", "result": "pass"},
+    {"command": "release Gameplay replay with RuntimeMetricsRecorder", "result": "pass", "raw": "gameplay-gui-frames.jsonl"},
+    {"command": "scripts/check-game --mode test --run-id phase2-p214-regression-20260812", "result": "pass"},
+    {"command": "git diff --check", "result": "pass"}
+  ],
+  "external_latency": {"status": "not-planned-by-product-decision", "reason": "On 2026-08-12 the product owner confirmed that suitable equipment is unavailable and explicitly decided not to perform external latency measurement, rather than defer it.", "future_action": "none", "decision_record": "docs/phase2-p214-latency-runbook.md", "measurement_points_separated": true, "software_timestamp_not_claimed_as_end_to_end": true},
+  "release_gate_risks": {"R-P1-001": "deferred-release-gate-blocker unchanged", "R-P1-003": "deferred-release-gate-blocker unchanged"},
+  "result": "pass-with-documented-non-execution-decision"
+}

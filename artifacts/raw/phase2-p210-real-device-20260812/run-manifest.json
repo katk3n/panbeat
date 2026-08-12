@@ -1,0 +1,64 @@
+{
+  "schema_version": "1.0.0",
+  "run_id": "phase2-p210-real-device-20260812",
+  "story": "P210",
+  "status": "complete",
+  "environment": {
+    "device": "Mood Pan MN-10",
+    "profile_id": "roland-mn10-handpan-minor-v1",
+    "audio_output_id": "Default",
+    "platform": "macOS"
+  },
+  "sessions": [
+    {
+      "purpose": "proposal-and-persistence",
+      "evidence": "baseline-diagnostics.json",
+      "result": "pass",
+      "valid_samples": 7,
+      "excluded_outliers": 2,
+      "median_delta_us": -36665,
+      "proposed_input_offset_us": 36665,
+      "saved_input_offset_us": 37000,
+      "restart_restored_input_offset_us": 37000
+    },
+    {
+      "purpose": "positive-input-offset-sign",
+      "evidence": "positive-input-offset.json",
+      "result": "pass",
+      "valid_samples": 5,
+      "proposed_input_offset_us": 74857,
+      "selected_input_offset_us": 125000,
+      "selected_minus_proposed_us": 50143,
+      "applied": false
+    },
+    {
+      "purpose": "negative-input-offset-sign",
+      "evidence": "negative-input-offset.json",
+      "result": "pass",
+      "valid_samples": 9,
+      "proposed_input_offset_us": 49777,
+      "selected_input_offset_us": 0,
+      "selected_minus_proposed_us": -49777,
+      "applied": false
+    }
+  ],
+  "acceptance": {
+    "sign_convention_preserved_and_explained": "pass",
+    "samples_include_stimulus_input_delta_and_environment": "pass",
+    "invalid_and_outlier_samples_excluded": "pass",
+    "proposal_review_fine_tune_and_reset": "pass",
+    "profile_audio_keyed_restart_persistence": "pass",
+    "deterministic_and_real_device_positive_negative_confirmation": "pass"
+  },
+  "definition_of_done": {
+    "story_tests": "16/16 pass",
+    "full_regression": "pass",
+    "release_build": "pass",
+    "raw_evidence_preserved": true,
+    "unexecuted_checks": [],
+    "remaining_risks": [
+      "Calibration measures user response relative to the application cue; it is not an external end-to-end audio latency measurement."
+    ]
+  },
+  "result": "pass"
+}

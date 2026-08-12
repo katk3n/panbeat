@@ -1,0 +1,52 @@
+{
+  "schema_version": "1.0.0",
+  "run_id": "phase2-p216-real-device-20260812",
+  "story": "P216",
+  "status": "awaiting-user-action",
+  "environment": {
+    "os": "macOS 26.5.2 (25F84)",
+    "architecture": "arm64",
+    "godot": "4.6.stable.official.89cea1439"
+  },
+  "build": {
+    "path": "artifacts/raw/phase2-p215-audio-duration-fix-20260812/PanBeat.zip",
+    "sha256": "2ba8dd9fc809f635a82ba59e9862074650ec11e6fc40e432bbbc47c56b114d08",
+    "bytes": 63015124,
+    "supersedes": "artifacts/raw/phase2-p215-navigation-fix-20260812/PanBeat.zip",
+    "reason": "Includes the prior CoreMIDI and navigation fixes and keeps Gameplay active for the converted audio duration instead of ending at the shorter score duration."
+  },
+  "acceptance_assets": {
+    "musicxml": {"path": "shared/fixtures/musicxml/p213-acceptance.musicxml", "sha256": "584e75b7863e7e64a21adbf3819f1bea377d4823a8d5ae62e36aaaf5b67ce6b5"},
+    "overlay": {"path": "shared/fixtures/musicxml/p213-acceptance-overlay.json", "sha256": "f6e668446c41ca2ce52aaa2251a75ef467c48fe4f7631b3fb222f86b7292023b"},
+    "audio": {"path": "game/content/phase1-fixed-song-v1/orbit-practice.wav", "sha256": "0c5adbe1ec8887f51684b2af4f9f7acff48d2ee5f8ee5c25ec46b9a11e18818c"}
+  },
+  "expected_device": {
+    "mode": "Handpan / Minor",
+    "midi_port": "MN-10",
+    "profile_id": "roland-mn10-handpan-minor-v1"
+  },
+  "evidence_categories": {
+    "software_diagnostics": "awaiting-user-action",
+    "subjective_observations": "awaiting-user-report",
+    "external_latency_measurement": "not-planned-by-product-decision"
+  },
+  "external_latency_future_action": "none",
+  "runbook": "docs/phase2-p216-runbook.md",
+  "resolved_defects": [
+    {
+      "code": "gameplay-ended-at-score-duration",
+      "evidence": "artifacts/raw/phase2-p216-real-device-20260812/session-1-gameplay.json",
+      "observed_package_duration_us": 4666667,
+      "expected_audio_duration_us": 36000000,
+      "resolution": "Package and transport duration now use converted audio duration; cache contract changed so reimport publishes a corrected version."
+    }
+  ],
+  "fix_verification": {
+    "p209_midi_lifetime_tests": "12/12 pass",
+    "full_test_suite": "pass",
+    "release_build": "pass",
+    "p213_audio_duration_regression": "15/15 pass",
+    "p215_regression": "artifacts/raw/phase2-p215-audio-duration-fix-20260812/run-manifest.json",
+    "calibration_ui": "artifacts/raw/phase2-p216-real-device-20260812/calibration-midi-status.png"
+  }
+}

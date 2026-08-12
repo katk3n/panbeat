@@ -1,0 +1,41 @@
+{
+  "schema_version": "1.0.0",
+  "run_id": "phase2-p215-run-f-20260812",
+  "story": "P215",
+  "status": "complete",
+  "prepared": {
+    "chart_sha256": "b5c1204f6aae8de66a69d672af10c09ba746120e74639d5ddada6751ba55da87",
+    "package_relative_path": "songs/packages/p215-acceptance/v1-03a42880ca1f",
+    "replay_input_count": 4,
+    "schema_version": "1.0.0"
+  },
+  "verification": {
+    "tests": "pass",
+    "import": "pass",
+    "build": "pass",
+    "release_replay": "pass",
+    "screenshot": "pass",
+    "results_readback": "pass"
+  },
+  "artifacts": {
+    "build": "PanBeat.zip",
+    "build_sha256": "2513e973a0567ffda3197fc6c79058d835084e2c55ad91eb022c2e8f203893cc",
+    "chart_sha256": "b5c1204f6aae8de66a69d672af10c09ba746120e74639d5ddada6751ba55da87",
+    "replay_sha256": "d7231ca3bb3d7238173464f87a0464375de8f03f2eb63f2a39eb0664fbbc0150",
+    "screenshot": "acceptance.png",
+    "results_history": "repository/results/history.json"
+  },
+  "result": {
+    "score": 4000,
+    "accuracy": 1,
+    "max_combo": 4,
+    "breakdown": {
+      "extra_hit": 0,
+      "good": 0,
+      "great": 0,
+      "miss": 0,
+      "perfect": 4
+    },
+    "history_records": 1
+  }
+}

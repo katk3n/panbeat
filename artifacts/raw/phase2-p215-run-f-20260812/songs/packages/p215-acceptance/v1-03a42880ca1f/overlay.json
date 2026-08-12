@@ -1,0 +1,9 @@
+{
+  "schema_version": "1.0.0",
+  "overlay_id": "p213-acceptance-slap-v1",
+  "source_musicxml_sha256": "584e75b7863e7e64a21adbf3819f1bea377d4823a8d5ae62e36aaaf5b67ce6b5",
+  "difficulty": {"id": "normal", "label": "Normal"},
+  "annotations": [
+    {"selector": {"part": "P1", "measure": "1", "tick": 12, "voice": "1"}, "technique": "slap", "target_id": "outer-hit-radius"}
+  ]
+}

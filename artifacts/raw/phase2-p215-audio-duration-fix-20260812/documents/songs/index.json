@@ -1,0 +1,18 @@
+{
+  "schema_version": "1.0.0",
+  "songs": [
+    {
+      "song_id": "p215-acceptance",
+      "import_version": 1,
+      "status": "valid",
+      "title": "P215 Acceptance",
+      "artist": "PanBeat",
+      "duration_us": 36000000,
+      "chart_schema_version": "1.0.0",
+      "artwork_path": "",
+      "profile_id": "roland-mn10-handpan-minor-v1",
+      "cache_key": "5aa768987f6650b9edb2d178d8d52034fe98f789a1c0e2c5c5073d90dbc0feee",
+      "package_path": "packages/p215-acceptance/v1-5aa768987f66"
+    }
+  ]
+}

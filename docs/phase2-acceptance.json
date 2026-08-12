@@ -1,0 +1,189 @@
+{
+  "schema_version": "1.0.0",
+  "story": "P201",
+  "status": "complete",
+  "contract": {
+    "phase": "Phase 2 MVP",
+    "engine": "Godot",
+    "engine_version": "4.6.stable.official.89cea1439",
+    "language": "typed GDScript",
+    "target_os": "macOS",
+    "target_architecture": "universal release export",
+    "product_entry_point": "game/",
+    "musicxml_version": "4.0",
+    "musicxml_root": "score-partwise",
+    "importer_version": "panbeat-musicxml-importer-v1",
+    "canonical_profile_id": "roland-mn10-handpan-minor-v1",
+    "judgement_rule_id": "panbeat-phase1-standard-v1",
+    "score_rule_id": "panbeat-phase1-score-v1",
+    "offset_sign_convention": {
+      "formula": "delta = actualInputSongTime + inputOffsetSec - (noteTime + audioOffsetSec)",
+      "positive_input_offset": "moves the logical input later",
+      "positive_audio_offset": "moves the judged note later",
+      "source": "docs/architecture.md"
+    }
+  },
+  "scope": {
+    "phase2_completion": "A functional macOS MVP with automated and real-device evidence.",
+    "release_permission": "Not granted by Phase 2 completion; Final Release Hardening must pass.",
+    "included": [
+      "safe deterministic MusicXML 4.0 subset and PanBeat overlay import",
+      "local song repository and Song Library",
+      "Device Setup, Calibration, Gameplay, and Results product flow",
+      "versioned settings and result history persistence",
+      "recorded replay and Mood Pan real-device acceptance"
+    ],
+    "excluded": [
+      "chords, tuplets, grace notes, repeats, multiple parts, and multiple voices",
+      "practice mode, BPM change, seek, loop, metronome, and hand guidance",
+      "Pressure, dynamics, Mute, Ghost Note, Roll, Bluetooth MIDI, Web, and Windows",
+      "signing, notarization, store distribution, updater, and telemetry",
+      "Final Release Hardening performance fixes and release gate"
+    ]
+  },
+  "musicxml_cases": {
+    "accepted": [
+      {"id": "mx-valid-minimal", "feature": "single part, single voice, monophonic pitched notes"},
+      {"id": "mx-valid-rest-time", "feature": "rests and time signature"},
+      {"id": "mx-valid-divisions-change", "feature": "divisions changes at measure boundaries"},
+      {"id": "mx-valid-tempo-sound", "feature": "sound tempo and basic tempo changes"},
+      {"id": "mx-valid-tempo-metronome", "feature": "metronome tempo"},
+      {"id": "mx-valid-tie", "feature": "well-formed tie chains across measures"}
+    ],
+    "rejected": [
+      {"id": "mx-unsupported-chord", "feature": "chord"},
+      {"id": "mx-unsupported-tuplet", "feature": "tuplet"},
+      {"id": "mx-unsupported-grace", "feature": "grace note"},
+      {"id": "mx-unsupported-repeat", "feature": "repeat, volta, D.C., or D.S."},
+      {"id": "mx-unsupported-backup-forward", "feature": "backup or forward"},
+      {"id": "mx-unsupported-multipart", "feature": "multiple parts"},
+      {"id": "mx-unsupported-multivoice", "feature": "multiple voices"},
+      {"id": "mx-invalid-root-version", "feature": "unknown root or major version"},
+      {"id": "mx-invalid-malformed", "feature": "malformed XML"},
+      {"id": "mx-security-doctype", "feature": "DOCTYPE or external entity"},
+      {"id": "mx-security-depth", "feature": "excessive XML depth"},
+      {"id": "mx-security-elements", "feature": "excessive element count"}
+    ],
+    "fixture_root": "shared/fixtures/musicxml"
+  },
+  "input_contracts": {
+    "score": {
+      "extensions": [".musicxml", ".xml", ".mxl"],
+      "max_source_bytes": 16777216,
+      "max_xml_depth": 64,
+      "max_xml_elements": 250000
+    },
+    "mxl": {
+      "max_archive_bytes": 33554432,
+      "max_entries": 256,
+      "max_expanded_bytes": 67108864,
+      "max_compression_ratio": 100,
+      "forbidden": ["absolute paths", "parent traversal", "symlinks", "special files"]
+    },
+    "overlay": {
+      "extensions": [".json"],
+      "max_bytes": 1048576,
+      "required": ["schema_version", "source_musicxml_sha256", "annotations"]
+    },
+    "audio": {
+      "candidate_input_extensions": [".wav", ".ogg"],
+      "max_source_bytes": 536870912,
+      "max_duration_sec": 3600,
+      "canonical_runtime_format": "Ogg Vorbis, 48 kHz stereo, FFmpeg built-in Vorbis quality 5, bitexact muxing",
+      "requirements": ["48 kHz", "stereo", "deterministic conversion before publication", "maximum duration 3600 seconds"]
+    },
+    "artwork": {
+      "candidate_extensions": [".png", ".jpg", ".jpeg"],
+      "max_bytes": 8388608,
+      "max_pixels": 16777216,
+      "status": "candidate-until-import-implementation"
+    },
+    "package_policy": "All limits are conservative P201 candidates; P203, P206, and P207 may tighten them with evidence but may not silently broaden them."
+  },
+  "persistence": {
+    "root": "OS application data directory resolved at runtime",
+    "settings_owner": "P202/P210",
+    "song_metadata_owner": "P202/P207/P208",
+    "result_history_owner": "P202/P211",
+    "rules": ["versioned schemas", "atomic publication", "backup and recovery", "unknown major versions rejected"]
+  },
+  "product_flow": ["Boot", "Device Setup", "Song Library", "Calibration", "Gameplay", "Results"],
+  "phase1_baseline": {
+    "source_revision": "ed84274dbd32178b0263a9748981ca1ce6dfe416",
+    "run_id": "phase2-p201-baseline-20260812",
+    "tests": {"unit": "44/44", "integration": "35/35", "replay": "7/7", "status": "pass"},
+    "build": {
+      "status": "pass",
+      "path": "artifacts/builds/phase2-p201-baseline-20260812/PanBeat.zip",
+      "sha256": "66bc5d0fa75e3608cf885ff52ad39c5577bc0e3108ca35ebe6c56d5e070e4f4a",
+      "bytes": 62932972
+    },
+    "immutable_assets": [
+      {"path": "game/content/phase1-fixed-song-v1/package.json", "sha256": "6b9af4af0dfaef17128aa210402a28e47e4cb8838773da4cc9250d33f493f0db"},
+      {"path": "game/content/phase1-fixed-song-v1/chart.json", "sha256": "04e9b186a0214da5b484c0519648d68f24d23b1d9941469b7cb67515934efc9f"},
+      {"path": "game/content/phase1-fixed-song-v1/orbit-practice.wav", "sha256": "0c5adbe1ec8887f51684b2af4f9f7acff48d2ee5f8ee5c25ec46b9a11e18818c"},
+      {"path": "shared/fixtures/instrument-profiles/roland-mn10-handpan-minor-v1.json", "sha256": "abfe1eae01e2b2c1e24801a7946354f35924426adc33c903672dce4d036fb42d"},
+      {"path": "game/config/judgement-rules-v1.json", "sha256": "08b17ac576db76145cbe6c412cef801dc16a1ec56186f597395c5afba0f1f33f"},
+      {"path": "game/config/score-rules-v1.json", "sha256": "4f81663f029b5e1566f76044999d0288cd5071467f4a814f1e5633aaaacdf5b1"},
+      {"path": "game/config/gameplay-settings-v1.json", "sha256": "809ceaf9f9a05b0698f3263f3028333bd9ecf1d88bc82d5c93026de0fbb03143"}
+    ],
+    "evidence": "artifacts/raw/phase2-p201-baseline-20260812/run-manifest.json"
+  },
+  "handoff_tracking": [
+    {"item": "MusicXML and overlay import with explicit unsupported diagnostics", "stories": ["P203", "P204", "P205", "P207"]},
+    {"item": "Device Setup and reconnect guidance", "stories": ["P209", "P212"]},
+    {"item": "Input and Audio Offset calibration, persistence, and migration", "stories": ["P202", "P210"]},
+    {"item": "Song Library, Results, settings, and result history", "stories": ["P202", "P208", "P211", "P212"]},
+    {"item": "physical strike to audio and display end-to-end latency", "status": "not-planned-by-product-decision", "future_action": "none", "stories": ["P214", "P216"]},
+    {"item": "long-song WAV and OGG comparison", "stories": ["P206", "P214"]},
+    {"item": "unmeasured Tone/Style, BLE, Pressure, and Mute remain unsupported", "stories": ["P217"]},
+    {"item": "release-speed long-run drift", "stories": ["FH01", "FH02", "FH04"]},
+    {"item": "MIDI dispatch without artificial frame wait", "stories": ["FH01", "FH03", "FH04"]},
+    {"item": "native CoreMIDI hot-plug and packet timestamp adoption", "status": "evaluate-do-not-presume-adoption", "stories": ["FH03"]},
+    {"item": "external allocation profiling", "stories": ["P214", "FH04"]}
+  ],
+  "risks": [
+    {"id": "R-P1-001", "status": "deferred-release-gate-blocker", "target": "FH01/FH02/FH04"},
+    {"id": "R-P1-003", "status": "deferred-release-gate-blocker", "target": "FH01/FH03/FH04"},
+    {"id": "R-P2-001", "status": "release-hardening-required", "summary": "Release heap monitoring returned zero; external allocation profiling is required.", "target": "FH04"},
+    {"id": "L-P2-001", "status": "accepted-phase2-limitation", "summary": "Godot 4.6 did not discover hot-plugged MN-10 in-process; reconnect then relaunch recovered it.", "target": "FH03 native CoreMIDI adoption evaluation"},
+    {"id": "L-P2-002", "status": "not-planned-by-product-decision", "summary": "External physical end-to-end latency is not measured; software values are not substituted.", "future_action": "none"}
+  ],
+  "verification_commands": [
+    "node scripts/check-phase2-baseline.mjs",
+    "node --test scripts/check-phase2-baseline.test.mjs",
+    "scripts/check-game --mode test --run-id phase2-p201-baseline-20260812",
+    "scripts/check-game --mode build --run-id phase2-p201-baseline-20260812",
+    "scripts/check-phase2-p215 phase2-p215-audio-duration-fix-20260812",
+    "P217 documentation audit: JSON parse, evidence/link resolution, story/status consistency, git diff --check"
+  ],
+  "gates": {
+    "phase2": {"status": "complete", "meaning": "MVP feature-complete with automated and real-device evidence", "release_allowed": false, "completion_report": "docs/phase2-completion-report.md"},
+    "final_release_hardening": {"plan": "docs/final-phase-stories.md", "required_for_release": true}
+  },
+  "stories": {
+    "P201": "complete", "P202": "complete", "P203": "complete", "P204": "complete", "P205": "complete",
+    "P206": "complete", "P207": "complete", "P208": "complete", "P209": "complete", "P210": "complete",
+    "P211": "complete", "P212": "complete", "P213": "complete", "P214": "complete", "P215": "complete",
+    "P216": "complete", "P217": "complete"
+  },
+  "story_evidence": {
+    "P201": "artifacts/raw/phase2-p201-baseline-20260812/run-manifest.json",
+    "P202": "artifacts/raw/phase2-p202-persistence-20260812/run-manifest.json",
+    "P203": "artifacts/raw/phase2-p203-musicxml-20260812/run-manifest.json",
+    "P204": "artifacts/raw/phase2-p204-runtime-chart-20260812/run-manifest.json",
+    "P205": "artifacts/raw/phase2-p205-overlay-20260812/run-manifest.json",
+    "P206": "artifacts/raw/phase2-p206-audio-20260812/run-manifest.json",
+    "P207": "artifacts/raw/phase2-p207-import-20260812/run-manifest.json",
+    "P208": "artifacts/raw/phase2-p208-library-20260812/run-manifest.json",
+    "P209": "artifacts/raw/phase2-p209-real-device-20260812/run-manifest.json",
+    "P210": "artifacts/raw/phase2-p210-real-device-20260812/run-manifest.json",
+    "P211": "artifacts/raw/phase2-p211-results-20260812/run-manifest.json",
+    "P212": "artifacts/raw/phase2-p212-product-flow-20260812/run-manifest.json",
+    "P213": "artifacts/raw/phase2-p213-imported-gameplay-20260812/run-manifest.json",
+    "P214": "artifacts/raw/phase2-p214-quality-20260812/run-manifest.json",
+    "P215": "artifacts/raw/phase2-p215-audio-duration-fix-20260812/run-manifest.json",
+    "P216": "artifacts/raw/phase2-p216-real-device-20260812/run-manifest.json",
+    "P217": "artifacts/raw/phase2-p217-gate-20260812/run-manifest.json"
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "schema_version": "1.0.0",
+  "song_id": "fixture-song",
+  "import_version": 1,
+  "title": "Fixture Song",
+  "artist": "PanBeat",
+  "duration_us": 1000000,
+  "chart_schema_version": "1.0.0",
+  "artwork_path": "",
+  "status": "valid",
+  "importer_version": "panbeat-musicxml-importer-v1",
+  "profile_id": "roland-mn10-handpan-minor-v1",
+  "cache_key": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "source": {
+    "original_name": "fixture.musicxml",
+    "archive_rootfile": "",
+    "extension": ".musicxml",
+    "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "bytes": 1024,
+    "archive_entries": []
+  },
+  "overlay_sha256": "none",
+  "audio": {
+    "source_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+    "runtime_path": "runtime.ogg"
+  },
+  "chart_path": "chart.json"
+}

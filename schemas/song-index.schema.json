@@ -1,0 +1,9 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://panbeat.local/schemas/song-index.schema.json",
+  "title": "PanBeat Local Song Index",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "songs"],
+  "properties": {"schema_version": {"const": "1.0.0"}, "songs": {"type": "array", "items": {"type": "object", "additionalProperties": false, "required": ["song_id", "import_version", "status", "title", "artist", "duration_us", "chart_schema_version", "artwork_path", "profile_id", "cache_key", "package_path"], "properties": {"song_id": {"type": "string", "pattern": "^[A-Za-z0-9._-]+$"}, "import_version": {"type": "integer", "minimum": 1}, "status": {"enum": ["valid", "warning", "invalid"]}, "title": {"type": "string", "minLength": 1}, "artist": {"type": "string"}, "duration_us": {"type": "integer", "minimum": 0}, "chart_schema_version": {"type": "string", "minLength": 1}, "artwork_path": {"type": "string"}, "profile_id": {"type": "string", "minLength": 1}, "cache_key": {"type": "string", "pattern": "^[0-9a-f]{64}$"}, "package_path": {"type": "string", "pattern": "^packages/[A-Za-z0-9._-]+/v[1-9][0-9]*-[0-9a-f]{12}$"}}}}}
+}

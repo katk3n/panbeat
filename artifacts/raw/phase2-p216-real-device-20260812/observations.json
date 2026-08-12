@@ -1,0 +1,36 @@
+{
+  "schema_version": "1.0.0",
+  "story": "P216",
+  "status": "complete",
+  "session_1": {
+    "status": "pass-after-audio-duration-fix",
+    "diagnostics": "session-1-retry-gameplay.json",
+    "audio_duration_us": 36000000,
+    "input_offset_us": 37000,
+    "audio_offset_us": 0,
+    "result_saved": true
+  },
+  "session_2": {
+    "status": "pass",
+    "diagnostics": "session-2-gameplay.json",
+    "audio_duration_us": 36000000,
+    "saved_offsets_restored": true,
+    "pause_resume_observed": true,
+    "result_saved": true
+  },
+  "session_3": {
+    "status": "pass",
+    "device_diagnostics": "session-3-recovery-device.json",
+    "gameplay_diagnostics": "session-3-gameplay.json",
+    "audio_duration_us": 36000000,
+    "mapped_techniques": ["tone", "ding", "slap"],
+    "result_saved": true
+  },
+  "recovery_route": "USB reconnect followed by full PanBeat relaunch; Reopen MIDI remained at NO MIDI PORTS",
+  "subjective_findings": [
+    "The initial acceptance package ended Gameplay at the shorter score duration while audio continued; fixed and reaccepted with audio-backed 36-second transport duration.",
+    "Godot 4.6 CoreMIDI did not discover MN-10 after hot-plug in the same process; relaunch recovery succeeded."
+  ],
+  "native_coremidi_decision": "Keep the current Godot backend for Phase 2. Evaluate whether to implement a native CoreMIDI backend in Final Phase FH03.",
+  "external_latency_measurement": "not-performed-by-product-decision"
+}

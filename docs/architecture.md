@@ -41,7 +41,7 @@ PanBeat は一般的なデスクトップ業務アプリではなく、次の性
 | 描画 | Godot 2D + Compatibility Renderer |
 | ゲーム画面 | Sprite / procedural mesh / SDF shader。Control/Canvas UIは文字・メニュー中心 |
 | メニュー・設定 | Godot Control node |
-| 音声 | 48 kHz mono 16-bit PCM WAV + `IGameTransport`相当の境界 + Godot AudioServer/playback clock |
+| 音声 | Phase 1固定曲は48 kHz mono 16-bit PCM WAV。Phase 2 import曲は48 kHz stereo Ogg Vorbis + `IGameTransport`相当の境界 + Godot AudioServer/playback clock |
 | MIDI（デスクトップ） | Godot標準`InputEventMIDI`。OS timestamp/切断状態の非公開を診断へ明記 |
 | MIDI（Web） | Godot Web MIDI入力（MVP対象外） |
 | MusicXML | エンジンの安全なストリーミングXML APIでMVP範囲を明示実装 |
@@ -435,6 +435,10 @@ Phase 1のruntime音源は、48 kHz、mono、signed 16-bit PCMのRIFF/WAVEに固
 
 Phase 2のユーザーimportではMP3等を入力として許可してもよいが、runtime assetはWAVまたはseek/loop精度を別途検証したOGGへ変換する。長時間曲の容量、変換時間、loop継ぎ目を測るまでは、Phase 1のWAV決定を全MVP曲へ無条件に拡張しない。
 
+P206の6分素材比較により、Phase 2 import曲のcanonical runtime形式は48 kHz stereo Ogg Vorbis（FFmpeg 8.1 built-in Vorbis encoder、quality 5、bitexact metadata/mux設定）に決定した。同条件WAVは69,120,078 bytes、OGGは1,960,462 bytesで、OGGは3回のfull decodeが約198.5〜200.6 ms、Godot loadが約4.0〜4.9 msだった。WAVはfull decode約83.5〜84.8 ms、Godot load約184.1〜195.3 msだった。両形式とも3回のstart、pause/resume、180秒seek、loop、終了遷移を通過し、reported durationは360秒、seek観測誤差はDummy driver上で約2.67 msだった。これはheadless lifecycle baselineであり、CoreAudio出力同期や聴感上のloop seamを合格させる証拠ではない。Phase 1固定曲WAVは回帰fixtureとして変更しない。詳細は[`adr-002-runtime-audio.md`](./adr-002-runtime-audio.md)を参照する。
+
+import packageの`duration_us`とaudio-backed transportの終了時刻は、変換後audioをffprobeした実時間とする。譜面の`duration_us`はnote範囲の検証用に保持し、譜面がbacking audioより短くてもaudio再生中にGameplayを完了させない。逆に譜面がaudioより長いimportは診断付きで拒否する。
+
 ---
 
 ## 7. MIDI・Mood Pan統合
@@ -748,6 +752,8 @@ Score計算は表示と分離したpure functionにする。MVP案:
 
 最終的なlatencyはソフトウェアログだけでは測れない。画面/音声刺激とMood Pan入力を高速度カメラ、loopback audio、または外部計測器で測り、次を分離する。
 
+2026-08-12の製品判断により、この外部計測は現在および将来フェーズで実施しない。以下は測定値を主張する場合に必要となる技術的な分解の説明として保持するものであり、機材調達、計測session、Final Phase作業、release gateを予定するものではない。PanBeatはsoftware timestampからend-to-end latencyを推定値として確定しない。この判断はR-P1-001/R-P1-003を解決済みにはしない。
+
 1. 物理打撃→MIDI event
 2. MIDI event→アプリcallback
 3. callback→判定
@@ -787,6 +793,8 @@ Input OffsetとAudio Offsetは、この分解結果と利用者のキャリブ�
 
 ### Phase 2: MVP
 
+詳細な実行単位、依存関係、各storyの受け入れ条件は[`phase2-stories.md`](./phase2-stories.md)を参照する。
+
 - MusicXML importerとPanBeat overlay
 - 曲import、validation diagnostics
 - Device Setup、Calibration、Song Library、Results
@@ -815,7 +823,7 @@ Input OffsetとAudio Offsetは、この分解結果と利用者のキャリブ�
 - 人工的な1 frame待ちを含まないMIDI dispatchを60/120 Hzと実機またはvirtual CoreMIDIで測る
 - 必要に応じてsample-based transport、MIDI arrival timestampのsong-time変換、native CoreMIDI adapterを実装する
 - drift各run 5 ms以下、MIDI dispatch p95 5 ms以下をrelease gateとする
-- allocationと物理打撃から音・画面までのend-to-end latencyを外部手段で確認する
+- allocationを外部profilerで確認する。物理打撃から音・画面までの外部end-to-end latency計測は製品判断により実施せず、software timestampを代用しない
 - R-P1-001とR-P1-003が未解決なら正式releaseを許可しない
 
 ### 将来Phase: Windows移植
@@ -835,7 +843,7 @@ Input OffsetとAudio Offsetは、この分解結果と利用者のキャリブ�
 | Tone Fieldのnote mapping | Styleで変化し得る | 製品用途に合わせHandpan / Minorを基準に実機採取 | Phase 0 |
 | Ch.1/2重複 | 音色により両方出力 | traceからdedupe規則策定 | Phase 0 |
 | 判定窓 | 要プレイテスト | latency測定後に調整 | Vertical Slice後 |
-| 音源形式 | Phase 1は48 kHz mono 16-bit PCM WAVに決定。長時間importは未決定 | OGG/WAVの容量・変換・seek/loopを比較 | Phase 2 |
+| 音源形式 | Phase 1は48 kHz mono 16-bit PCM WAV。Phase 2 import曲は48 kHz stereo Ogg Vorbisに決定 | CoreAudio実速度と外部loop seamはFinal Phaseで再確認 | Final Phase |
 | ゲームエンジン | Godot 4.6を採用 | ADR-001 / E03 | 決定済み |
 | 実装言語 | typed GDScript | ADR-001 / E03 | 決定済み |
 | MIDI backend | Godot標準MIDI | E02で3/3 session復旧。OS timestamp/切断通知なしは残存risk | 決定済み |
@@ -916,3 +924,10 @@ Input OffsetとAudio Offsetは、この分解結果と利用者のキャリブ�
 - **Context:** Web MIDIはlimited availabilityで、secure context、許可、ブラウザ差がある。
 - **Decision:** デスクトップ品質を先に確立し、WebはChromium系限定PoCを経て判断する。
 - **Consequences:** 初期到達性より互換性と判定品質を優先する。Domainと入力境界はWeb派生を妨げない設計にする。
+
+### ADR-005: 曲importはstaging後にindexを最後に公開する
+
+- **Status:** Accepted（2026-08-12）
+- **Context:** MusicXML、MXL、overlay、audioのいずれかが不正でも既存Libraryを壊さず、process中断やdisk errorで半端な曲を表示してはならない。
+- **Decision:** sourceを変更せず検査し、隠しstaging directoryでRuntime Chartとcanonical Oggを生成・検証する。immutable package directoryへのrename後、atomic song indexを最後に保存する。cache keyはimporter/source/overlay/profile/explicit mapping/audioを含む。
+- **Consequences:** indexにないorphan packageはLibraryから不可視であり、index保存失敗時は直ちに削除する。active versionと同一contentはduplicate、同一song IDの変更はimport versionを増加する。詳細は`docs/song-import.md`を正とする。
