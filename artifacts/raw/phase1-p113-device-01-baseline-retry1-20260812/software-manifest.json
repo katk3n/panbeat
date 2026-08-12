@@ -1,0 +1,105 @@
+{
+  "schema_version": "1.0.0",
+  "story": "P113",
+  "run_id": "phase1-p113-device-01-baseline-retry1-20260812",
+  "scenario": "baseline",
+  "result": "software-evidence-pass-operator-observation-pending",
+  "source_build": {
+    "p112_run_id": "phase1-p112-acceptance-k-20260812",
+    "target": "macOS universal release",
+    "engine_version": "4.6.stable.official.89cea1439",
+    "build": {
+      "path": "artifacts/raw/phase1-p112-acceptance-k-20260812/PanBeat.zip",
+      "sha256": "45ad64f9c6662f3aa973fd7d3a4edae22af3f0126c2d49fedefead56cbee44e6",
+      "bytes": 62932973
+    }
+  },
+  "environment": {
+    "platform": "darwin",
+    "architecture": "arm64",
+    "os_release": "25.5.0"
+  },
+  "device": {
+    "manufacturer": "Roland",
+    "model": "Mood Pan MN-10",
+    "midi_ports": [
+      "MN-10"
+    ],
+    "profile_id": "roland-mn10-handpan-minor-v1",
+    "profile_sha256": "abfe1eae01e2b2c1e24801a7946354f35924426adc33c903672dce4d036fb42d"
+  },
+  "completion": {
+    "judgement_record_count": 50,
+    "summary": {
+      "accuracy": 0.24,
+      "breakdown": {
+        "extra_hit": 5,
+        "good": 2,
+        "great": 8,
+        "miss": 30,
+        "perfect": 5
+      },
+      "combo": 3,
+      "latest_direction": "late",
+      "latest_grade": "great",
+      "max_combo": 3,
+      "score": 12000
+    },
+    "normalized_physical_input_count": 20,
+    "normalized_techniques": [
+      "ding",
+      "slap",
+      "tone"
+    ],
+    "effective_input_offset_sec": 0,
+    "offset_formula_verified_for_all_judged_records": true,
+    "pause_observed": false,
+    "resume_observed": false,
+    "normalized_inputs_during_pause": 0,
+    "paused_inputs_rejected_from_judgement": false,
+    "disconnect_observed_by_api": false,
+    "reopen_after_disconnect_observed_by_api": false
+  },
+  "evidence_separation": {
+    "software_log": "artifacts/raw/phase1-p113-device-01-baseline-retry1-20260812/diagnostics.json",
+    "judgement_records": "artifacts/raw/phase1-p113-device-01-baseline-retry1-20260812/judgement-records.json",
+    "summary": "artifacts/raw/phase1-p113-device-01-baseline-retry1-20260812/summary.json",
+    "operator_observations": "artifacts/raw/phase1-p113-device-01-baseline-retry1-20260812/operator-observations.json"
+  },
+  "limitations": [
+    "Godot exposes no OS MIDI receive timestamp; physical strike-to-audio/display latency is not derived from software timestamps.",
+    "Only Handpan / Minor Tone, Ding, and Slap are in scope; BLE, Pressure, Mute, and other Tone/Style modes are unverified."
+  ],
+  "outputs": [
+    {
+      "path": "artifacts/raw/phase1-p112-acceptance-k-20260812/PanBeat.zip",
+      "sha256": "45ad64f9c6662f3aa973fd7d3a4edae22af3f0126c2d49fedefead56cbee44e6",
+      "bytes": 62932973
+    },
+    {
+      "path": "artifacts/raw/phase1-p112-acceptance-k-20260812/run-manifest.json",
+      "sha256": "63027828d5ac2f70ca9e19a3ff0590a23bf036062a8ea97a491d53059fde093b",
+      "bytes": 2065
+    },
+    {
+      "path": "shared/fixtures/instrument-profiles/roland-mn10-handpan-minor-v1.json",
+      "sha256": "abfe1eae01e2b2c1e24801a7946354f35924426adc33c903672dce4d036fb42d",
+      "bytes": 2793
+    },
+    {
+      "path": "artifacts/raw/phase1-p113-device-01-baseline-retry1-20260812/judgement-records.json",
+      "sha256": "375a994c4b5efa94cf111eb1877fceec6800ce5279539e5302b97cb4a24aa642",
+      "bytes": 29521
+    },
+    {
+      "path": "artifacts/raw/phase1-p113-device-01-baseline-retry1-20260812/summary.json",
+      "sha256": "c3688b95d05c750bd54d35ea9421f7b858a42667a5272ede26b94491d29ef3eb",
+      "bytes": 236
+    },
+    {
+      "path": "artifacts/raw/phase1-p113-device-01-baseline-retry1-20260812/diagnostics.json",
+      "sha256": "cbee018930fb4ab40aae2fcfdcfbffc0f38bd55463f3899f744eeb8be87d99cb",
+      "bytes": 122267
+    }
+  ]
+}

@@ -1,0 +1,248 @@
+{
+  "schema_version": "1.0.0",
+  "story": "P101",
+  "status": "complete",
+  "contract": {
+    "engine": "Godot",
+    "engine_version": "4.6.stable.official.89cea1439",
+    "language": "typed GDScript",
+    "target_os": "macOS",
+    "target_architecture": "arm64 development host; universal release export",
+    "renderer": "gl_compatibility",
+    "product_entry_point": "game/",
+    "canonical_profile": {
+      "profile_id": "roland-mn10-handpan-minor-v1",
+      "path": "shared/fixtures/instrument-profiles/roland-mn10-handpan-minor-v1.json"
+    },
+    "fixed_song_package": {
+      "package_id": "phase1-fixed-song-v1",
+      "planned_path": "game/content/phase1-fixed-song-v1/package.json",
+      "status": "complete"
+    },
+    "judgement_rule_candidate": {
+      "clock_domain": "song_time",
+      "time_unit": "microseconds",
+      "perfect_max_abs_delta_us": 30000,
+      "great_max_abs_delta_us": 60000,
+      "good_max_abs_delta_us": 100000,
+      "source": "shared/fixtures/test-pack/golden-results.json",
+      "status": "candidate-until-P108"
+    }
+  },
+  "scope": {
+    "included": [
+      "one fixed JSON chart and repository-licensed audio file",
+      "audio-backed gameplay transport",
+      "USB MIDI Tone, Ding, and Slap normalization",
+      "Perfect, Great, Good, and Miss judgement",
+      "score, combo, and manual Input/Audio Offset",
+      "radial three-technique presentation and minimal hit feedback",
+      "deterministic replay, risk measurements, and macOS development build"
+    ],
+    "deferred_to_phase2": [
+      "MusicXML and MXL import",
+      "user song import and Song Library",
+      "product Device Setup, Calibration, and Results screens",
+      "automatic offset calibration",
+      "multiple songs, difficulty selection, and metadata editing",
+      "persistent settings and result history",
+      "final error, accessibility, art, and sound design",
+      "practice, free play, BPM change, seek, loop, and metronome",
+      "Bluetooth MIDI, Web, Windows, signing, notarization, and store release",
+      "chords, tuplets, grace notes, repeats, and multiple parts"
+    ]
+  },
+  "phase0_inheritance": [
+    {
+      "id": "adr-001",
+      "kind": "accepted-architecture-decision",
+      "path": "docs/architecture.md"
+    },
+    {
+      "id": "chart-schema",
+      "kind": "schema",
+      "path": "schemas/panbeat-chart.schema.json",
+      "sha256": "e0db8e435c49fb0ffa7f06980cc67597a1ddbf65c686ac985abf2be1deb3436b"
+    },
+    {
+      "id": "phase0-chart",
+      "kind": "fixture",
+      "path": "shared/fixtures/test-pack/chart.json",
+      "sha256": "825e2256754862a0132ada43aacd21d72ba9bb722d4c3c3079e45a09c264ba07"
+    },
+    {
+      "id": "golden-inputs",
+      "kind": "recorded-replay",
+      "path": "shared/fixtures/test-pack/golden-inputs.json",
+      "sha256": "dab29c86b6af6c49f9bc385d5c7e65f23616ec8e88ac5d0fec795db023697a67"
+    },
+    {
+      "id": "golden-results",
+      "kind": "expected-results",
+      "path": "shared/fixtures/test-pack/golden-results.json",
+      "sha256": "66739a72f3cf3c8435e3fa285c052bc28491014632808dd13801c18ad28f6831"
+    },
+    {
+      "id": "canonical-instrument-profile",
+      "kind": "real-device-contract",
+      "path": "shared/fixtures/instrument-profiles/roland-mn10-handpan-minor-v1.json",
+      "sha256": "abfe1eae01e2b2c1e24801a7946354f35924426adc33c903672dce4d036fb42d"
+    },
+    {
+      "id": "godot-hard-gates",
+      "kind": "hard-gate-evidence",
+      "path": "artifacts/raw/godot-g06/hard-gate-summary.json",
+      "sha256": "8cfc85f6aff5069e65dc081dda011b889f10232498d4801de46df2ef0c9d5390"
+    },
+    {
+      "id": "engine-selection",
+      "kind": "selection-record",
+      "path": "artifacts/raw/e03-engine-selection/score-result.json",
+      "sha256": "e8f192d50f91460dd0ceb554afa64aabe6b1b114b917f2351dc539a3eafbf04f"
+    },
+    {
+      "id": "real-device-trace",
+      "kind": "raw-midi-trace",
+      "path": "artifacts/raw/m02-mood-pan-20260810/handpan-minor-slap-left3-then-right3.jsonl",
+      "sha256": "d12ed3f77808be6b76645f454a5b21ec83469056874bc916087203fc6ae2d4c9"
+    }
+  ],
+  "verification_commands": [
+    "node scripts/check-phase1-baseline.mjs",
+    "node --test scripts/check-phase1-baseline.test.mjs",
+    "scripts/check-game --mode test",
+    "scripts/check-game --mode build"
+  ],
+  "baseline": {
+    "run_id": "phase1-p101-baseline-20260810T124443Z",
+    "source_revision": "25ebaf4178b794de9b8fb356a1d8f4c3fa56ae3a",
+    "working_tree": "dirty-existing-user-doc-changes",
+    "test": "pass",
+    "build": "pass",
+    "evidence": "artifacts/raw/phase1-p101-baseline-20260810T124443Z/run-manifest.json"
+  },
+  "story_evidence": {
+    "P101": "artifacts/raw/phase1-p101-baseline-20260810T124443Z/run-manifest.json",
+    "P102": "artifacts/raw/phase1-p102-harness-20260810T125200Z/run-manifest.json",
+    "P103": "artifacts/raw/phase1-p103-song-20260810T130100Z/run-manifest.json"
+    ,"P104": "artifacts/raw/phase1-p104-runtime-chart-20260810T131300Z/run-manifest.json",
+    "P105": "artifacts/raw/phase1-p105-audio-transport-20260810T134000Z/run-manifest.json"
+    ,"P106": "artifacts/raw/phase1-p106-midi-20260810T140000Z/run-manifest.json",
+    "P107": "artifacts/raw/phase1-p107-gameplay-20260810T143000Z/run-manifest.json",
+    "P108": "artifacts/raw/phase1-p108-judgement-20260810T150000Z/run-manifest.json",
+    "P109": "artifacts/raw/phase1-p109-score-offset-20260810T153000Z/run-manifest.json",
+    "P110": "artifacts/raw/phase1-p110-vertical-slice-20260810T160000Z/run-manifest.json",
+    "P111": "artifacts/raw/phase1-p111-performance/run-manifest.json",
+    "P112": "artifacts/raw/phase1-p112-acceptance/run-manifest.json",
+    "P113": "artifacts/raw/phase1-p113-device-acceptance-20260812/run-manifest.json",
+    "P114": "artifacts/raw/phase1-p114-gate-reclassification-20260812/run-manifest.json"
+  },
+  "correction_evidence": [
+    {
+      "owner_story": "P106",
+      "discovered_by": "P113",
+      "failed_run": "artifacts/raw/phase1-p113-device-01-baseline-20260812/diagnostics.json",
+      "correction": "Open the Godot MIDI backend before cold-start port enumeration.",
+      "regression_test": "MIDI backend opens before cold-start enumeration",
+      "accepted_build_runs": [
+        "artifacts/raw/phase1-p112-acceptance-j-20260812/run-manifest.json",
+        "artifacts/raw/phase1-p112-acceptance-k-20260812/run-manifest.json"
+      ]
+    }
+  ],
+  "contract_amendments": [
+    {
+      "story": "P107",
+      "date": "2026-08-10",
+      "change": "Number the eight acoustic outer tone fields tone-1 through tone-8 and place them in the D Kurd zigzag with upper-left 8 and upper-right 7.",
+      "reason": "The original target IDs mirrored the electronic MN-10 pad numbering. The product presentation must mirror an acoustic handpan instead.",
+      "source": "https://handpanguru.com/handpan-scales/d-kurd",
+      "confirmed_by_owner": true
+    },
+    {
+      "story": "P114",
+      "date": "2026-08-12",
+      "change": "Reclassify R-P1-001 and R-P1-003 from Phase 1 blockers to deferred release-gate blockers and schedule them in the mandatory Final Release Hardening Phase.",
+      "reason": "The fixed-song slice and three real-device sessions passed without an observed gameplay problem. The measured values remain above target, but the Phase 1 methods include 0.1x audio stretching and an artificial frame wait and should not stop unrelated feature development.",
+      "supersedes": "artifacts/raw/phase1-p114-gate-20260812/run-manifest.json",
+      "confirmed_by_owner": true
+    }
+  ],
+  "risks": [
+    {
+      "id": "R-P1-001",
+      "status": "deferred-release-gate-blocker",
+      "owner_story": "P111",
+      "target_phase": "Final Release Hardening",
+      "summary": "CoreAudio release-equivalent 5:59 x3 final absolute drift was 6,078 / 2,387 / 4,186 us; max and p95 6,078 us exceed the 5,000 us target."
+    },
+    {
+      "id": "R-P1-002",
+      "status": "measured-pass-with-allocation-risk",
+      "owner_story": "P111",
+      "summary": "At configured 60 fps, frame-time p95/p99 were 16,667 us with 35 over-budget samples and 121,646 us max including injected stalls; note pool max was 8/64 with zero overflow. Release heap monitor returned zero and remains a Phase 2 instrumentation risk."
+    },
+    {
+      "id": "R-P1-003",
+      "status": "deferred-release-gate-blocker",
+      "owner_story": "P111",
+      "target_phase": "Final Release Hardening",
+      "summary": "Recorded burst acceptance-to-Gameplay processing p50/p95/p99 was 6,516 / 8,295 / 9,764 us; p95 exceeds the 5,000 us target. Godot exposes no OS receive timestamp, so this excludes device-to-engine latency."
+    },
+    {
+      "id": "R-P1-004",
+      "status": "known-warning",
+      "owner_story": "P102",
+      "summary": "The baseline exporter reports a sandbox Trash permission warning when replacing an existing ZIP, although export exits successfully."
+    },
+    {
+      "id": "R-P1-005",
+      "status": "phase2-risk",
+      "owner_story": "P111",
+      "summary": "Performance.MEMORY_STATIC returned zero in the release export, so heap allocation totals were unavailable. Product per-frame collections are preallocated and the note pool had zero overflow, but an external allocation profiler remains required."
+    },
+    {
+      "id": "R-P1-006",
+      "status": "resolved-in-phase1",
+      "owner_story": "P106",
+      "summary": "The first P113 clean launch failed because product code enumerated MIDI ports before opening CoreMIDI. Open-before-enumerate and a cold-start regression test were added; replacement P112 runs j/k and all three accepted P113 sessions passed."
+    },
+    {
+      "id": "R-P1-007",
+      "status": "phase2-risk",
+      "owner_story": "P113",
+      "summary": "The physical USB disconnect/reconnect recovered without relaunch, but Godot exposed no port-list disconnect event. Device Setup must provide explicit reopen/relaunch guidance and must not infer disconnect from silence alone."
+    }
+  ],
+  "phase1_gate": {
+    "decision": "complete-with-deferred-release-gate-items",
+    "decided_at": "2026-08-12",
+    "vertical_slice_functional_acceptance": "pass",
+    "mvp_complete": false,
+    "phase1_blocking_risks": [],
+    "deferred_release_gate_risks": [
+      "R-P1-001",
+      "R-P1-003"
+    ],
+    "final_phase_plan": "docs/final-phase-stories.md",
+    "completion_report": "docs/phase1-completion-report.md",
+    "supersedes": "artifacts/raw/phase1-p114-gate-20260812/run-manifest.json",
+    "reason": "The fixed-song product slice and three real-device sessions passed. Long-run drift and recorded-burst MIDI dispatch remain mandatory release-gate work but do not block unrelated feature development."
+  },
+  "stories": {
+    "P101": "complete",
+    "P102": "complete",
+    "P103": "complete",
+    "P104": "complete",
+    "P105": "complete",
+    "P106": "complete",
+    "P107": "complete",
+    "P108": "complete",
+    "P109": "complete",
+    "P110": "complete",
+    "P111": "complete",
+    "P112": "complete",
+    "P113": "complete",
+    "P114": "complete"
+  }
+}

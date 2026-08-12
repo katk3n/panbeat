@@ -28,6 +28,30 @@
       }
     },
     "unknown_policy": { "const": "diagnostic" },
+    "layout": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["angle_convention", "up_reference", "tones", "provenance"],
+      "properties": {
+        "angle_convention": { "const": "degrees_clockwise_from_up" },
+        "up_reference": { "const": "away_from_player_and_controls" },
+        "tones": {
+          "type": "array",
+          "minItems": 8,
+          "maxItems": 8,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["target_id", "angle_degrees"],
+            "properties": {
+              "target_id": { "type": "string", "pattern": "^tone-[1-8]$" },
+              "angle_degrees": { "type": "number", "minimum": 0, "exclusiveMaximum": 360 }
+            }
+          }
+        },
+        "provenance": { "type": "string", "minLength": 1 }
+      }
+    },
     "deduplication": {
       "type": "object",
       "additionalProperties": false,

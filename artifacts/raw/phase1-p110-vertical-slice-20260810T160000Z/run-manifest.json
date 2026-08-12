@@ -1,0 +1,24 @@
+{
+  "schema_version":"1.0.0",
+  "run_id":"phase1-p110-vertical-slice-20260810T160000Z",
+  "story":"P110",
+  "engine":"Godot 4.6.stable.official.89cea1439",
+  "commands":[
+    {"command":"scripts/godot --headless --path game -- --input-mode replay --replay-speed=4 --quit-on-complete","result":"pass","evidence":"artifacts/raw/phase1-p110-vertical-slice-20260810T160000Z/e2e-4x.log","evidence_sha256":"5e317b551f43632a16ce4ef3f007b214a54f2adf25290abe442a1887bd2318db","marker":"PANBEAT_VERTICAL_SLICE_COMPLETE"},
+    {"command":"node scripts/generate-phase1-song.mjs verify && node scripts/validate-fixtures.mjs --cases shared/fixtures/phase1-schema-cases.json && node scripts/check-phase1-baseline.mjs && node --test scripts/*.test.mjs","result":"pass","node_tests":"21/21"},
+    {"command":"scripts/check-game --mode all --run-id phase1-p110-final-20260810","result":"pass","unit":"43/43","integration":"35/35","replay":"7/7","release_build_sha256":"47628fbb7598eff3409ffcc02ac979664be833795fdbf6d7963cc8aa03407ddd"},
+    {"command":"git diff --check","result":"pass"}
+  ],
+  "golden_summary":{"path":"game/content/phase1-fixed-song-v1/expected-summary.json","sha256":"9309c6e6eecee462026847cf09385f699581b9d8001de226793328fedb121ada","score":45000,"accuracy":1.0,"max_combo":45,"perfect":45,"great":0,"good":0,"miss":0,"extra_hit":0},
+  "verified_contracts":[
+    "main scene reaches ready, one-second count-in, playing, and completed through audio-backed transport",
+    "startup selects exactly one of physical MIDI or deterministic replay",
+    "profile, chart, rules, settings, replay data, and audio load before scheduling playback",
+    "Tone, Ding, Slap, feedback, judgement, score, and combo share one session",
+    "pause gates input and resume preserves transport, scheduler index, and score records",
+    "completion HUD exposes score, accuracy, max combo, and judgement breakdown",
+    "load, chart, audio, MIDI, and transport failures enter failed state with diagnostics",
+    "P103 deterministic replay final summary equals the package golden summary"
+  ],
+  "notes":["The 4x replay speed is an acceptance-only CLI option; normal MIDI and replay gameplay default to 1x."]
+}

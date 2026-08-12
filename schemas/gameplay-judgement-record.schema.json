@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://panbeat.local/schemas/gameplay-judgement-record.schema.json",
+  "title": "PanBeat Gameplay Judgement Record",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "rule_id", "record_id", "note_id", "input_event_id", "expected_timestamp_us", "actual_timestamp_us", "delta_us", "clock_domain", "expected_technique", "actual_technique", "expected_target_id", "actual_target_id", "grade", "outcome"],
+  "properties": {
+    "schema_version": { "const": "1.0.0" },
+    "rule_id": { "type": "string", "minLength": 1 },
+    "record_id": { "type": "string", "minLength": 1 },
+    "note_id": { "type": ["string", "null"] },
+    "input_event_id": { "type": ["string", "null"] },
+    "expected_timestamp_us": { "type": ["integer", "null"] },
+    "actual_timestamp_us": { "type": ["integer", "null"] },
+    "delta_us": { "type": ["integer", "null"] },
+    "clock_domain": { "const": "song_time" },
+    "expected_technique": { "type": ["string", "null"] },
+    "actual_technique": { "type": ["string", "null"] },
+    "expected_target_id": { "type": ["string", "null"] },
+    "actual_target_id": { "type": ["string", "null"] },
+    "input_offset_us": { "type": "integer" },
+    "audio_offset_us": { "type": "integer" },
+    "grade": { "enum": ["perfect", "great", "good", "miss", "extra_hit"] },
+    "outcome": { "enum": ["judged", "miss", "extra"] },
+    "reason": { "enum": ["wrong_target", "wrong_technique", "no_candidate"] }
+  },
+  "allOf": [
+    { "if": { "properties": { "outcome": { "const": "extra" } } }, "then": { "properties": { "reason": {} }, "required": ["reason"] } }
+  ]
+}

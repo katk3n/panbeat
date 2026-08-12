@@ -1,0 +1,52 @@
+{
+  "schema_version": "1.0.0",
+  "run_id": "phase1-p101-baseline-20260810T124443Z",
+  "story": "P101",
+  "started_at": "2026-08-10T12:44:43Z",
+  "source_revision": "25ebaf4178b794de9b8fb356a1d8f4c3fa56ae3a",
+  "working_tree": "dirty-existing-user-doc-changes",
+  "environment": {
+    "engine": "Godot",
+    "engine_version": "4.6.stable.official.89cea1439",
+    "os": "macOS 26.5.2",
+    "os_build": "25F84",
+    "architecture": "arm64",
+    "renderer": "gl_compatibility",
+    "audio_settings": "baseline command; no physical output measurement",
+    "hardware": "development host; no Mood Pan required"
+  },
+  "commands": [
+    {
+      "command": "scripts/check-game --mode test",
+      "exit_code": 0,
+      "result": "pass",
+      "success_marker": "PANBEAT_GAME_TESTS_OK 6/6",
+      "output": {
+        "path": "artifacts/raw/phase1-p101-baseline-20260810T124443Z/test.log",
+        "sha256": "88574fb7173f52a6c1b75f6e6b891c9066ee84007872e3813105c43350d7a43a"
+      }
+    },
+    {
+      "command": "scripts/check-game --mode build",
+      "exit_code": 0,
+      "result": "pass",
+      "output": {
+        "path": "artifacts/raw/phase1-p101-baseline-20260810T124443Z/build.log",
+        "sha256": "ffd7391515bc8e9165db0474620d3ea0914f7eeccf0011b3261a85ff20a86cd8"
+      },
+      "build": {
+        "path": "artifacts/builds/game/PanBeat.zip",
+        "sha256": "530cb3f2b88392c45ccd5109d698f9d936c2083c527b8ce4fa52326f1ab6ff89",
+        "tracked": false
+      }
+    }
+  ],
+  "known_warnings": [
+    "get_system_ca_certificates returned noErr failure in the restricted macOS environment",
+    "the exporter could not move the previous PanBeat.zip to Trash before replacing it"
+  ],
+  "measurement_limitations": [
+    "This baseline is not a real-device session.",
+    "This baseline does not measure physical audio output, drift, frame time, or MIDI dispatch jitter."
+  ]
+}

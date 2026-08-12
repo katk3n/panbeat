@@ -1,0 +1,11 @@
+{
+  "schema_version": "1.0.0",
+  "settings_id": "panbeat-phase1-local-v1",
+  "input_offset_sec": 0.0,
+  "audio_offset_sec": 0.0,
+  "semantics": {
+    "positive_input_offset": "moves the logical input later",
+    "positive_audio_offset": "moves the judged note later",
+    "application": "judgement delta only; exactly once; never visual or audio playback"
+  }
+}

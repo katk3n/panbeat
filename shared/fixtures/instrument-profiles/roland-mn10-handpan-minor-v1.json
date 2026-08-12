@@ -10,6 +10,21 @@
     "style": "minor"
   },
   "unknown_policy": "diagnostic",
+  "layout": {
+    "angle_convention": "degrees_clockwise_from_up",
+    "up_reference": "away_from_player_and_controls",
+    "tones": [
+      { "target_id": "tone-7", "angle_degrees": 22.5 },
+      { "target_id": "tone-5", "angle_degrees": 67.5 },
+      { "target_id": "tone-3", "angle_degrees": 112.5 },
+      { "target_id": "tone-1", "angle_degrees": 157.5 },
+      { "target_id": "tone-2", "angle_degrees": 202.5 },
+      { "target_id": "tone-4", "angle_degrees": 247.5 },
+      { "target_id": "tone-6", "angle_degrees": 292.5 },
+      { "target_id": "tone-8", "angle_degrees": 337.5 }
+    ],
+    "provenance": "Acoustic D Kurd reference (https://handpanguru.com/handpan-scales/d-kurd): eight outer tone fields ascend in the handpan-standard left/right zigzag. PanBeat numbers those outer fields 1 through 8. The PanBeat owner confirmed on 2026-08-10 that screen-up is the side away from the player and controls, with upper-left 8 and upper-right 7."
+  },
   "deduplication": {
     "mode": "none",
     "window_us": 0,
@@ -18,14 +33,14 @@
   },
   "mappings": [
     { "channel_wire": 0, "note": 50, "velocity_min": 1, "velocity_max": 127, "technique": "ding", "target_id": "ding" },
-    { "channel_wire": 0, "note": 57, "velocity_min": 1, "velocity_max": 127, "technique": "tone", "target_id": "tone-2" },
-    { "channel_wire": 0, "note": 58, "velocity_min": 1, "velocity_max": 127, "technique": "tone", "target_id": "tone-3" },
-    { "channel_wire": 0, "note": 60, "velocity_min": 1, "velocity_max": 127, "technique": "tone", "target_id": "tone-4" },
-    { "channel_wire": 0, "note": 62, "velocity_min": 1, "velocity_max": 127, "technique": "tone", "target_id": "tone-5" },
-    { "channel_wire": 0, "note": 64, "velocity_min": 1, "velocity_max": 127, "technique": "tone", "target_id": "tone-6" },
-    { "channel_wire": 0, "note": 65, "velocity_min": 1, "velocity_max": 127, "technique": "tone", "target_id": "tone-7" },
-    { "channel_wire": 0, "note": 67, "velocity_min": 1, "velocity_max": 127, "technique": "tone", "target_id": "tone-8" },
-    { "channel_wire": 0, "note": 69, "velocity_min": 1, "velocity_max": 127, "technique": "tone", "target_id": "tone-9" },
+    { "channel_wire": 0, "note": 57, "velocity_min": 1, "velocity_max": 127, "technique": "tone", "target_id": "tone-1" },
+    { "channel_wire": 0, "note": 58, "velocity_min": 1, "velocity_max": 127, "technique": "tone", "target_id": "tone-2" },
+    { "channel_wire": 0, "note": 60, "velocity_min": 1, "velocity_max": 127, "technique": "tone", "target_id": "tone-3" },
+    { "channel_wire": 0, "note": 62, "velocity_min": 1, "velocity_max": 127, "technique": "tone", "target_id": "tone-4" },
+    { "channel_wire": 0, "note": 64, "velocity_min": 1, "velocity_max": 127, "technique": "tone", "target_id": "tone-5" },
+    { "channel_wire": 0, "note": 65, "velocity_min": 1, "velocity_max": 127, "technique": "tone", "target_id": "tone-6" },
+    { "channel_wire": 0, "note": 67, "velocity_min": 1, "velocity_max": 127, "technique": "tone", "target_id": "tone-7" },
+    { "channel_wire": 0, "note": 69, "velocity_min": 1, "velocity_max": 127, "technique": "tone", "target_id": "tone-8" },
     { "channel_wire": 0, "note": 93, "velocity_min": 1, "velocity_max": 127, "technique": "slap", "target_id": "outer-hit-radius" },
     { "channel_wire": 0, "note": 95, "velocity_min": 1, "velocity_max": 127, "technique": "slap", "target_id": "outer-hit-radius" }
   ]

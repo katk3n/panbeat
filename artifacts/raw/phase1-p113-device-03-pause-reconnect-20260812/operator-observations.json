@@ -1,0 +1,27 @@
+{
+  "schema_version": "1.0.0",
+  "session_id": "phase1-p113-device-03-pause-reconnect-20260812",
+  "status": "complete",
+  "device_setting": "Handpan / Minor",
+  "clean_launch_usb_recognized": true,
+  "technique_and_target_display": {
+    "tone": true,
+    "ding": true,
+    "slap": true
+  },
+  "audio_and_visual_played_normally": true,
+  "completion_summary_observed": true,
+  "pause_resume": {
+    "performed": true,
+    "no_double_audio_or_notes": true,
+    "no_input_accepted_while_paused": true
+  },
+  "disconnect_reconnect": {
+    "performed": true,
+    "automatic_recovery_observed": true,
+    "relaunch_required": false,
+    "result": "Physical USB reconnect recovered without a relaunch. Godot did not expose a port-list disconnect event."
+  },
+  "subjective_end_to_end_latency": "No particular problem observed; no numeric end-to-end latency is claimed.",
+  "other_subjective_notes": "User reported no problems after completing all three sessions."
+}

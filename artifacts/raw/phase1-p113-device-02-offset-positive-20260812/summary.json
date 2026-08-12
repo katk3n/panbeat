@@ -1,0 +1,15 @@
+{
+  "accuracy": 0.207627118644068,
+  "breakdown": {
+    "extra_hit": 14,
+    "good": 1,
+    "great": 9,
+    "miss": 30,
+    "perfect": 5
+  },
+  "combo": 3,
+  "latest_direction": "late",
+  "latest_grade": "great",
+  "max_combo": 4,
+  "score": 12250
+}

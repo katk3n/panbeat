@@ -1,0 +1,37 @@
+{
+  "schema_version": "1.0.0",
+  "run_id": "phase1-p111-performance",
+  "engine": "godot",
+  "started_at": "2026-08-10T14:09:37.286Z",
+  "source_revision": "working-tree",
+  "build_type": "release",
+  "clock_domains": [
+    "song_time",
+    "monotonic",
+    "godot_audio"
+  ],
+  "inputs": [
+    {
+      "path": "artifacts/raw/phase1-p111-performance/trial-1.jsonl",
+      "sha256": "0a836448367712bbcdbf90441a8342bc79d7109ff10f2fae3fedcfd88e160228"
+    },
+    {
+      "path": "artifacts/raw/phase1-p111-performance/trial-2.jsonl",
+      "sha256": "71d70408579f6ccfb67c81d23ada5145534e6e8b2e8498c48d5195aff0457a1e"
+    },
+    {
+      "path": "artifacts/raw/phase1-p111-performance/trial-3.jsonl",
+      "sha256": "c6dc7528010175d733c648d96f09e1421dfb9c34951faca2e41e63401ff410c0"
+    },
+    {
+      "path": "artifacts/raw/phase1-p111-performance/midi-burst.jsonl",
+      "sha256": "ae5136b17d54effcd0b3b6b281997259bbeab78b094ac4a126c38cd9d328c002"
+    }
+  ],
+  "outputs": [
+    {
+      "path": "artifacts/raw/phase1-p111-performance/summary.json",
+      "sha256": "99f5e2f42053c29fe1dc3c5733816c9a30ad7e97493f641b2d21fc28f7cd2caf"
+    }
+  ]
+}

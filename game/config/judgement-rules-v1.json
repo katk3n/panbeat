@@ -1,0 +1,13 @@
+{
+  "schema_version": "1.0.0",
+  "rule_id": "panbeat-phase1-standard-v1",
+  "clock_domain": "song_time",
+  "time_unit": "microseconds",
+  "delta_sign_convention": "actual_minus_expected; negative is early and positive is late",
+  "candidate_match": "same target_id and technique; minimum absolute delta; earlier expected time then note_id break ties",
+  "perfect_max_abs_delta_us": 30000,
+  "great_max_abs_delta_us": 60000,
+  "good_max_abs_delta_us": 100000,
+  "miss_window_us": 100000,
+  "miss_condition": "current_time_us > expected_time_us + miss_window_us"
+}

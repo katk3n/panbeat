@@ -1,0 +1,27 @@
+{
+  "schema_version": "1.0.0",
+  "session_id": "",
+  "status": "pending_operator",
+  "device_setting": "Handpan / Minor",
+  "clean_launch_usb_recognized": null,
+  "technique_and_target_display": {
+    "tone": null,
+    "ding": null,
+    "slap": null
+  },
+  "audio_and_visual_played_normally": null,
+  "completion_summary_observed": null,
+  "pause_resume": {
+    "performed": null,
+    "no_double_audio_or_notes": null,
+    "no_input_accepted_while_paused": null
+  },
+  "disconnect_reconnect": {
+    "performed": null,
+    "automatic_recovery_observed": null,
+    "relaunch_required": null,
+    "result": ""
+  },
+  "subjective_end_to_end_latency": "",
+  "other_subjective_notes": ""
+}

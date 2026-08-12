@@ -1,0 +1,15 @@
+{
+  "schema_version": "1.0.0",
+  "score_rule_id": "panbeat-phase1-score-v1",
+  "note_count": 45,
+  "score": 45000,
+  "accuracy": 1,
+  "max_combo": 45,
+  "breakdown": {
+    "perfect": 45,
+    "great": 0,
+    "good": 0,
+    "miss": 0,
+    "extra_hit": 0
+  }
+}

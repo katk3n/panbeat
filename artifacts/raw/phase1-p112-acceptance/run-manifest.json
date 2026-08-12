@@ -1,0 +1,13 @@
+{
+  "schema_version":"1.0.0",
+  "story":"P112",
+  "command":"scripts/check-phase1-acceptance RUN_ID",
+  "result":"pass",
+  "runs":[
+    {"run_id":"phase1-p112-acceptance-j-20260812","manifest":"artifacts/raw/phase1-p112-acceptance-j-20260812/run-manifest.json","manifest_sha256":"5925b2c1d63cb567ec52e381553a354c3b8848550ae4187ee902b4338591bc23","build_sha256":"e9f6e5f7d437b1325cbfddc35ff0017c7102f91bcfb73f13c5f152a6b1f2d3ba"},
+    {"run_id":"phase1-p112-acceptance-k-20260812","manifest":"artifacts/raw/phase1-p112-acceptance-k-20260812/run-manifest.json","manifest_sha256":"63027828d5ac2f70ca9e19a3ff0590a23bf036062a8ea97a491d53059fde093b","build_sha256":"45ad64f9c6662f3aa973fd7d3a4edae22af3f0126c2d49fedefead56cbee44e6"}
+  ],
+  "determinism":{"replay_sha256":"c12405817cd8abf3b43ac15db447f9c87d6e8dc4ef11ac895cc876478c2e5321","screenshot_sha256":"5bfec4f6bc4dcefbcf113798b2693a151a4664a1a3805f57d2132a1f4f44a584","byte_identical_across_runs":true},
+  "fresh_evidence":true,
+  "known_phase1_blockers":["P111 drift target","P111 recorded-burst dispatch target"]
+}

@@ -1,0 +1,8 @@
+{
+  "schema_version": "1.0.0",
+  "file": "orbit-practice.wav",
+  "spdx_license": "CC0-1.0",
+  "provenance": "Deterministically synthesized by scripts/generate-phase1-song.mjs from source.json; no third-party samples or compositions are used.",
+  "format": "RIFF/WAVE PCM, mono, signed 16-bit little-endian, 48000 Hz",
+  "generator": "scripts/generate-phase1-song.mjs"
+}

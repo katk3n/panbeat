@@ -1,0 +1,67 @@
+#!/bin/sh
+set -eu
+script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+repository_root=$(CDPATH= cd -- "$script_dir/.." && pwd)
+
+if [ "$#" -ne 2 ]; then
+  printf '%s\n' 'usage: scripts/run-phase1-p113-session RUN_ID baseline|offset-positive|pause-reconnect' >&2
+  exit 64
+fi
+run_id=$1
+scenario=$2
+case "$run_id" in ''|*[!A-Za-z0-9._-]*) printf '%s\n' 'run-phase1-p113-session: invalid run ID' >&2; exit 64 ;; esac
+case "$scenario" in
+  baseline) input_offset_sec=0.0 ;;
+  offset-positive) input_offset_sec=0.030 ;;
+  pause-reconnect) input_offset_sec=0.0 ;;
+  *) printf '%s\n' 'run-phase1-p113-session: invalid scenario' >&2; exit 64 ;;
+esac
+
+p112_run=phase1-p112-acceptance-k-20260812
+build="$repository_root/artifacts/raw/$p112_run/PanBeat.zip"
+build_manifest="$repository_root/artifacts/raw/$p112_run/run-manifest.json"
+evidence="$repository_root/artifacts/raw/$run_id"
+if [ ! -f "$build" ] || [ ! -f "$build_manifest" ]; then
+  printf 'run-phase1-p113-session: accepted P112 build is missing: %s\n' "$build" >&2
+  exit 66
+fi
+if [ -e "$evidence" ]; then
+  printf 'run-phase1-p113-session: evidence already exists: %s\n' "$evidence" >&2
+  exit 73
+fi
+
+mkdir -p "$evidence/logs"
+cp "$repository_root/docs/phase1-p113-operator-observations-template.json" "$evidence/operator-observations.json"
+temporary_root=$(mktemp -d /private/tmp/panbeat-phase1-p113.XXXXXX)
+cleanup() { rm -rf "$temporary_root"; }
+trap cleanup EXIT HUP INT TERM
+unzip -q "$build" -d "$temporary_root"
+binary="$temporary_root/PanBeat.app/Contents/MacOS/PanBeat"
+
+printf 'P113 session: %s (%s)\n' "$run_id" "$scenario"
+printf '%s\n' 'Play through the entire fixed song. Close the window only after the COMPLETE summary is visible.'
+if [ "$scenario" = pause-reconnect ]; then
+  printf '%s\n' 'During play: press Space to pause, test disconnect/reconnect as documented, then press Space to resume.'
+fi
+
+set +e
+"$binary" -- --input-mode midi --input-offset-sec="$input_offset_sec" --records-output="$evidence/judgement-records.json" --diagnostics-output="$evidence/diagnostics.json" >"$evidence/logs/application.log" 2>&1
+application_status=$?
+set -e
+if [ "$application_status" -ne 0 ]; then
+  printf 'run-phase1-p113-session: application exited %d; raw log retained at %s\n' "$application_status" "$evidence/logs/application.log" >&2
+  exit "$application_status"
+fi
+
+if ! node "$script_dir/finalize-phase1-p113-session.mjs" \
+  "--repository-root=$repository_root" \
+  "--run-dir=$evidence" \
+  "--build=$build" \
+  "--build-manifest=$build_manifest" \
+  "--scenario=$scenario" \
+  "--expected-input-offset-sec=$input_offset_sec" >"$evidence/logs/finalize.log" 2>&1; then
+  cat "$evidence/logs/finalize.log" >&2
+  exit 1
+fi
+cat "$evidence/logs/finalize.log"
+printf 'Operator observations remain separate and pending: %s\n' "$evidence/operator-observations.json"

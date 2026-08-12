@@ -15,10 +15,19 @@ test("profile has unique mappings and valid velocity ranges", () => {
   assert.deepEqual(validateProfileSemantics(profile), []);
 });
 
-test("all nine Handpan Minor pads map to ding or their tone target", () => {
+test("ding and eight Handpan Minor outer fields map to acoustic-style targets", () => {
   const notes = [50, 57, 58, 60, 62, 64, 65, 67, 69];
   const mapped = notes.map((note, index) => mapMidiEvent(event("note_on", 0, note, 127, index), profile));
-  assert.deepEqual(mapped.map((item) => item.target_id), ["ding", "tone-2", "tone-3", "tone-4", "tone-5", "tone-6", "tone-7", "tone-8", "tone-9"]);
+  assert.deepEqual(mapped.map((item) => item.target_id), ["ding", "tone-1", "tone-2", "tone-3", "tone-4", "tone-5", "tone-6", "tone-7", "tone-8"]);
+});
+
+test("layout follows the acoustic player-facing zigzag with upper-left 8 and upper-right 7", () => {
+  const angles = Object.fromEntries(profile.layout.tones.map((tone) => [tone.target_id, tone.angle_degrees]));
+  assert.deepEqual(angles, {
+    "tone-7": 22.5, "tone-5": 67.5, "tone-3": 112.5, "tone-1": 157.5,
+    "tone-2": 202.5, "tone-4": 247.5, "tone-6": 292.5, "tone-8": 337.5
+  });
+  assert.equal(profile.layout.up_reference, "away_from_player_and_controls");
 });
 
 test("left and right Handpan Slaps are distinguished from Pad 1", () => {

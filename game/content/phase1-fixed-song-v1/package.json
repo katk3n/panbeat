@@ -1,0 +1,20 @@
+{
+  "schema_version": "1.0.0",
+  "package_id": "phase1-fixed-song-v1",
+  "title": "Orbit Practice",
+  "chart_file": "chart.json",
+  "audio_file": "orbit-practice.wav",
+  "expected_events_file": "expected-events.json",
+  "expected_summary_file": "expected-summary.json",
+  "bpm": 120,
+  "duration_us": 36000000,
+  "sample_rate_hz": 48000,
+  "preload_margin_us": 2000000,
+  "ending_margin_us": 4000000,
+  "sync": {
+    "clock_domain": "song_time",
+    "audio_sample_zero_timestamp_us": 0,
+    "first_note_timestamp_us": 2000000,
+    "last_note_timestamp_us": 32000000
+  }
+}

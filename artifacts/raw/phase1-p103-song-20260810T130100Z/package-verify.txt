@@ -1,0 +1,7 @@
+OK 274122c27abbcdd853a25d81905a010d8a06b9977b5850833679d40a2978366f game/content/phase1-fixed-song-v1/package.json
+OK eddd4c72a68e8bdd303a54af7df452a8fd0988690d2f58fa8c51eabf38fc573f game/content/phase1-fixed-song-v1/chart.json
+OK 43ad315b494d59d6980f3ac0004321bd871330a8901e18a16426bce435a16f2b game/content/phase1-fixed-song-v1/expected-events.json
+OK 5494397b1a2c23f95fd4772b82baaa38662f4d4d5894ac064602ef2e5c851f6f game/content/phase1-fixed-song-v1/audio-provenance.json
+OK e4ffabf9b124f53d969c8e6da3ab97f4a6012489289fcabebc04ca3db1904423 game/content/phase1-fixed-song-v1/orbit-practice.wav
+OK 46fc6bf56f9429bdbe67d6511eed860090ac84141c38c5da71d1cc962d01569c game/content/phase1-fixed-song-v1/checksums.json
+Verified Phase 1 fixed-song package.

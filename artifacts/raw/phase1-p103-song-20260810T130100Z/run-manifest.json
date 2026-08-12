@@ -1,0 +1,41 @@
+{
+  "schema_version": "1.0.0",
+  "run_id": "phase1-p103-song-20260810T130100Z",
+  "story": "P103",
+  "source_revision": "25ebaf4178b794de9b8fb356a1d8f4c3fa56ae3a",
+  "environment": {
+    "engine": "Godot",
+    "engine_version": "4.6.stable.official.89cea1439",
+    "os": "macOS 26.5.2",
+    "architecture": "arm64",
+    "audio": "48000 Hz mono signed 16-bit PCM WAV",
+    "input_fixture": "game/content/phase1-fixed-song-v1/source.json"
+  },
+  "commands": [
+    {"command":"scripts/generate-phase1-song verify","result":"pass","evidence":"artifacts/raw/phase1-p103-song-20260810T130100Z/package-verify.txt","sha256":"ea52d848339dd6c0386a2c22431970fc6be5bffea6ef2e5806599b6665b77683"},
+    {"command":"node --test scripts/generate-phase1-song.test.mjs","result":"pass","tests":"3/3","evidence":"artifacts/raw/phase1-p103-song-20260810T130100Z/generator-tests.txt","sha256":"6440aef55d65b3ab4c5aee853d43e44b67e4d22624220643f94d3221ef9acfa7"},
+    {"command":"scripts/check-game --mode test --run-id phase1-p103-test-20260810T130100Z","result":"pass","godot_integration_tests":"8/8","evidence":"artifacts/raw/phase1-p103-song-20260810T130100Z/godot-decode.txt","sha256":"3883203241fbef8f19815a2f18075d80f169297d573f1e90b63c570b82c67212"},
+    {"command":"scripts/check-game --mode build --run-id phase1-p103-build-20260810T130100Z","result":"pass","evidence":"artifacts/raw/phase1-p103-song-20260810T130100Z/build.txt","sha256":"d582f58503799296b8e5ec633e59541bb3cfc292ed3794331d4be2ff2316195b"}
+  ],
+  "package": {
+    "path": "game/content/phase1-fixed-song-v1/package.json",
+    "audio_sha256": "e4ffabf9b124f53d969c8e6da3ab97f4a6012489289fcabebc04ca3db1904423",
+    "chart_sha256": "eddd4c72a68e8bdd303a54af7df452a8fd0988690d2f58fa8c51eabf38fc573f",
+    "duration_us": 36000000,
+    "first_note_us": 2000000,
+    "last_note_us": 32000000,
+    "note_count": 45,
+    "license": "CC0-1.0"
+  },
+  "attempt_accounting": {
+    "failed_attempts": 1,
+    "failure": "The first clean headless test had not imported the new WAV, so ResourceLoader reported no loader.",
+    "resolution": "check-game now performs a CLI editor import before suites/build; the separate decode and duration run passed.",
+    "failed_evidence": "artifacts/raw/phase1-p103-song-20260810T130100Z/initial-failed-decode.txt",
+    "failed_sha256": "299252ba17bd1181bf86e6575468ef69e080d6f5b0b432f5c656de7a5e07da3e"
+  },
+  "limitations": [
+    "Godot resource decode and release packaging were verified; this story does not claim physical-output playback or long-run drift.",
+    "Long-form compression, seek, and loop format choices remain Phase 2 concerns; P111 owns the five-minute measurement."
+  ]
+}

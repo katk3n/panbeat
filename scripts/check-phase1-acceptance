@@ -1,0 +1,46 @@
+#!/bin/sh
+set -eu
+script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+repository_root=$(CDPATH= cd -- "$script_dir/.." && pwd)
+run_id="${1-phase1-acceptance-$(date -u +%Y%m%dT%H%M%SZ)}"
+case "$run_id" in ''|*[!A-Za-z0-9._-]*) printf '%s\n' 'check-phase1-acceptance: invalid run ID' >&2; exit 64 ;; esac
+evidence="$repository_root/artifacts/raw/$run_id"
+if [ -e "$evidence" ]; then printf 'check-phase1-acceptance: evidence already exists: %s\n' "$evidence" >&2; exit 73; fi
+mkdir -p "$evidence/logs"
+temporary_root=$(mktemp -d /private/tmp/panbeat-phase1-acceptance.XXXXXX)
+clean_root="$temporary_root/checkout"
+cleanup() { rm -rf "$temporary_root"; }
+trap cleanup EXIT HUP INT TERM
+mkdir -p "$clean_root"
+revision=$(git -C "$repository_root" rev-parse HEAD)
+if [ -n "$(git -C "$repository_root" status --porcelain --untracked-files=no)" ]; then dirty=true; else dirty=false; fi
+rsync -a --exclude .git --exclude .tools --exclude node_modules --exclude artifacts --exclude game/.godot "$repository_root/" "$clean_root/"
+for inherited in artifacts/raw/godot-g06/hard-gate-summary.json artifacts/raw/e03-engine-selection/score-result.json artifacts/raw/m02-mood-pan-20260810/handpan-minor-pads1-9-medium.jsonl artifacts/raw/m02-mood-pan-20260810/handpan-minor-slap-left3-then-right3.jsonl; do
+  mkdir -p "$clean_root/$(dirname "$inherited")"
+  cp "$repository_root/$inherited" "$clean_root/$inherited"
+done
+ln -s "$repository_root/.tools" "$clean_root/.tools"
+ln -s "$repository_root/node_modules" "$clean_root/node_modules"
+(
+  cd "$clean_root"
+  node scripts/validate-fixtures.mjs
+  node scripts/validate-fixtures.mjs --cases shared/fixtures/phase1-schema-cases.json
+  node scripts/check-phase1-baseline.mjs
+  node scripts/generate-phase1-song.mjs verify
+  node --test scripts/*.test.mjs
+) >"$evidence/logs/contracts.log" 2>&1 || { printf 'check-phase1-acceptance: contracts failed: %s\n' "$evidence/logs/contracts.log" >&2; exit 1; }
+"$clean_root/scripts/check-game" --mode all --run-id "$run_id" >"$evidence/logs/check-game.log" 2>&1 || { printf 'check-phase1-acceptance: test/build failed: %s\n' "$evidence/logs/check-game.log" >&2; exit 1; }
+cp -R "$clean_root/artifacts/reports/$run_id/." "$evidence/logs/"
+cp "$clean_root/artifacts/builds/$run_id/PanBeat.zip" "$evidence/PanBeat.zip"
+mkdir -p "$temporary_root/app"
+unzip -q "$evidence/PanBeat.zip" -d "$temporary_root/app"
+binary="$temporary_root/app/PanBeat.app/Contents/MacOS/PanBeat"
+pck="$temporary_root/app/PanBeat.app/Contents/Resources/PanBeat.pck"
+"$binary" --headless -- --input-mode replay --replay-speed=4 --records-output="$evidence/replay.json" --quit-on-complete >"$evidence/logs/release-replay.log" 2>&1 || { printf 'check-phase1-acceptance: release replay failed: %s\n' "$evidence/logs/release-replay.log" >&2; exit 1; }
+rg -q 'PANBEAT_VERTICAL_SLICE_COMPLETE' "$evidence/logs/release-replay.log" || { printf '%s\n' 'check-phase1-acceptance: release replay marker missing' >&2; exit 1; }
+for required in 'phase1-fixed-song-v1/chart.json' 'phase1-fixed-song-v1/orbit-practice.wav' 'default-instrument-profile.json' 'judgement-rules-v1.json' 'score-rules-v1.json'; do
+  rg -a -q "$required" "$pck" || { printf 'check-phase1-acceptance: build resource missing: %s\n' "$required" >&2; exit 1; }
+done
+if rg -a -q 'artifacts/raw|pocs/|BEGIN [A-Z ]*PRIVATE KEY|/Users/kentaktwo/projects' "$pck"; then printf '%s\n' 'check-phase1-acceptance: forbidden developer/raw/credential/absolute-path content found' >&2; exit 1; fi
+"$clean_root/scripts/godot" --path "$clean_root/game" --resolution 1280x720 --log-file "$evidence/logs/screenshot.log" --script res://tests/capture_p112.gd -- --input-mode replay --replay-speed=4 --output "$evidence/gameplay.png" >"$evidence/logs/screenshot-console.log" 2>&1 || { printf 'check-phase1-acceptance: screenshot failed: %s\n' "$evidence/logs/screenshot.log" >&2; exit 1; }
+node "$clean_root/scripts/create-phase1-acceptance-manifest.mjs" "--repository-root=$repository_root" "--run-dir=$evidence" "--build=$evidence/PanBeat.zip" "--replay=$evidence/replay.json" "--screenshot=$evidence/gameplay.png" "--revision=$revision" "--dirty=$dirty" | tee "$evidence/logs/manifest.log"

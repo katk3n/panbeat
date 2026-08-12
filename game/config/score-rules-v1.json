@@ -1,0 +1,21 @@
+{
+  "schema_version": "1.0.0",
+  "rule_id": "panbeat-phase1-score-v1",
+  "weights": {
+    "perfect": 1000,
+    "great": 750,
+    "good": 500,
+    "miss": 0,
+    "extra_hit": 0
+  },
+  "accuracy_weights": {
+    "perfect": 1.0,
+    "great": 0.75,
+    "good": 0.5,
+    "miss": 0.0,
+    "extra_hit": 0.0
+  },
+  "combo_increments": ["perfect", "great", "good"],
+  "combo_breaks": ["miss", "extra_hit"],
+  "extra_hit_counts_toward_accuracy": true
+}

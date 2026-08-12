@@ -1,0 +1,6 @@
+[
+  {"message_type":"note_on","arrival_timestamp_us":1000000,"channel_wire":0,"data1":57,"data2":80},
+  {"message_type":"note_on","arrival_timestamp_us":2000000,"channel_wire":0,"data1":50,"data2":80},
+  {"message_type":"note_on","arrival_timestamp_us":3000000,"channel_wire":0,"data1":93,"data2":80},
+  {"message_type":"note_off","arrival_timestamp_us":3100000,"channel_wire":0,"data1":93,"data2":0}
+]

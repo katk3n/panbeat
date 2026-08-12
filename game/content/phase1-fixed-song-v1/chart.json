@@ -1,0 +1,279 @@
+{
+  "schema_version": "1.0.0",
+  "chart_id": "phase1-fixed-song-v1",
+  "clock_domain": "song_time",
+  "time_unit": "microseconds",
+  "duration_us": 36000000,
+  "notes": [
+    {
+      "note_id": "orbit-001",
+      "timestamp_us": 2000000,
+      "technique": "ding",
+      "target_id": "ding"
+    },
+    {
+      "note_id": "orbit-002",
+      "timestamp_us": 3000000,
+      "technique": "tone",
+      "target_id": "tone-1"
+    },
+    {
+      "note_id": "orbit-003",
+      "timestamp_us": 4000000,
+      "technique": "tone",
+      "target_id": "tone-2"
+    },
+    {
+      "note_id": "orbit-004",
+      "timestamp_us": 5000000,
+      "technique": "slap",
+      "target_id": "outer-hit-radius"
+    },
+    {
+      "note_id": "orbit-005",
+      "timestamp_us": 6000000,
+      "technique": "tone",
+      "target_id": "tone-3"
+    },
+    {
+      "note_id": "orbit-006",
+      "timestamp_us": 6500000,
+      "technique": "tone",
+      "target_id": "tone-4"
+    },
+    {
+      "note_id": "orbit-007",
+      "timestamp_us": 7000000,
+      "technique": "ding",
+      "target_id": "ding"
+    },
+    {
+      "note_id": "orbit-008",
+      "timestamp_us": 7500000,
+      "technique": "slap",
+      "target_id": "outer-hit-radius"
+    },
+    {
+      "note_id": "orbit-009",
+      "timestamp_us": 8000000,
+      "technique": "tone",
+      "target_id": "tone-5"
+    },
+    {
+      "note_id": "orbit-010",
+      "timestamp_us": 8500000,
+      "technique": "tone",
+      "target_id": "tone-6"
+    },
+    {
+      "note_id": "orbit-011",
+      "timestamp_us": 9000000,
+      "technique": "ding",
+      "target_id": "ding"
+    },
+    {
+      "note_id": "orbit-012",
+      "timestamp_us": 9500000,
+      "technique": "slap",
+      "target_id": "outer-hit-radius"
+    },
+    {
+      "note_id": "orbit-013",
+      "timestamp_us": 10000000,
+      "technique": "tone",
+      "target_id": "tone-7"
+    },
+    {
+      "note_id": "orbit-014",
+      "timestamp_us": 10250000,
+      "technique": "tone",
+      "target_id": "tone-8"
+    },
+    {
+      "note_id": "orbit-015",
+      "timestamp_us": 10500000,
+      "technique": "ding",
+      "target_id": "ding"
+    },
+    {
+      "note_id": "orbit-016",
+      "timestamp_us": 10750000,
+      "technique": "slap",
+      "target_id": "outer-hit-radius"
+    },
+    {
+      "note_id": "orbit-017",
+      "timestamp_us": 11000000,
+      "technique": "tone",
+      "target_id": "tone-1"
+    },
+    {
+      "note_id": "orbit-018",
+      "timestamp_us": 11250000,
+      "technique": "ding",
+      "target_id": "ding"
+    },
+    {
+      "note_id": "orbit-019",
+      "timestamp_us": 11500000,
+      "technique": "tone",
+      "target_id": "tone-3"
+    },
+    {
+      "note_id": "orbit-020",
+      "timestamp_us": 11750000,
+      "technique": "slap",
+      "target_id": "outer-hit-radius"
+    },
+    {
+      "note_id": "orbit-021",
+      "timestamp_us": 16000000,
+      "technique": "ding",
+      "target_id": "ding"
+    },
+    {
+      "note_id": "orbit-022",
+      "timestamp_us": 17000000,
+      "technique": "tone",
+      "target_id": "tone-4"
+    },
+    {
+      "note_id": "orbit-023",
+      "timestamp_us": 18000000,
+      "technique": "tone",
+      "target_id": "tone-6"
+    },
+    {
+      "note_id": "orbit-024",
+      "timestamp_us": 19000000,
+      "technique": "slap",
+      "target_id": "outer-hit-radius"
+    },
+    {
+      "note_id": "orbit-025",
+      "timestamp_us": 20000000,
+      "technique": "tone",
+      "target_id": "tone-8"
+    },
+    {
+      "note_id": "orbit-026",
+      "timestamp_us": 20500000,
+      "technique": "ding",
+      "target_id": "ding"
+    },
+    {
+      "note_id": "orbit-027",
+      "timestamp_us": 21000000,
+      "technique": "tone",
+      "target_id": "tone-7"
+    },
+    {
+      "note_id": "orbit-028",
+      "timestamp_us": 21500000,
+      "technique": "slap",
+      "target_id": "outer-hit-radius"
+    },
+    {
+      "note_id": "orbit-029",
+      "timestamp_us": 22000000,
+      "technique": "tone",
+      "target_id": "tone-5"
+    },
+    {
+      "note_id": "orbit-030",
+      "timestamp_us": 22500000,
+      "technique": "ding",
+      "target_id": "ding"
+    },
+    {
+      "note_id": "orbit-031",
+      "timestamp_us": 23000000,
+      "technique": "tone",
+      "target_id": "tone-3"
+    },
+    {
+      "note_id": "orbit-032",
+      "timestamp_us": 23500000,
+      "technique": "slap",
+      "target_id": "outer-hit-radius"
+    },
+    {
+      "note_id": "orbit-033",
+      "timestamp_us": 24000000,
+      "technique": "tone",
+      "target_id": "tone-1"
+    },
+    {
+      "note_id": "orbit-034",
+      "timestamp_us": 24250000,
+      "technique": "tone",
+      "target_id": "tone-2"
+    },
+    {
+      "note_id": "orbit-035",
+      "timestamp_us": 24500000,
+      "technique": "ding",
+      "target_id": "ding"
+    },
+    {
+      "note_id": "orbit-036",
+      "timestamp_us": 24750000,
+      "technique": "slap",
+      "target_id": "outer-hit-radius"
+    },
+    {
+      "note_id": "orbit-037",
+      "timestamp_us": 25000000,
+      "technique": "tone",
+      "target_id": "tone-4"
+    },
+    {
+      "note_id": "orbit-038",
+      "timestamp_us": 25250000,
+      "technique": "tone",
+      "target_id": "tone-6"
+    },
+    {
+      "note_id": "orbit-039",
+      "timestamp_us": 25500000,
+      "technique": "ding",
+      "target_id": "ding"
+    },
+    {
+      "note_id": "orbit-040",
+      "timestamp_us": 25750000,
+      "technique": "slap",
+      "target_id": "outer-hit-radius"
+    },
+    {
+      "note_id": "orbit-041",
+      "timestamp_us": 30000000,
+      "technique": "ding",
+      "target_id": "ding"
+    },
+    {
+      "note_id": "orbit-042",
+      "timestamp_us": 30500000,
+      "technique": "tone",
+      "target_id": "tone-1"
+    },
+    {
+      "note_id": "orbit-043",
+      "timestamp_us": 31000000,
+      "technique": "tone",
+      "target_id": "tone-3"
+    },
+    {
+      "note_id": "orbit-044",
+      "timestamp_us": 31500000,
+      "technique": "tone",
+      "target_id": "tone-5"
+    },
+    {
+      "note_id": "orbit-045",
+      "timestamp_us": 32000000,
+      "technique": "tone",
+      "target_id": "tone-7"
+    }
+  ]
+}

@@ -1,0 +1,82 @@
+{
+  "schema_version": "1.0.0",
+  "run_id": "phase1-p114-gate-20260812",
+  "story": "P114",
+  "story_status": "complete",
+  "phase1_gate": {
+    "decision": "blocked",
+    "vertical_slice_functional_acceptance": "pass",
+    "mvp_complete": false,
+    "blocking_risks": [
+      {
+        "id": "R-P1-001",
+        "measurement": "five-minute drift p95/max 6078 us",
+        "target": "5000 us or less"
+      },
+      {
+        "id": "R-P1-003",
+        "measurement": "recorded-burst MIDI dispatch p95 8295 us",
+        "target": "5000 us or less"
+      }
+    ]
+  },
+  "accepted_product_evidence": {
+    "p112": "artifacts/raw/phase1-p112-acceptance/run-manifest.json",
+    "p113": "artifacts/raw/phase1-p113-device-acceptance-20260812/run-manifest.json",
+    "p113_sessions": "3/3",
+    "accepted_build_run": "phase1-p112-acceptance-k-20260812",
+    "accepted_build_sha256": "45ad64f9c6662f3aa973fd7d3a4edae22af3f0126c2d49fedefead56cbee44e6"
+  },
+  "verification": [
+    {
+      "command": "node scripts/finalize-phase1-p113.mjs",
+      "result": "pass",
+      "evidence": "artifacts/raw/phase1-p114-gate-20260812/logs/p113-audit.log",
+      "sha256": "6a1e1d2dc9a30d370720d47f4226b70fe98cdb589f45acedbe51000912c9cd8d"
+    },
+    {
+      "command": "node scripts/check-phase1-gate.mjs",
+      "result": "pass-with-blocked-gate",
+      "evidence": "artifacts/raw/phase1-p114-gate-20260812/logs/gate-audit.log",
+      "sha256": "3b2f0cbe17f11c9d7b8a2504e56eeb0b292adf946df4b182aab835b75c093278"
+    },
+    {
+      "command": "node --test scripts/*.test.mjs",
+      "result": "pass",
+      "tests": "22/22",
+      "evidence": "artifacts/raw/phase1-p114-gate-20260812/logs/contracts.log",
+      "sha256": "6c2e08283ced48a0d028785dec15020f1dbb72130879344a3976e2a586b4a75f"
+    },
+    {
+      "command": "scripts/check-game --mode test --run-id phase1-p114-gate-evidence-20260812",
+      "result": "pass",
+      "unit": "44/44",
+      "integration": "35/35",
+      "replay": "7/7",
+      "evidence": "artifacts/raw/phase1-p114-gate-20260812/logs/game-tests.log",
+      "sha256": "18fe9ae2751238c908e65e1022b9006bfc04b742c30e5e289a2dd38219fd82d5"
+    },
+    {
+      "command": "git diff --check",
+      "result": "pass",
+      "evidence": "artifacts/raw/phase1-p114-gate-20260812/logs/diff-check.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "documents": [
+    {
+      "path": "docs/phase1-completion-report.md",
+      "sha256": "9863eb083ef736865b7aae7d7af4a10f36767c0146abea73c5ef0f39d4be9961"
+    },
+    {
+      "path": "docs/phase1-acceptance.json",
+      "sha256": "2c126ccc20f72910f7e75431a3399c2779c699c9a116c38f5b70b65ca2c3e2c0"
+    },
+    {
+      "path": "docs/architecture.md",
+      "sha256": "dcd770762bcc628dc4c2bbbe830b3272194537c3a1731a05c7e9565cc0993830"
+    }
+  ],
+  "phase0_evidence_integrity": "pass",
+  "phase2_handoff_recorded": true
+}

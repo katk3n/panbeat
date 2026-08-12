@@ -1,0 +1,12 @@
+{
+  "schema_version":"1.0.0","run_id":"phase1-p106-midi-20260810T140000Z","story":"P106",
+  "engine":"Godot 4.6.stable.official.89cea1439","os":"macOS 26.5.2 arm64",
+  "profile":"shared/fixtures/instrument-profiles/roland-mn10-handpan-minor-v1.json",
+  "recorded_traces":["artifacts/raw/m02-mood-pan-20260810/handpan-minor-pads1-9-medium.jsonl","artifacts/raw/m02-mood-pan-20260810/handpan-minor-slap-left3-then-right3.jsonl"],
+  "commands":[
+    {"command":"scripts/check-game --mode test --run-id phase1-p106-test-20260810T140000Z","result":"pass","unit":"30/30","integration":"14/14","replay":"5/5","unit_evidence":"artifacts/raw/phase1-p106-midi-20260810T140000Z/unit.txt","replay_evidence":"artifacts/raw/phase1-p106-midi-20260810T140000Z/replay.txt"},
+    {"command":"scripts/check-game --mode build --run-id phase1-p106-build-20260810T140000Z","result":"pass","evidence":"artifacts/raw/phase1-p106-midi-20260810T140000Z/build.txt","build_sha256":"414b2de5d193b883042b519ffd90490d7b5acdf05dadd0fd01bad21d49405061"}
+  ],
+  "verified_contracts":["no-port/open-failure diagnostics","startup-after-connect","close/reopen","velocity-zero Note On","Note Off","CC","Aftertouch","unknown mapping","physical/replay normalized contract","real Tone/Ding/Slap mapping"],
+  "limitations":["Godot exposes neither an OS receive timestamp nor reliable physical-disconnect state.","Godot opens all MIDI inputs; preferred-port selection is logical validation rather than exclusive OS open."]
+}

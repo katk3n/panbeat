@@ -1,0 +1,125 @@
+{
+  "schema_version": "1.0.0",
+  "story": "P111",
+  "trials": [
+    {
+      "trial": 1,
+      "duration_us": 359905266,
+      "valid_duration": true,
+      "final_drift_us": -6078,
+      "final_absolute_drift_us": 6078,
+      "stall_recovery_drift_us": -6391,
+      "audio_driver": "CoreAudio",
+      "sample_rate_hz": 44100,
+      "output_latency_seconds": 0,
+      "evidence": "artifacts/raw/phase1-p111-performance/trial-1.jsonl",
+      "sha256": "94d23e22bb2b5c8a5651c2897d80a24c57e1a7a9296819937872665816f77a83"
+    },
+    {
+      "trial": 2,
+      "duration_us": 359922380,
+      "valid_duration": true,
+      "final_drift_us": -2387,
+      "final_absolute_drift_us": 2387,
+      "stall_recovery_drift_us": 1746,
+      "audio_driver": "CoreAudio",
+      "sample_rate_hz": 44100,
+      "output_latency_seconds": 0,
+      "evidence": "artifacts/raw/phase1-p111-performance/trial-2.jsonl",
+      "sha256": "bae926801ffe6387574ec44c754dcfe7f27a73eaf88f410b0d30d249c63aa604"
+    },
+    {
+      "trial": 3,
+      "duration_us": 359920353,
+      "valid_duration": true,
+      "final_drift_us": -4186,
+      "final_absolute_drift_us": 4186,
+      "stall_recovery_drift_us": -1359,
+      "audio_driver": "CoreAudio",
+      "sample_rate_hz": 44100,
+      "output_latency_seconds": 0,
+      "evidence": "artifacts/raw/phase1-p111-performance/trial-3.jsonl",
+      "sha256": "ee3b93ee3b646b822f71a8bd329d80c45dc92e68abecab7dd59e8ec31bdebaaa"
+    }
+  ],
+  "environment": {
+    "hardware_model": "Apple M4",
+    "logical_cpu_count": 10,
+    "hostname": "kk2024-m4-mbp.local",
+    "os": "Darwin 25.5.0",
+    "architecture": "arm64",
+    "godot_version": "4.6-stable (official)",
+    "build_type": "release-equivalent",
+    "renderer": "gl_compatibility",
+    "resolution": [
+      1280,
+      720
+    ],
+    "configured_max_fps": 60,
+    "display_refresh_rate_hz": 120,
+    "audio_device": "CoreAudio default output; device name unavailable through the selected Godot API",
+    "audio_driver": "CoreAudio",
+    "sample_rate_hz": 44100,
+    "output_latency_seconds": 0,
+    "buffer_frames_estimate": 0
+  },
+  "final_absolute_drift_us": {
+    "samples": 3,
+    "p50": 4186,
+    "p95": 6078,
+    "p99": 6078,
+    "max": 6078
+  },
+  "frame_time_us": {
+    "samples": 64769,
+    "p50": 16666,
+    "p95": 16667,
+    "p99": 16667,
+    "max": 121646
+  },
+  "frame_target": {
+    "minimum_fps": 60,
+    "budget_us": 16667,
+    "over_budget_samples": 35
+  },
+  "pool": {
+    "maximum_active_notes": 8,
+    "overflow_count": 0
+  },
+  "steady_memory": {
+    "available": false,
+    "minimum_bytes": 0,
+    "maximum_bytes": 0,
+    "range_bytes": 0,
+    "note": "Godot's static-memory monitor returned zero in this release export. Product scheduling uses 64 preallocated note slots; the recorder uses 200,000 preallocated samples; judgement creates 45 event records and no product code performs per-frame collection growth."
+  },
+  "allocation_contract": {
+    "note_slots_preallocated": 64,
+    "measurement_samples_preallocated": 200000,
+    "judgement_records_event_driven": 45,
+    "per_frame_product_collection_growth_observed": false,
+    "runtime_heap_counter_available": false,
+    "classification": "phase2-risk: release heap allocation counter unavailable"
+  },
+  "midi_dispatch_us": {
+    "samples": 1700,
+    "p50": 6516,
+    "p95": 8295,
+    "p99": 9764,
+    "max": 9788,
+    "os_receive_timestamp_available": false,
+    "scope": "Godot _input acceptance-equivalent enqueue to Gameplay queue processing",
+    "evidence": "artifacts/raw/phase1-p111-performance/midi-burst.jsonl",
+    "sha256": "5c757f037741602284ef624a9dfcc8da7ab6d68bd22f8a746a6845f126103363"
+  },
+  "targets": {
+    "drift_final_abs_us": 5000,
+    "midi_dispatch_p95_us": 5000,
+    "minimum_fps": 60
+  },
+  "classification": {
+    "drift": "phase1-blocker",
+    "midi": "phase1-blocker",
+    "frame": "meets-target"
+  }
+}

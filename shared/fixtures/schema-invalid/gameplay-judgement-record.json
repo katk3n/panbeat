@@ -1,0 +1,17 @@
+{
+  "schema_version": "1.0.0",
+  "rule_id": "panbeat-phase1-standard-v1",
+  "record_id": "judgement-000002",
+  "note_id": "orbit-001",
+  "input_event_id": "midi-wrong",
+  "expected_timestamp_us": 2000000,
+  "actual_timestamp_us": 2000000,
+  "delta_us": 0,
+  "clock_domain": "song_time",
+  "expected_technique": "tone",
+  "actual_technique": "tone",
+  "expected_target_id": "tone-1",
+  "actual_target_id": "tone-2",
+  "grade": "extra_hit",
+  "outcome": "extra"
+}

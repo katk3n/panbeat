@@ -4,20 +4,37 @@ script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 repository_root=$(CDPATH= cd -- "$script_dir/.." && pwd)
 project="$repository_root/game"
 mode=all
+run_id=game-latest
 while [ "$#" -gt 0 ]; do
   case "$1" in
-    -h|--help) printf '%s\n' 'Usage: scripts/check-game [--mode test|build|all]'; exit 0 ;;
-    --mode) case "${2-}" in test|build|all) mode="$2"; shift 2 ;; *) printf '%s\n' 'check-game: --mode must be test, build, or all' >&2; exit 64 ;; esac ;;
+    -h|--help) printf '%s\n' 'Usage: scripts/check-game [--mode unit|integration|replay|test|build|all] [--run-id ID]'; exit 0 ;;
+    --mode) case "${2-}" in unit|integration|replay|test|build|all) mode="$2"; shift 2 ;; *) printf '%s\n' 'check-game: invalid --mode' >&2; exit 64 ;; esac ;;
+    --run-id) run_id="${2-}"; shift 2 ;;
     *) printf 'check-game: unknown option: %s\n' "$1" >&2; exit 64 ;;
   esac
 done
-report_dir="$repository_root/artifacts/reports/game"
-build_dir="$repository_root/artifacts/builds/game"
+case "$run_id" in ''|*[!A-Za-z0-9._-]*) printf '%s\n' 'check-game: --run-id must contain only letters, digits, dot, underscore, or hyphen' >&2; exit 64 ;; esac
+report_dir="$repository_root/artifacts/reports/$run_id"
+build_dir="$repository_root/artifacts/builds/$run_id"
 mkdir -p "$report_dir" "$build_dir"
-run_test() {
-  "$script_dir/godot" --headless --path "$project" --script res://tests/run_tests.gd --log-file "$report_dir/test.log"
-  rg -q 'PANBEAT_GAME_TESTS_OK 6/6' "$report_dir/test.log" || { printf '%s\n' 'check-game: success marker missing' >&2; exit 1; }
+imported=0
+ensure_imported() {
+  if [ "$imported" -eq 0 ]; then
+    "$script_dir/godot" --headless --editor --path "$project" --quit --log-file "$report_dir/import.log"
+    imported=1
+  fi
 }
-run_build() { "$script_dir/godot" --headless --path "$project" --export-release macOS "$build_dir/PanBeat.zip" --log-file "$report_dir/build.log"; }
-case "$mode" in test) run_test ;; build) run_build ;; all) run_test; run_build ;; esac
+run_suite() {
+  suite="$1"
+  marker="$2"
+  ensure_imported
+  "$script_dir/godot" --headless --path "$project" --script "res://tests/run_${suite}_tests.gd" --log-file "$report_dir/${suite}.log"
+  rg -q "$marker" "$report_dir/${suite}.log" || { printf 'check-game: %s success marker missing\n' "$suite" >&2; exit 1; }
+}
+run_unit() { run_suite unit PANBEAT_UNIT_TESTS_OK; }
+run_integration() { run_suite integration PANBEAT_INTEGRATION_TESTS_OK; }
+run_replay() { run_suite replay PANBEAT_REPLAY_TESTS_OK; }
+run_test() { run_unit; run_integration; run_replay; }
+run_build() { ensure_imported; "$script_dir/godot" --headless --path "$project" --export-release macOS "$build_dir/PanBeat.zip" --log-file "$report_dir/build.log"; }
+case "$mode" in unit) run_unit ;; integration) run_integration ;; replay) run_replay ;; test) run_test ;; build) run_build ;; all) run_test; run_build ;; esac
 printf 'check-game: %s succeeded\n' "$mode"

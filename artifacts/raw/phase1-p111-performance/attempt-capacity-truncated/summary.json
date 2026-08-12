@@ -1,0 +1,95 @@
+{
+  "schema_version": "1.0.0",
+  "story": "P111",
+  "trials": [
+    {
+      "trial": 1,
+      "duration_us": 136440648,
+      "valid_duration": false,
+      "final_drift_us": 6116,
+      "final_absolute_drift_us": 6116,
+      "stall_recovery_drift_us": 7576,
+      "audio_driver": "CoreAudio",
+      "sample_rate_hz": 44100,
+      "output_latency_seconds": 0,
+      "evidence": "artifacts/raw/phase1-p111-performance/trial-1.jsonl",
+      "sha256": "0a836448367712bbcdbf90441a8342bc79d7109ff10f2fae3fedcfd88e160228"
+    },
+    {
+      "trial": 2,
+      "duration_us": 135820435,
+      "valid_duration": false,
+      "final_drift_us": 4687,
+      "final_absolute_drift_us": 4687,
+      "stall_recovery_drift_us": 6049,
+      "audio_driver": "CoreAudio",
+      "sample_rate_hz": 44100,
+      "output_latency_seconds": 0,
+      "evidence": "artifacts/raw/phase1-p111-performance/trial-2.jsonl",
+      "sha256": "71d70408579f6ccfb67c81d23ada5145534e6e8b2e8498c48d5195aff0457a1e"
+    },
+    {
+      "trial": 3,
+      "duration_us": 135376705,
+      "valid_duration": false,
+      "final_drift_us": 4755,
+      "final_absolute_drift_us": 4755,
+      "stall_recovery_drift_us": 7264,
+      "audio_driver": "CoreAudio",
+      "sample_rate_hz": 44100,
+      "output_latency_seconds": 0,
+      "evidence": "artifacts/raw/phase1-p111-performance/trial-3.jsonl",
+      "sha256": "c6dc7528010175d733c648d96f09e1421dfb9c34951faca2e41e63401ff410c0"
+    }
+  ],
+  "final_absolute_drift_us": {
+    "samples": 3,
+    "p50": 4755,
+    "p95": 6116,
+    "p99": 6116,
+    "max": 6116
+  },
+  "frame_time_us": {
+    "samples": 600000,
+    "p50": 673,
+    "p95": 785,
+    "p99": 862,
+    "max": 147973
+  },
+  "frame_target": {
+    "minimum_fps": 60,
+    "budget_us": 16667,
+    "over_budget_samples": 3
+  },
+  "pool": {
+    "maximum_active_notes": 8,
+    "overflow_count": 0
+  },
+  "steady_memory": {
+    "minimum_bytes": 0,
+    "maximum_bytes": 0,
+    "range_bytes": 0,
+    "note": "Recorder storage is preallocated before playback; this range includes engine/resource behavior."
+  },
+  "midi_dispatch_us": {
+    "samples": 1700,
+    "p50": 6666,
+    "p95": 8135,
+    "p99": 9603,
+    "max": 9628,
+    "os_receive_timestamp_available": false,
+    "scope": "Godot _input acceptance-equivalent enqueue to Gameplay queue processing",
+    "evidence": "artifacts/raw/phase1-p111-performance/midi-burst.jsonl",
+    "sha256": "ae5136b17d54effcd0b3b6b281997259bbeab78b094ac4a126c38cd9d328c002"
+  },
+  "targets": {
+    "drift_final_abs_us": 5000,
+    "midi_dispatch_p95_us": 5000,
+    "minimum_fps": 60
+  },
+  "classification": {
+    "drift": "phase1-blocker",
+    "midi": "phase1-blocker",
+    "frame": "meets-target"
+  }
+}

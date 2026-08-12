@@ -26,7 +26,7 @@ PanBeat は一般的なデスクトップ業務アプリではなく、次の性
 - 初期対象のmacOSで安定し、将来Windowsへ移植可能な境界を保つ
 - 将来、練習モードや演出を大きく拡張する可能性がある
 
-選定したGodotは標準MIDI入力、テキストscene、headless CLI、Web export、MIT Licenseに強みがある。CoreAudio release driftはEC-001の1分×3回ですべて5 ms以内、Mood Pan release sessionは3/3で再接続後に復旧した。OS MIDI受信timestampと物理切断状態がpublic APIにない点、1分を超えるdrift、release frame timeは残存riskとして追跡する。
+選定したGodotは標準MIDI入力、テキストscene、headless CLI、Web export、MIT Licenseに強みがある。Phase 1のMood Pan製品buildは実機3/3 sessionを完走し、Tone / Ding / Slap、+30 ms Input Offset、pause/resume、物理再接続を確認した。一方、CoreAudio release相当5分59秒×3回のdrift最大値6.078 msとrecorded-burst MIDI dispatch p95 8.295 msは目標5 msを超えた。実機で体感不具合がなく判定窓より小さいこと、測定が0.1倍速audioと人工的なframe待ちを含むことから、プロダクト責任者判断で機能開発を止めない`deferred-release-gate-blocker`へ再分類した。Phase 1 gateは通過させるが、Final Release Hardening Phaseで再測定・改善するまでreleaseは許可せず、MVP完成とも扱わない。OS MIDI受信timestampと物理切断状態がpublic APIにない制約も継続する。
 
 設計の中心となるChart、Instrument Profile、入力正規化、判定、scoreの概念とテストベクターは両候補で同一にする。PoCは使い捨ての別ゲームを二つ作るのではなく、同一仕様の薄いvertical sliceを各エンジンで実装し、測定値とCodex運用性を比較する。
 
@@ -41,7 +41,7 @@ PanBeat は一般的なデスクトップ業務アプリではなく、次の性
 | 描画 | Godot 2D + Compatibility Renderer |
 | ゲーム画面 | Sprite / procedural mesh / SDF shader。Control/Canvas UIは文字・メニュー中心 |
 | メニュー・設定 | Godot Control node |
-| 音声 | `IGameTransport`相当の境界 + Godot AudioServer/playback clock |
+| 音声 | 48 kHz mono 16-bit PCM WAV + `IGameTransport`相当の境界 + Godot AudioServer/playback clock |
 | MIDI（デスクトップ） | Godot標準`InputEventMIDI`。OS timestamp/切断状態の非公開を診断へ明記 |
 | MIDI（Web） | Godot Web MIDI入力（MVP対象外） |
 | MusicXML | エンジンの安全なストリーミングXML APIでMVP範囲を明示実装 |
@@ -429,6 +429,12 @@ progress = 1 - (expectedTime - currentTime) / approachDuration
 - MP3はcodec frame境界によりseek位置が曖昧になり得るため、インポートは許可してもruntime assetはWAVまたは検証済みOGGへ変換する
 - loopの継ぎ目が重要な練習モードでは、区間前にプリロールを設ける
 
+### 6.6 Phase 1 runtime音源形式
+
+Phase 1のruntime音源は、48 kHz、mono、signed 16-bit PCMのRIFF/WAVEに固定する。固定曲は`scripts/generate-phase1-song.mjs`からbyte単位で決定的に再生成でき、Godot 4.6でのdecode、preload、release packaging、5分超の連続再生を検証済みである。非圧縮のため配布容量は増えるが、短い固定曲では許容でき、codec primingやframe境界を同期検証へ持ち込まない利点を優先した。
+
+Phase 2のユーザーimportではMP3等を入力として許可してもよいが、runtime assetはWAVまたはseek/loop精度を別途検証したOGGへ変換する。長時間曲の容量、変換時間、loop継ぎ目を測るまでは、Phase 1のWAV決定を全MVP曲へ無条件に拡張しない。
+
 ---
 
 ## 7. MIDI・Mood Pan統合
@@ -448,6 +454,8 @@ Roland公式マニュアルから、少なくとも次を前提にできる。
 - Bluetooth Low Energy MIDIも機器仕様に含まれる
 
 Slapのmessage種別はNote Onとして設計できる。未確定なのは、Slapのnote number、channel、velocity特性、Tone/Style設定による変化、複数箇所のSlapが同じnoteになるか、といった割り当て詳細である。Special Pad、Pressure、Mute等も公開マニュアルだけでは対応を確定できない。これらの値をGameplayコードへ埋め込まず、Instrument Profileに記録する。
+
+Godotではclean process起動時に`OS.open_midi_inputs()`を呼んでから`OS.get_connected_midi_inputs()`を列挙する。P113の最初の実機runで逆順にした製品回帰が`no ports`を発生させたため、open-before-enumerateをcold-start testで固定した。物理切断はport listへ現れない場合があるため、無音だけを切断確定とはせず、利用者向けreopen/relaunch操作と診断履歴をPhase 2のDevice Setupへ実装する。
 
 ### 7.2 入力の正規化
 
@@ -769,6 +777,8 @@ Input OffsetとAudio Offsetは、この分解結果と利用者のキャリブ�
 
 ### Phase 1: 採用エンジンでのProduct Vertical Slice
 
+詳細な実行単位、依存関係、各storyの受け入れ条件は[`phase1-stories.md`](./phase1-stories.md)を参照する。
+
 - 固定JSON譜面1曲
 - USB MIDI、Tone / Ding / Slap
 - 音源再生、audio-backed transport、3段階判定＋Miss
@@ -797,6 +807,17 @@ Input OffsetとAudio Offsetは、この分解結果と利用者のキャリブ�
 - デスクトップと同じtrace/golden testを実行
 - 品質基準を満たす場合のみ対応環境を明記して公開
 
+### Final Phase: Release Hardening
+
+主要機能の実装終了後、release candidateを許可する直前に[`final-phase-stories.md`](./final-phase-stories.md)を実施する。
+
+- 6分以上の実音源を1倍速で3回測り、長時間driftと終了frame誤差を分離する
+- 人工的な1 frame待ちを含まないMIDI dispatchを60/120 Hzと実機またはvirtual CoreMIDIで測る
+- 必要に応じてsample-based transport、MIDI arrival timestampのsong-time変換、native CoreMIDI adapterを実装する
+- drift各run 5 ms以下、MIDI dispatch p95 5 ms以下をrelease gateとする
+- allocationと物理打撃から音・画面までのend-to-end latencyを外部手段で確認する
+- R-P1-001とR-P1-003が未解決なら正式releaseを許可しない
+
 ### 将来Phase: Windows移植
 
 - Windows実機とMood Panを確保してから開始する
@@ -814,7 +835,7 @@ Input OffsetとAudio Offsetは、この分解結果と利用者のキャリブ�
 | Tone Fieldのnote mapping | Styleで変化し得る | 製品用途に合わせHandpan / Minorを基準に実機採取 | Phase 0 |
 | Ch.1/2重複 | 音色により両方出力 | traceからdedupe規則策定 | Phase 0 |
 | 判定窓 | 要プレイテスト | latency測定後に調整 | Vertical Slice後 |
-| 音源形式 | 要件例はMP3 | seek/loop試験後にOGG/WAVを選択 | Phase 1 |
+| 音源形式 | Phase 1は48 kHz mono 16-bit PCM WAVに決定。長時間importは未決定 | OGG/WAVの容量・変換・seek/loopを比較 | Phase 2 |
 | ゲームエンジン | Godot 4.6を採用 | ADR-001 / E03 | 決定済み |
 | 実装言語 | typed GDScript | ADR-001 / E03 | 決定済み |
 | MIDI backend | Godot標準MIDI | E02で3/3 session復旧。OS timestamp/切断通知なしは残存risk | 決定済み |

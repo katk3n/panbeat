@@ -1,0 +1,65 @@
+{
+  "schema_version": "1.0.0",
+  "run_id": "phase1-p112-acceptance-k-20260812",
+  "story": "P112",
+  "source_revision": "25ebaf4178b794de9b8fb356a1d8f4c3fa56ae3a",
+  "source_dirty": true,
+  "engine_version": "4.6.stable.official.89cea1439",
+  "target": "macOS universal release",
+  "renderer": "gl_compatibility",
+  "replay": {
+    "records": 45,
+    "summary": {
+      "accuracy": 1,
+      "breakdown": {
+        "extra_hit": 0,
+        "good": 0,
+        "great": 0,
+        "miss": 0,
+        "perfect": 45
+      },
+      "combo": 45,
+      "latest_direction": "on_time",
+      "latest_grade": "perfect",
+      "max_combo": 45,
+      "score": 45000
+    },
+    "golden": "game/content/phase1-fixed-song-v1/expected-summary.json",
+    "result": "pass"
+  },
+  "artifact_inspection": {
+    "required_resources": "pass",
+    "forbidden_credentials_raw_traces_absolute_paths_and_pocs": "pass"
+  },
+  "known_phase1_blockers": [
+    "P111 CoreAudio five-minute drift max 6.078 ms exceeds 5 ms target",
+    "P111 recorded-burst dispatch p95 8.295 ms exceeds 5 ms target"
+  ],
+  "outputs": [
+    {
+      "path": "artifacts/raw/phase1-p112-acceptance-k-20260812/PanBeat.zip",
+      "sha256": "45ad64f9c6662f3aa973fd7d3a4edae22af3f0126c2d49fedefead56cbee44e6",
+      "bytes": 62932973
+    },
+    {
+      "path": "artifacts/raw/phase1-p112-acceptance-k-20260812/replay.json",
+      "sha256": "c12405817cd8abf3b43ac15db447f9c87d6e8dc4ef11ac895cc876478c2e5321",
+      "bytes": 27152
+    },
+    {
+      "path": "artifacts/raw/phase1-p112-acceptance-k-20260812/gameplay.png",
+      "sha256": "5bfec4f6bc4dcefbcf113798b2693a151a4664a1a3805f57d2132a1f4f44a584",
+      "bytes": 37946
+    },
+    {
+      "path": "game/content/phase1-fixed-song-v1/checksums.json",
+      "sha256": "896fc81e18bddf4d6ce8515515e14abfe56f0226beff372121f2e97c4a59d841",
+      "bytes": 719
+    },
+    {
+      "path": "shared/fixtures/instrument-profiles/roland-mn10-handpan-minor-v1.json",
+      "sha256": "abfe1eae01e2b2c1e24801a7946354f35924426adc33c903672dce4d036fb42d",
+      "bytes": 2793
+    }
+  ]
+}

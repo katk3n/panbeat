@@ -1,0 +1,73 @@
+Godot Engine v4.6.stable.official.89cea1439 - https://godotengine.org
+
+ERROR: Condition "ret != noErr" is true. Returning: ""
+   at: get_system_ca_certificates (platform/macos/os_macos.mm:1014)
+[   0% ] first_scan_filesystem | Started プロジェクトの初期化 (5 steps)
+[   0% ] first_scan_filesystem | ファイル構造をスキャン中...
+[  16% ] first_scan_filesystem | グローバルクラス名を読み込み中...
+[  33% ] first_scan_filesystem | GDExtensionを検証中...
+[  50% ] first_scan_filesystem | 自動読み込みスクリプトを作成中...
+[  66% ] first_scan_filesystem | プラグインを初期化中...
+[  83% ] first_scan_filesystem | ファイルスキャンを開始...
+[ DONE ] first_scan_filesystem
+
+[   0% ] export | Started macOS用にエクスポート (3 steps)
+[   0% ] export | アプリバンドルの作成
+[  25% ] export | PKGを作成中
+[   0% ] savepack | Started パック中 (102 steps)
+[   1% ] savepack | ファイルの保存中: res://application/game_transport.gdc
+[   4% ] savepack | ファイルの保存中: res://application/normalized_input_queue.gdc
+[   8% ] savepack | ファイルの保存中: res://config/default-instrument-profile.json
+[  11% ] savepack | ファイルの保存中: res://content/phase1-fixed-song-v1/audio-provenance.json
+[  15% ] savepack | ファイルの保存中: res://content/phase1-fixed-song-v1/chart.json
+[  18% ] savepack | ファイルの保存中: res://content/phase1-fixed-song-v1/checksums.json
+[  22% ] savepack | ファイルの保存中: res://content/phase1-fixed-song-v1/expected-events.json
+[  26% ] savepack | ファイルの保存中: res://.godot/imported/orbit-practice.wav-c06d170b684ede10698e1ea28501b2f6.sample
+[  26% ] savepack | ファイルの保存中: res://content/phase1-fixed-song-v1/orbit-practice.wav.import
+[  29% ] savepack | ファイルの保存中: res://content/phase1-fixed-song-v1/package.json
+[  33% ] savepack | ファイルの保存中: res://content/phase1-fixed-song-v1/source.json
+[  35% ] savepack | ファイルの保存中: res://domain/fixed_object_pool.gdc
+[  39% ] savepack | ファイルの保存中: res://domain/input_technique.gdc
+[  42% ] savepack | ファイルの保存中: res://domain/judgement_engine.gdc
+[  46% ] savepack | ファイルの保存中: res://domain/note_visual_kinematics.gdc
+[  50% ] savepack | ファイルの保存中: res://infrastructure/godot_audio_clock.gdc
+[  53% ] savepack | ファイルの保存中: res://infrastructure/godot_midi_adapter.gdc
+[  57% ] savepack | ファイルの保存中: res://infrastructure/json_chart_source.gdc
+[  60% ] savepack | ファイルの保存中: res://infrastructure/midi_normalizer.gdc
+[  64% ] savepack | ファイルの保存中: res://infrastructure/profile_contract.gdc
+[  66% ] savepack | ファイルの保存中: res://infrastructure/scheduled_audio_transport.gdc
+[  70% ] savepack | ファイルの保存中: res://presentation/main.gdc
+[  74% ] savepack | ファイルの保存中: res://.godot/exported/133200997/export-1c7ced1d733f75dbde915a77f14685d1-main.scn
+[  77% ] savepack | ファイルの保存中: res://presentation/radial_view.gdc
+[  81% ] savepack | ファイルの保存中: res://tests/fixtures/minimal-chart.json
+[  84% ] savepack | ファイルの保存中: res://tests/fixtures/normalized-replay.json
+[  88% ] savepack | ファイルの保存中: res://tests/run_integration_tests.gdc
+[  91% ] savepack | ファイルの保存中: res://tests/run_replay_tests.gdc
+[  95% ] savepack | ファイルの保存中: res://tests/run_unit_tests.gdc
+[  95% ] savepack | ファイルの保存中: res://application/game_transport.gd.remap
+[  95% ] savepack | ファイルの保存中: res://application/normalized_input_queue.gd.remap
+[  95% ] savepack | ファイルの保存中: res://domain/fixed_object_pool.gd.remap
+[  95% ] savepack | ファイルの保存中: res://domain/input_technique.gd.remap
+[  95% ] savepack | ファイルの保存中: res://domain/judgement_engine.gd.remap
+[  95% ] savepack | ファイルの保存中: res://domain/note_visual_kinematics.gd.remap
+[  95% ] savepack | ファイルの保存中: res://infrastructure/godot_audio_clock.gd.remap
+[  95% ] savepack | ファイルの保存中: res://infrastructure/godot_midi_adapter.gd.remap
+[  95% ] savepack | ファイルの保存中: res://infrastructure/json_chart_source.gd.remap
+[  95% ] savepack | ファイルの保存中: res://infrastructure/midi_normalizer.gd.remap
+[  95% ] savepack | ファイルの保存中: res://infrastructure/profile_contract.gd.remap
+[  95% ] savepack | ファイルの保存中: res://infrastructure/scheduled_audio_transport.gd.remap
+[  95% ] savepack | ファイルの保存中: res://presentation/main.gd.remap
+[  95% ] savepack | ファイルの保存中: res://presentation/main.tscn.remap
+[  95% ] savepack | ファイルの保存中: res://presentation/radial_view.gd.remap
+[  95% ] savepack | ファイルの保存中: res://tests/run_integration_tests.gd.remap
+[  95% ] savepack | ファイルの保存中: res://tests/run_replay_tests.gd.remap
+[  95% ] savepack | ファイルの保存中: res://tests/run_unit_tests.gd.remap
+[  95% ] savepack | ファイルの保存中: res://.godot/global_script_class_cache.cfg
+[  95% ] savepack | ファイルの保存中: res://.godot/uid_cache.bin
+[  95% ] savepack | ファイルの保存中: res://project.binary
+[ DONE ] savepack
+
+[  50% ] export | bundleをコード署名中
+[  75% ] export | ZIPを作成中
+[ DONE ] export
+

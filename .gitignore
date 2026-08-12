@@ -54,9 +54,16 @@ node_modules/
 coverage/
 TestResults/
 
-# Phase 0 generated artifacts
-# Raw evidence belongs in artifacts/raw and is intentionally not ignored.
+# Generated artifacts
+# Structured, canonical raw evidence belongs in artifacts/raw. Reproducible
+# application archives, exploratory runs, and superseded capacity-limited logs
+# remain local; their canonical manifests retain checksums and commands.
 /artifacts/reports/
 /artifacts/builds/
 /artifacts/tmp/
 /shared/generated/
+/artifacts/raw/phase1-p112-acceptance-*/PanBeat.zip
+/artifacts/raw/phase1-p112-acceptance-[a-i]-*/
+/artifacts/raw/phase1-p113-preparation-*/
+/artifacts/raw/phase1-p111-smoke/
+/artifacts/raw/phase1-p111-performance/attempt-capacity-truncated/*.jsonl

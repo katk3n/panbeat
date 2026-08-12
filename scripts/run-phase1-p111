@@ -1,0 +1,18 @@
+#!/bin/sh
+set -eu
+script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+repository_root=$(CDPATH= cd -- "$script_dir/.." && pwd)
+raw_dir="$repository_root/artifacts/raw/phase1-p111-performance"
+report_dir="$repository_root/artifacts/reports/phase1-p111-performance"
+build_dir="$repository_root/artifacts/builds/phase1-p111-performance"
+mkdir -p "$raw_dir" "$report_dir" "$build_dir"
+if [ ! -f "$build_dir/PanBeat.zip" ]; then
+  "$script_dir/check-game" --mode build --run-id phase1-p111-performance
+fi
+unzip -q -o "$build_dir/PanBeat.zip" -d "$build_dir/app"
+binary="$build_dir/app/PanBeat.app/Contents/MacOS/PanBeat"
+for trial in 1 2 3; do
+  "$binary" -- --input-mode replay --replay-speed=0.1 --measurement-output="$raw_dir/trial-$trial.jsonl" --inject-stall-at-sec=12 --quit-on-complete >"$report_dir/trial-$trial.log" 2>&1
+done
+"$script_dir/godot" --headless --path "$repository_root/game" --log-file "$report_dir/midi-burst.log" --script res://tests/measure_p111_midi_burst.gd -- --output "$raw_dir/midi-burst.jsonl"
+node "$script_dir/summarize-phase1-p111.mjs"

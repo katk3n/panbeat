@@ -1,0 +1,8 @@
+{
+  "schema_version": "1.0.0",
+  "chart_id": "p102-minimal-chart",
+  "clock_domain": "song_time",
+  "time_unit": "microseconds",
+  "duration_us": 2000000,
+  "notes": []
+}
