@@ -1,7 +1,8 @@
 {
-  "schema_version": "1.0.0",
+  "schema_version": "1.1.0",
   "overlay_id": "p205-slap-v1",
   "source_musicxml_sha256": "d039856c26d8a8428c214f37f06d1839f69b4d1fc61b92ec947286c540c996fc",
+  "handpan_scale_name": "D Kurd 9",
   "difficulty": {"id": "normal", "label": "Normal"},
   "annotations": [
     {"selector": {"note_id": "P1:m1:t0:v1:D4:0"}, "technique": "slap", "target_id": "outer-hit-radius"}

@@ -6,9 +6,10 @@
   "additionalProperties": false,
   "required": ["schema_version", "overlay_id", "source_musicxml_sha256", "annotations"],
   "properties": {
-    "schema_version": {"const": "1.0.0"},
+    "schema_version": {"enum": ["1.0.0", "1.1.0"]},
     "overlay_id": {"type": "string", "minLength": 1},
     "source_musicxml_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "handpan_scale_name": {"type": "string", "minLength": 1, "maxLength": 80, "pattern": "^\\S(?:[^\\r\\n\\t]*\\S)?$"},
     "difficulty": {"type": "object"},
     "annotations": {"type": "array", "items": {"type": "object", "additionalProperties": false, "required": ["selector", "technique", "target_id"], "properties": {
       "selector": {"oneOf": [
@@ -18,5 +19,6 @@
       "technique": {"enum": ["tone", "ding", "slap"]},
       "target_id": {"type": "string", "minLength": 1}
     }}}
-  }
+  },
+  "allOf": [{"if": {"properties": {"schema_version": {"const": "1.0.0"}}, "required": ["schema_version"]}, "then": {"properties": {"handpan_scale_name": false}}}]
 }

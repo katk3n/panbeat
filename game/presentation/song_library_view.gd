@@ -74,42 +74,45 @@ func _build_ui() -> void:
 	var notation_row := HBoxContainer.new(); notation_row.add_theme_constant_override("separation", 12); layout.add_child(notation_row)
 	var notation_label := Label.new(); notation_label.text = "PITCH NOTATION"; notation_label.add_theme_color_override("font_color", Color("d6b66d")); notation_row.add_child(notation_label)
 	_written_octave_high = CheckBox.new(); _written_octave_high.text = "Written 1 octave high"; _written_octave_high.tooltip_text = "Map every written pitch to the Mood Pan note one octave lower"; notation_row.add_child(_written_octave_high)
-	var actions := HBoxContainer.new(); layout.add_child(actions)
+	var actions := HFlowContainer.new(); actions.add_theme_constant_override("h_separation", 4); actions.add_theme_constant_override("v_separation", 6); layout.add_child(actions)
 	_title_input = LineEdit.new(); _title_input.placeholder_text = "Song title"; _title_input.custom_minimum_size.x = 190; actions.add_child(_title_input)
 	_score_button = Button.new(); _score_button.text = "Choose Score…"; _score_button.pressed.connect(func() -> void: _choose_file("score")); actions.add_child(_score_button)
 	_audio_button = Button.new(); _audio_button.text = "Audio (optional)…"; _audio_button.pressed.connect(func() -> void: _choose_file("audio")); actions.add_child(_audio_button)
 	var clear_audio := Button.new(); clear_audio.text = "No Audio"; clear_audio.tooltip_text = "Import without backing audio; Mood Pan provides the sound"; clear_audio.pressed.connect(_clear_audio); actions.add_child(clear_audio)
 	_overlay_button = Button.new(); _overlay_button.text = "Overlay (optional)…"; _overlay_button.pressed.connect(func() -> void: _choose_file("overlay")); actions.add_child(_overlay_button)
-	var import_button := Button.new(); import_button.text = "Import"; import_button.tooltip_text = "Validate and import the selected MusicXML with optional audio"; import_button.pressed.connect(func() -> void: _run_import(false)); actions.add_child(import_button)
+	var import_button := Button.new(); import_button.text = "Import"; import_button.tooltip_text = "Validate and import the selected MusicXML or NotePan score with optional audio"; import_button.pressed.connect(func() -> void: _run_import(false)); actions.add_child(import_button)
 	var reimport := Button.new(); reimport.text = "Re-import"; reimport.pressed.connect(func() -> void: _run_import(true)); actions.add_child(reimport)
 	_delete = Button.new(); _delete.text = "Delete…"; _delete.pressed.connect(_on_delete); actions.add_child(_delete)
-	_list = ItemList.new(); _list.custom_minimum_size.y = 130; _list.item_selected.connect(_on_selected); layout.add_child(_list)
-	_details = RichTextLabel.new(); _details.fit_content = true; _details.custom_minimum_size.y = 100; _details.text = "Select a song to view validation diagnostics."; layout.add_child(_details)
+	_list = ItemList.new(); _list.custom_minimum_size.y = 110; _list.item_selected.connect(_on_selected); layout.add_child(_list)
+	_details = RichTextLabel.new(); _details.fit_content = false; _details.size_flags_vertical = Control.SIZE_EXPAND_FILL; _details.custom_minimum_size.y = 100; _details.text = "Select a song to view validation diagnostics."; layout.add_child(_details)
 	import_button.grab_focus()
 
 func _choose_file(kind: String) -> void:
 	var dialog := FileDialog.new(); dialog.file_mode = FileDialog.FILE_MODE_OPEN_FILE; dialog.access = FileDialog.ACCESS_FILESYSTEM; dialog.use_native_dialog = true
 	match kind:
-		"score": dialog.filters = PackedStringArray(["*.musicxml, *.xml, *.mxl ; MusicXML score"])
+		"score": dialog.filters = PackedStringArray(["*.musicxml, *.xml, *.mxl, *.pan ; MusicXML or NotePan score"])
 		"audio": dialog.filters = PackedStringArray(["*.wav, *.ogg ; WAV or Ogg audio"])
 		"overlay": dialog.filters = PackedStringArray(["*.json ; PanBeat overlay"])
 	dialog.file_selected.connect(func(path: String) -> void:
 		match kind:
-			"score": _score_path = path; _score_button.text = path.get_file()
+			"score": _score_path = path; _score_button.text = path.get_file(); _update_score_options()
 			"audio": _audio_path = path; _audio_button.text = path.get_file()
 			"overlay": _overlay_path = path; _overlay_button.text = path.get_file()
 		dialog.queue_free())
 	dialog.canceled.connect(dialog.queue_free); add_child(dialog); dialog.popup_centered_ratio(0.75)
 
 func _run_import(reimport: bool) -> void:
-	if _score_path.is_empty(): _details.text = "IMPORT INPUT REQUIRED — Choose a MusicXML score."; return
+	if _score_path.is_empty(): _details.text = "IMPORT INPUT REQUIRED — Choose a MusicXML or NotePan score."; return
 	if reimport and _pending_delete.is_empty(): _details.text = "Select an existing song before Re-import."; return
 	var profile_value: Variant = JSON.parse_string(FileAccess.get_file_as_string(ProjectSettings.globalize_path("res://config/default-instrument-profile.json")))
 	if profile_value is not Dictionary: _details.text = "IMPORT FAILED — Instrument Profile could not be loaded."; return
 	var song_id := _pending_delete if reimport else _portable_id(_title_input.text if not _title_input.text.strip_edges().is_empty() else _score_path.get_file().get_basename())
-	var request := {"score_path":_score_path, "audio_path":_audio_path, "overlay_path":_overlay_path, "profile":profile_value, "notation_octave_shift":-1 if _written_octave_high.button_pressed else 0, "song_id":song_id, "title":_title_input.text if not _title_input.text.strip_edges().is_empty() else song_id}
+	var request := {"score_path":_score_path, "audio_path":_audio_path, "overlay_path":_overlay_path, "profile":profile_value, "notation_octave_shift":-1 if _written_octave_high.button_pressed else 0, "song_id":song_id, "title":_title_input.text.strip_edges()}
 	var result: Dictionary = Importer.new(Files.new(), AudioConverter.new()).import_song(request, repository_root, repositories.songs)
-	if result.get("ok", false): _details.text = "IMPORTED — %s%s" % [result.get("song", {}).get("title", song_id), " (duplicate content)" if result.get("duplicate", false) else ""] ; refresh()
+	if result.get("ok", false):
+		var lines: Array[String] = ["IMPORTED — %s%s" % [result.get("song", {}).get("title", song_id), " (duplicate content)" if result.get("duplicate", false) else ""]]
+		for diagnostic: Dictionary in result.get("diagnostics", []): lines.append("%s %s: %s" % [str(diagnostic.get("severity", "warning")).to_upper(), diagnostic.get("code", "unknown"), diagnostic.get("message", "")])
+		_details.text = "\n".join(lines); refresh()
 	else:
 		var lines: Array[String] = ["IMPORT FAILED"]
 		for diagnostic: Dictionary in result.get("diagnostics", []): lines.append("%s: %s\nFix: %s" % [diagnostic.get("code", "unknown"), diagnostic.get("message", ""), diagnostic.get("remediation", "")])
@@ -118,6 +121,17 @@ func _run_import(reimport: bool) -> void:
 func _clear_audio() -> void:
 	_audio_path = ""
 	_audio_button.text = "Audio (optional)…"
+
+func _update_score_options() -> void:
+	var is_notepan := _score_path.get_extension().to_lower() == "pan"
+	_overlay_button.disabled = is_notepan
+	_written_octave_high.disabled = is_notepan
+	if is_notepan:
+		_overlay_path = ""; _overlay_button.text = "Overlay (N/A)"; _overlay_button.tooltip_text = "PanBeat overlay is available only for MusicXML sources"
+		_written_octave_high.button_pressed = false
+	else:
+		_overlay_button.text = "Overlay (optional)…" if _overlay_path.is_empty() else _overlay_path.get_file()
+		_overlay_button.tooltip_text = "Optional source-bound PanBeat overlay for MusicXML"
 
 func _portable_id(source: String) -> String:
 	var result := ""
@@ -138,22 +152,28 @@ func refresh() -> void:
 	for song: Dictionary in _songs:
 		var marker: String = str({"valid":"VALID", "warning":"WARNING", "invalid":"INVALID"}.get(song.get("display_status", "invalid"), "INVALID"))
 		var duration := float(song.get("duration_us", 0)) / 1000000.0
-		_list.add_item("%s — %s · %s · %.1fs · chart %s · profile %s · %s" % [marker, song.get("title", song.get("song_id", "Untitled")), song.get("artist", ""), duration, song.get("chart_schema_version", "unknown"), song.get("profile_compatibility", "unknown"), song.get("artwork_label", "No artwork")])
-	if _songs.is_empty(): _details.text = "EMPTY — No local songs. Import MusicXML and audio to begin."
+		var scale_name := str(song.get("handpan_scale_name", ""))
+		var scale_label := "Scale %s" % scale_name if not scale_name.is_empty() else "Scale not specified"
+		var artist := str(song.get("artist", ""))
+		var item_text := "%s — %s · %s · %s · %.1fs" % [marker, song.get("title", song.get("song_id", "Untitled")), artist if not artist.is_empty() else "Unknown artist", scale_label, duration]
+		_list.add_item(item_text); _list.set_item_tooltip(_list.item_count - 1, item_text)
+	if _songs.is_empty(): _details.text = "EMPTY — No local songs. Import MusicXML or NotePan to begin."
 
 func _on_selected(index: int) -> void:
 	if index < 0 or index >= _songs.size(): return
-	var song := _songs[index]; _pending_delete = str(song.get("song_id", "")); _play.disabled = song.get("display_status") != "valid"; var lines: Array[String] = ["%s — import v%s" % [song.get("title", _pending_delete), song.get("import_version", "?")]]
-	var selected_background := _resolved_background_id(_pending_delete); _select_background_id(selected_background); lines.append("BACKGROUND — %s" % BackgroundPresets.preset(selected_background).get("label", selected_background))
-	var selected_speed := _resolved_note_scroll_speed_id(_pending_delete); _select_note_scroll_speed_id(selected_speed); lines.append("NOTE SPEED — %s" % NoteScrollSpeeds.preset(selected_speed).get("label", selected_speed))
+	var song := _songs[index]; _pending_delete = str(song.get("song_id", "")); _play.disabled = not bool(song.get("playable", false)); var lines: Array[String] = ["%s — import v%s" % [song.get("title", _pending_delete), song.get("import_version", "?")]]
+	var scale_name := str(song.get("handpan_scale_name", "")); lines.append("SCALE — %s" % [scale_name if not scale_name.is_empty() else "Not specified"])
 	for diagnostic: Dictionary in song.get("diagnostics", []): lines.append("%s %s: %s\nFix: %s" % [str(diagnostic.get("severity", "error")).to_upper(), diagnostic.get("code", "unknown"), diagnostic.get("message", ""), diagnostic.get("remediation", "")])
 	if song.get("diagnostics", []).is_empty(): lines.append("VALID — No import diagnostics.")
+	lines.append("TECHNICAL — chart %s · profile %s (%s) · %s" % [song.get("chart_schema_version", "unknown"), song.get("profile_id", "unknown"), song.get("profile_compatibility", "unknown"), song.get("artwork_label", "No artwork")])
+	var selected_background := _resolved_background_id(_pending_delete); _select_background_id(selected_background); lines.append("BACKGROUND — %s" % BackgroundPresets.preset(selected_background).get("label", selected_background))
+	var selected_speed := _resolved_note_scroll_speed_id(_pending_delete); _select_note_scroll_speed_id(selected_speed); lines.append("NOTE SPEED — %s" % NoteScrollSpeeds.preset(selected_speed).get("label", selected_speed))
 	_details.text = "\n".join(lines)
 
 func _play_selected() -> void:
 	if _pending_delete.is_empty(): _details.text = "Select a valid song before playing."; return
 	for song: Dictionary in _songs:
-		if song.get("song_id") == _pending_delete and song.get("display_status") == "valid": play_requested.emit(repository_root.path_join(str(song["package_path"]))); return
+		if song.get("song_id") == _pending_delete and bool(song.get("playable", false)): play_requested.emit(repository_root.path_join(str(song["package_path"]))); return
 	_details.text = "PLAY UNAVAILABLE — Re-import the selected song or choose a compatible valid package."
 
 func _on_background_selected(index: int) -> void:

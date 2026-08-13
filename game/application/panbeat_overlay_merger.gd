@@ -2,16 +2,31 @@ class_name PanBeatOverlayMerger
 extends RefCounted
 
 const Canonical := preload("res://application/canonical_json.gd")
-const OVERLAY_VERSION := "1.0.0"
+const OVERLAY_VERSIONS: Array[String] = ["1.0.0", "1.1.0"]
 
 static func merge(timed_chart: RefCounted, overlay: Dictionary, source_sha256: String, profile: Dictionary, explicit_pitch_mapping: Dictionary = {}, notation_octave_shift: int = 0) -> Dictionary:
 	var diagnostics: Array[Dictionary] = []
 	var annotations: Array = []
+	var song_metadata: Dictionary = {}
 	if not overlay.is_empty():
-		if overlay.get("schema_version") != OVERLAY_VERSION: diagnostics.append(_diagnostic("unsupported_overlay_version", "overlay schema_version must be 1.0.0", -1))
+		var overlay_version := str(overlay.get("schema_version", ""))
+		if not OVERLAY_VERSIONS.has(overlay_version): diagnostics.append(_metadata_diagnostic("unsupported_overlay_version", "overlay schema_version must be 1.0.0 or 1.1.0"))
 		if overlay.get("source_musicxml_sha256") != source_sha256: diagnostics.append(_diagnostic("overlay_source_checksum_mismatch", "overlay does not match source MusicXML SHA-256", -1))
 		if overlay.get("annotations") is not Array: diagnostics.append(_diagnostic("invalid_annotations", "overlay annotations must be an array", -1))
 		else: annotations = overlay["annotations"]
+		if overlay.has("handpan_scale_name"):
+			if overlay_version != "1.1.0":
+				diagnostics.append(_metadata_diagnostic("unsupported_overlay_metadata_version", "handpan_scale_name requires overlay schema_version 1.1.0"))
+			else:
+				var scale_name: Variant = overlay["handpan_scale_name"]
+				if scale_name is not String:
+					diagnostics.append(_metadata_diagnostic("invalid_handpan_scale_name", "handpan_scale_name must be a string"))
+				else:
+					var text := scale_name as String
+					if text.is_empty() or text.length() > 80 or text != text.strip_edges() or "\n" in text or "\r" in text or "\t" in text:
+						diagnostics.append(_metadata_diagnostic("invalid_handpan_scale_name", "handpan_scale_name must be a trimmed single-line string of 1 to 80 characters"))
+					else:
+						song_metadata["handpan_scale_name"] = text
 	if not diagnostics.is_empty(): return {"ok":false, "diagnostics":diagnostics}
 	var selected: Dictionary = {}
 	for index: int in annotations.size():
@@ -48,7 +63,14 @@ static func merge(timed_chart: RefCounted, overlay: Dictionary, source_sha256: S
 	for note: Dictionary in timed_chart.notes:
 		var mapping: Dictionary = selected.get(note["note_id"], {})
 		if mapping.is_empty() and not str(note.get("authoring_technique", "")).is_empty():
-			mapping = {"technique":str(note["authoring_technique"]), "target_id":str(note.get("authoring_target_id", ""))}
+			var authoring_technique := str(note["authoring_technique"])
+			var authoring_target := str(note.get("authoring_target_id", ""))
+			if authoring_target.is_empty():
+				var resolved_target := _unique_profile_target(profile, authoring_technique)
+				if not resolved_target.get("ok", false):
+					diagnostics.append(_diagnostic(str(resolved_target.get("code", "unknown_target")), str(resolved_target.get("error", "Technique target is unavailable.")), -1, note.get("source", {}))); continue
+				authoring_target = str(resolved_target["target_id"])
+			mapping = {"technique":authoring_technique, "target_id":authoring_target}
 			if not _profile_has_pair(profile, mapping["technique"], mapping["target_id"]):
 				diagnostics.append(_diagnostic("unknown_target", "profile has no %s:%s target" % [mapping["technique"], mapping["target_id"]], -1, note.get("source", {}))); continue
 		if mapping.is_empty():
@@ -61,7 +83,7 @@ static func merge(timed_chart: RefCounted, overlay: Dictionary, source_sha256: S
 		gameplay_notes.append({"note_id":note["note_id"], "timestamp_us":note["timestamp_us"], "duration_us":note["duration_us"], "technique":mapping["technique"], "target_id":mapping["target_id"], "source":note["source"], "pitch":note["pitch"]})
 	if not diagnostics.is_empty(): return {"ok":false, "diagnostics":diagnostics}
 	var chart := {"schema_version":"1.0.0", "chart_id":timed_chart.chart_id, "importer_version":timed_chart.importer_version, "overlay_id":overlay.get("overlay_id", "none"), "profile_id":profile.get("profile_id", ""), "duration_us":timed_chart.duration_us, "tempo_map":timed_chart.tempo_map.duplicate(true), "notes":gameplay_notes}
-	return {"ok":true, "chart":chart, "canonical_json":Canonical.encode(chart) + "\n", "diagnostics":[]}
+	return {"ok":true, "chart":chart, "canonical_json":Canonical.encode(chart) + "\n", "song_metadata":song_metadata, "diagnostics":[]}
 
 static func _resolve_pitch(pitch: Dictionary, profile: Dictionary, explicit: Dictionary, notation_octave_shift: int) -> Dictionary:
 	var key := "%s%s%s" % [pitch.get("step", ""), "#" if int(pitch.get("alter", 0)) == 1 else "b" if int(pitch.get("alter", 0)) == -1 else "", pitch.get("octave", "")]
@@ -94,8 +116,20 @@ static func _profile_has_pair(profile: Dictionary, technique: String, target_id:
 		if value is Dictionary and value.get("technique") == technique and value.get("target_id") == target_id: return true
 	return false
 
+static func _unique_profile_target(profile: Dictionary, technique: String) -> Dictionary:
+	var targets: Dictionary = {}
+	for value: Variant in profile.get("mappings", []):
+		if value is Dictionary and value.get("technique") == technique:
+			targets[str(value.get("target_id", ""))] = true
+	if targets.is_empty(): return {"ok":false, "code":"unknown_target", "error":"profile has no %s target" % technique}
+	if targets.size() > 1: return {"ok":false, "code":"ambiguous_technique_target", "error":"profile has more than one %s target" % technique}
+	return {"ok":true, "target_id":str(targets.keys()[0])}
+
 static func _source_matches(source: Dictionary, selector: Dictionary) -> bool:
 	return str(source.get("part", "")) == str(selector.get("part", "")) and str(source.get("measure", "")) == str(selector.get("measure", "")) and int(source.get("tick", -1)) == int(selector.get("tick", -2)) and str(source.get("voice", "")) == str(selector.get("voice", ""))
 
 static func _diagnostic(code: String, message: String, annotation_index: int, source: Dictionary = {}) -> Dictionary:
 	return {"severity":"error", "code":code, "file":"overlay" if annotation_index >= 0 else "MusicXML", "annotation_index":annotation_index, "part":source.get("part", ""), "measure":source.get("measure", ""), "element":"annotation" if annotation_index >= 0 else "note", "message":message, "remediation":"Correct the overlay selector, target, source checksum, or explicit pitch mapping."}
+
+static func _metadata_diagnostic(code: String, message: String) -> Dictionary:
+	return {"severity":"error", "code":code, "file":"overlay", "annotation_index":-1, "part":"", "measure":"", "element":"handpan_scale_name", "message":message, "remediation":"Use overlay schema_version 1.1.0 and a trimmed single-line handpan scale name of at most 80 characters."}

@@ -25,7 +25,7 @@ class FakeRepositories extends RefCounted:
 class FakeLibrary extends RefCounted:
 	func loading_state() -> Dictionary: return {"label":"LOADING — Reading local songs…"}
 	func query(_root: String, _store: RefCounted, _profile: String) -> Dictionary:
-		return {"label":"1 SONG READY","songs":[{"song_id":"quiet-forge","title":"Quiet Forge Etude","artist":"PanBeat Studio","duration_us":96_000_000,"chart_schema_version":"1.0.0","profile_compatibility":"compatible","artwork_label":"No artwork","display_status":"valid","import_version":"1.0.0","package_path":"quiet-forge","diagnostics":[]}]}
+		return {"label":"1 SONG READY","songs":[{"song_id":"quiet-forge","title":"Quiet Forge Etude","artist":"PanBeat Studio","handpan_scale_name":"D Kurd 9","duration_us":96_000_000,"chart_schema_version":"1.0.0","profile_id":"roland-mn10-handpan-minor-v1","profile_compatibility":"compatible","artwork_label":"No artwork","display_status":"valid","playable":true,"import_version":1,"package_path":"quiet-forge","diagnostics":[]}]}
 
 class FakeAdapter extends Node:
 	signal record_received(raw: Dictionary, normalized: Dictionary)

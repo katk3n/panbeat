@@ -45,7 +45,8 @@ PanBeat は一般的なデスクトップ業務アプリではなく、次の性
 | MIDI（デスクトップ） | Godot標準`InputEventMIDI`。OS timestamp/切断状態の非公開を診断へ明記 |
 | MIDI（Web） | Godot Web MIDI入力（MVP対象外） |
 | MusicXML | エンジンの安全なストリーミングXML APIでMVP範囲を明示実装 |
-| データ形式 | MusicXML 4.0 + PanBeat JSON Schema + 任意の伴奏音源ファイル |
+| NotePan | bounded binary readerでschema 6/8非圧縮・単一trackの対応範囲を明示実装 |
+| データ形式 | MusicXML 4.0 / NotePan schema 6/8 + PanBeat JSON Schema + 任意の伴奏音源ファイル |
 | JSON | Godot JSON API + schema/semantic validation |
 | テスト | 共通golden fixture + fake clock + MIDI trace replay。engine別headless/integration test |
 | CI | 初期はmacOS build、headless test、JSON Schema検証、screenshot比較 |
@@ -62,7 +63,7 @@ GodotはMIT Licenseである。Unityのライセンス調査結果はPhase 0のd
 2. Tone / Ding / Slapを「形状 × 移動方向」で識別できる描画
 3. USB MIDI入力の正規化とInstrument Profileによる割り当て
 4. 音源再生と独立しない、再現可能なタイミング判定
-5. MusicXMLを原譜とし、ゲーム固有情報を別データに保つ変換パイプライン
+5. MusicXMLまたはNotePanを原譜とし、ゲーム固有情報を別データに保つ変換パイプライン
 6. Input Offset / Audio Offsetの調整
 7. 将来のPressure、Aftertouch、CC、Roll、Mute、左右手ガイドへの拡張
 
@@ -280,9 +281,11 @@ MonoGameはWindows / macOS / Linuxで共通のC#ゲームコードと2D/3D描画
 flowchart LR
     MP["Mood Pan MN-10"] -->|"USB MIDI"| MI["MIDI Platform Adapter"]
     XML["score.musicxml"] --> IMP["MusicXML Importer"]
+    PAN["score.pan"] --> IMP2["Safe NotePan Reader"]
     OV["chart.panbeat.json"] --> IMP
     IP["instrument-profile.json"] --> MAP["Instrument Mapper"]
     IMP --> ME["Musical Event Model"]
+    IMP2 --> ME
     ME --> MAP
     MAP --> RC["Runtime Chart"]
     AU["audio.ogg / wav"] --> AC["Audio Clock / Transport"]
@@ -423,7 +426,9 @@ MusicXMLのChordは、base noteと`<chord/>` memberを同じtimestampに持つ�
 
 実音より1オクターブ高いハンドパン記譜は曲importの明示option `notation_octave_shift=-1` で扱う。通常記譜と音域が重なるため自動検出せず、source pitchとnote IDは原譜どおり保持し、Instrument Profileへのpitch-to-target解決時だけMIDI noteを12下げる。このoptionはcache keyとpackage metadataに含める。
 
-NotePan lyricを持つMusicXML `<unpitched>`は、primary label（`+`より前）をauthoring techniqueへ変換する。`g`はGhostとしてscore cursorを進めるがRuntime Noteを作らない。`S`は`slap:outer-hit-radius`、`T`はMood Pan代替の`ding:ding`とする。複合ラベルの追加Toneは後続のMusicXML `<chord/>` noteから独立Runtime Noteとして得るため、lyric文字列からToneを二重生成しない。未知labelは位置付きdiagnosticで拒否する。
+NotePan lyricを持つMusicXML `<unpitched>`は、primary label（`+`より前）をauthoring techniqueへ変換する。`g`はGhostとしてscore cursorを進めるがRuntime Noteを作らない。`S`と`T`は`slap:outer-hit-radius`とする。複合ラベルの追加Toneは後続のMusicXML `<chord/>` noteから独立Runtime Noteとして得るため、lyric文字列からToneを二重生成しない。未知labelは位置付きdiagnosticで拒否する。
+
+NotePan `.pan`の直接importでは埋め込みpitchをそのままInstrument Profileへ解決し、MusicXML向けoctave shiftを適用しない。`S/T`はSlap、`d/P/F`はDingへ変換し、profile内でtechnique targetが一意でない場合は拒否する。装飾の縮退warningはpackageへ永続化し、profile不一致とは別の再生可能状態として扱う。
 
 ### 6.5 Pause / Resume / Seek
 
@@ -555,19 +560,22 @@ Phase 0では最低限、全9パッド、定性的な弱/中/強、Slapのnote n
 song-id/
 ├── song.json                 # 曲名、作者、音源、譜面、バージョン
 ├── score.musicxml            # 音楽的な原譜
+├── source.pan                # NotePanを直接importした場合の原本
 ├── chart.panbeat.json        # Slap等の注釈、マッピング上書き、難易度
 ├── audio.ogg                 # 配布用伴奏。必要に応じwav
 └── artwork.png               # 任意
 ```
 
-MusicXMLは原譜、PanBeat JSONはゲーム固有情報、Runtime Chartは両者から生成されるキャッシュとする。生成物を人が編集する運用にしない。
+MusicXMLまたはNotePanは原譜、PanBeat JSONはMusicXML向けゲーム固有情報、Runtime Chartは原譜から生成されるキャッシュとする。生成物を人が編集する運用にしない。
 
 ### 8.2 変換パイプライン
 
 ```mermaid
 flowchart TD
     A["MusicXML 4.0"] --> B["Safe XML Reader"]
+    N["NotePan schema 6/8"] --> NB["Bounded Binary Reader"]
     B --> C["Symbolic Score: part / measure / voice / tick"]
+    NB --> C
     C --> D["Tie resolution / Tempo map"]
     O["PanBeat overlay"] --> E["Technique annotations"]
     D --> E
@@ -925,8 +933,8 @@ Input OffsetとAudio Offsetは、この分解結果と利用者のキャリブ�
 
 - **Status:** Accepted
 - **Context:** 原譜の可搬性を保ちつつ、Slap、target、左右手、難易度等を追加する必要がある。
-- **Decision:** MusicXMLを音楽原本、PanBeat JSONをゲーム注釈、Runtime Chartを生成キャッシュとする。
-- **Consequences:** source参照の安定性とmigrationが必要だが、標準形式とゲーム固有情報の責務が明確になる。
+- **Decision:** MusicXMLを音楽原本、PanBeat JSONをゲーム注釈と作者入力メタデータ、Runtime Chartを生成キャッシュとする。譜面固有のハンドパンスケール表示名はoverlayで明示し、生成したsong packageへ正規化するが、Runtime Chartやsong indexへ複製しない。
+- **Consequences:** source参照の安定性とmigrationが必要だが、標準形式、作者入力、表示用曲メタデータ、ゲーム実行データの責務が明確になる。スケール名は音符列やInstrument Profileから推測しない。
 
 ### ADR-004: ブラウザはMVP正式対象外
 

@@ -6,7 +6,7 @@ const Canonical := preload("res://application/canonical_json.gd")
 const IMPORTER_VERSION := "panbeat-musicxml-importer-v1"
 const DEFAULT_BPM_MILLI := 120_000
 
-static func compile(score: RefCounted, chart_id: String) -> Dictionary:
+static func compile(score: RefCounted, chart_id: String, importer_version: String = IMPORTER_VERSION) -> Dictionary:
 	var diagnostics: Array[Dictionary] = []
 	if score.ticks_per_quarter <= 0: return _failed("invalid_ticks_per_quarter", "ticks_per_quarter must be positive")
 	var tempo_result := _build_tempo_map(score.tempo_events, score.ticks_per_quarter)
@@ -28,7 +28,7 @@ static func compile(score: RefCounted, chart_id: String) -> Dictionary:
 	for event: Dictionary in score.time_signatures:
 		time_map.append({"tick":int(event["tick"]), "timestamp_us":tick_to_us(int(event["tick"]), tempo_map, score.ticks_per_quarter), "beats":int(event["beats"]), "beat_type":int(event["beat_type"]), "source":{"part":event.get("part", ""), "measure":event.get("measure", ""), "line":event.get("line", 0)}})
 	var duration_us := tick_to_us(duration_ticks, tempo_map, score.ticks_per_quarter)
-	var chart := TimedChart.new(chart_id, IMPORTER_VERSION, score.ticks_per_quarter, duration_ticks, duration_us, tempo_map, time_map, timed_notes)
+	var chart := TimedChart.new(chart_id, importer_version, score.ticks_per_quarter, duration_ticks, duration_us, tempo_map, time_map, timed_notes)
 	var dictionary := chart.to_dictionary()
 	return {"ok": true, "chart": chart, "canonical_json": Canonical.encode(dictionary) + "\n", "diagnostics": diagnostics}
 

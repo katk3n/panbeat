@@ -54,6 +54,14 @@ func _initialize() -> void:
 	var octave_imported := importer.import_song(octave_request, root.path_join("library"), repositories.songs)
 	var octave_chart_result: Dictionary = files.read_json(str(octave_imported.get("published_path", "")).path_join("chart.json"), 1024 * 1024) if octave_imported.get("ok") else {}
 	_check(octave_imported.get("ok") and octave_imported.get("package", {}).get("notation_octave_shift") == -1 and octave_chart_result.get("document", {}).get("notes", [])[0]["target_id"] == "ding", "one-octave-high notation imports against sounding pitches one octave lower", failures)
+	var scale_request := request.duplicate(true); scale_request["song_id"] = "p207-scale"; scale_request["overlay_path"] = ProjectSettings.globalize_path("res://../shared/fixtures/musicxml/p205-slap-overlay.json")
+	var scale_imported := importer.import_song(scale_request, root.path_join("library"), repositories.songs)
+	_check(scale_imported.get("ok") and scale_imported.get("package", {}).get("schema_version") == "1.2.0" and scale_imported.get("package", {}).get("handpan_scale_name") == "D Kurd 9" and not scale_imported.get("package", {}).get("chart_path", "").is_empty(), "overlay scale metadata is persisted in package without changing Runtime Chart", failures)
+	var changed_overlay: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(str(scale_request["overlay_path"]))) as Dictionary; changed_overlay["handpan_scale_name"] = "E Amara 9"
+	var changed_overlay_path := root.path_join("changed-scale-overlay.json"); files.write_text(changed_overlay_path, JSON.stringify(changed_overlay) + "\n")
+	var changed_scale_request := scale_request.duplicate(true); changed_scale_request["overlay_path"] = changed_overlay_path
+	var changed_scale_import := importer.import_song(changed_scale_request, root.path_join("library"), repositories.songs)
+	_check(changed_scale_import.get("ok") and int(changed_scale_import.get("song", {}).get("import_version", 0)) == 2 and changed_scale_import.get("package", {}).get("handpan_scale_name") == "E Amara 9", "changing only overlay scale metadata invalidates cache and increments import version", failures)
 	var invalid_octave_request := octave_request.duplicate(true); invalid_octave_request["song_id"] = "invalid-octave"; invalid_octave_request["notation_octave_shift"] = -2
 	_check(_code(importer.import_song(invalid_octave_request, root.path_join("invalid-octave-root"), repositories.songs)) == "invalid_notation_octave_shift", "unsupported notation octave shift is diagnosed", failures)
 	var cancelled := CancelCounter.new(); cancelled.cancel_at = 1
@@ -91,7 +99,7 @@ func _initialize() -> void:
 	var audio_request := request.duplicate(true); audio_request["song_id"] = "bad-audio"; audio_request["audio_path"] = corrupt_audio
 	_check(_code(importer.import_song(audio_request, root.path_join("bad-audio-root"), repositories.songs)) == "corrupt_or_unreadable_audio", "corrupt audio rejected before publication", failures)
 	files.remove_tree(root)
-	_finish(failures, 23)
+	_finish(failures, 25)
 
 func _create_mxl(path: String, score: PackedByteArray, include_container: bool) -> void:
 	var packer := ZIPPacker.new(); packer.open(path)

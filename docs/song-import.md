@@ -1,12 +1,12 @@
 # Song Import Pipeline
 
-P207 imports `.musicxml`, `.xml`, or `.mxl` plus optional PanBeat overlay JSON and optional WAV/Ogg backing audio. Run:
+P207 imports `.musicxml`, `.xml`, or `.mxl` plus optional PanBeat overlay JSON and optional WAV/Ogg backing audio. P401 adds direct `.pan` schema 6 import without overlay. Run:
 
 ```sh
 scripts/check-phase2-p207 phase2-p207-import-YYYYMMDD
 ```
 
-The Application service inspects extensions, byte limits, and SHA-256 without modifying sources. MusicXML is parsed by the safe reader, compiled deterministically, merged with the source-bound overlay and selected Instrument Profile, and written with canonical JSON. When backing audio is supplied, FFmpeg converts it into 48 kHz stereo Ogg Vorbis using the accepted P206 settings. Without backing audio, package duration comes from the score and Gameplay uses a monotonic clock.
+The Application service inspects extensions, byte limits, source format, and SHA-256 without modifying sources. MusicXML and NotePan dispatch through their safe readers into the same Symbolic Score, compiler, selected Instrument Profile, and canonical Runtime Chart path. MusicXML may use a source-bound overlay; NotePan may not. When backing audio is supplied, FFmpeg converts it into 48 kHz stereo Ogg Vorbis using the accepted P206 settings. Without backing audio, package duration comes from the score and Gameplay uses a monotonic clock.
 
 ## MXL security limits
 
@@ -16,13 +16,15 @@ Only the declared rootfile is read; the archive is never expanded into the Song 
 
 ## Atomic publication and recovery
 
-Import writes `source.musicxml`, optional `overlay.json`, `chart.json`, optional `runtime.ogg`, and `package.json` below a hidden staging directory. Every step must pass before the staging directory is renamed to its immutable version path. The atomic song index is saved last, so a crash, cancellation, conversion failure, or validation error cannot expose a partial song to Song Library. If index publication fails, the newly renamed package is removed.
+Import writes `source.musicxml` or `source.pan`, optional MusicXML `overlay.json`, `chart.json`, optional `runtime.ogg`, and `package.json` below a hidden staging directory. Every step must pass before the staging directory is renamed to its immutable version path. The atomic song index is saved last, so a crash, cancellation, conversion failure, or validation error cannot expose a partial song to Song Library. If index publication fails, the newly renamed package is removed.
 
 The index stores paths relative to the Song Repository and package metadata stores only the original filename, never a user-specific absolute source path.
 
+Overlay `1.1.0` `handpan_scale_name` is validated during merge. NotePan uses its explicit embedded scale string. Both are copied to package metadata and deliberately excluded from Runtime Chart and the song index. Package `1.2.0` adds source format/path and persistent non-blocking import diagnostics; existing package `1.0.0` and `1.1.0` remain readable.
+
 ## Duplicate and update policy
 
-The cache key covers importer version, cache contract version, MusicXML content SHA-256, overlay SHA-256, Instrument Profile SHA-256, explicit pitch mapping SHA-256, and audio SHA-256. The cache contract is bumped when NotePan technique semantics change so Re-import cannot return a chart produced by the older mapping.
+The cache key covers importer version, cache contract version, source format and content SHA-256, overlay SHA-256, Instrument Profile SHA-256, explicit pitch mapping SHA-256, notation octave shift, and audio SHA-256. NotePan uses importer `panbeat-score-importer-v2`; existing MusicXML continues to identify charts as `panbeat-musicxml-importer-v1`.
 It also covers `notation_octave_shift`. Song Library exposes “Written 1 octave high”; when selected, mapping resolves each written pitch one octave lower while preserving the source MusicXML pitch in the chart. This is explicit rather than auto-detected because the written and sounding ranges can overlap.
 
 For NotePan-authored `<unpitched>` notes, the first NotePan lyric token is authoritative: `g` advances score time but is omitted from Gameplay, while standalone `S` and `T` both map to Slap. Mood Pan cannot play a Slap and Tone Field chord, so compound labels such as `T+1` and `S+6` omit the unpitched `T`/`S` member; only the pitched member from the following MusicXML chord note is imported and judged.

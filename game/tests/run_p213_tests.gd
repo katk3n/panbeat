@@ -17,6 +17,7 @@ func _initialize() -> void:
 	var imported := Importer.new(files, Audio.new()).import_song(request, root.path_join("library"), repositories.songs)
 	_check(imported.get("ok") and FileAccess.file_exists(imported["published_path"].path_join("runtime.ogg")), "MusicXML overlay and audio imported as playable package", failures)
 	var package: Dictionary = files.read_json(imported["published_path"].path_join("package.json"), 1024 * 1024)["document"]; var chart_result := ChartSource.load_chart(imported["published_path"].path_join(package["chart_path"])); var chart: Dictionary = chart_result.get("chart", {})
+	_check(package.get("schema_version") == "1.2.0" and package.get("handpan_scale_name") == "D Kurd 9" and not chart.has("handpan_scale_name"), "handpan scale remains package metadata rather than Runtime Chart data", failures)
 	_check(chart_result.get("ok") and chart["notes"].size() == 4, "tied notes merge into one runtime event", failures)
 	var techniques: Array[String] = []; for note: Dictionary in chart["notes"]: techniques.append(note["technique"])
 	_check(techniques.has("tone") and techniques.has("ding") and techniques.has("slap"), "Tone Ding and Slap survive imported package", failures)
@@ -40,7 +41,7 @@ func _initialize() -> void:
 	_check(result["metadata"]["song_id"] == "p213-acceptance" and result["metadata"]["importer_version"] == Importer.IMPORTER_VERSION, "Results retains imported package provenance", failures)
 	var index: Dictionary = repositories.songs.load()["document"]; _check(index["songs"][0]["package_path"] in imported["published_path"], "Song Library entry resolves published package", failures)
 	_check(FileAccess.get_sha256(score) == package["source"]["sha256"], "rights-safe source remains unchanged and checksummed", failures)
-	files.remove_tree(root); _finish(failures, 15)
+	files.remove_tree(root); _finish(failures, 16)
 
 func _json(path: String) -> Dictionary: return JSON.parse_string(FileAccess.get_file_as_string(ProjectSettings.globalize_path(path))) as Dictionary
 func _check(condition: bool, label: String, failures: Array[String]) -> void: if not condition: failures.append(label)

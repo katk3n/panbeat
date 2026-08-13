@@ -1,0 +1,45 @@
+{
+  "schema_version": "1.2.0",
+  "song_id": "fixture-notepan-song",
+  "import_version": 1,
+  "title": "Fixture NotePan Song",
+  "artist": "PanBeat",
+  "handpan_scale_name": "D Kurd 9",
+  "duration_us": 2000000,
+  "chart_schema_version": "1.0.0",
+  "artwork_path": "",
+  "status": "valid",
+  "importer_version": "panbeat-score-importer-v2",
+  "profile_id": "roland-mn10-handpan-minor-v1",
+  "cache_key": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "notation_octave_shift": 0,
+  "source": {
+    "format": "notepan",
+    "stored_path": "source.pan",
+    "original_name": "fixture.pan",
+    "archive_rootfile": "",
+    "extension": ".pan",
+    "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "bytes": 1024,
+    "archive_entries": []
+  },
+  "overlay_sha256": "none",
+  "audio": {
+    "present": false,
+    "source_sha256": "none",
+    "runtime_path": ""
+  },
+  "chart_path": "chart.json",
+  "import_diagnostics": [
+    {
+      "severity": "warning",
+      "code": "notepan_grace_simplified",
+      "file": "fixture.pan",
+      "part": "",
+      "measure": "",
+      "element": "notes",
+      "message": "Imported one grace-marked attack as a base gameplay attack.",
+      "remediation": "No action is required for gameplay."
+    }
+  ]
+}

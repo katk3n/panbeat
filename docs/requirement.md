@@ -33,7 +33,7 @@ PanBeatでは以下を主要原則とする。
 - SlapノーツはSpawn Ringから外周へリング状に拡大する
 - Tone FieldとSlapは共通のOuter Hit Radiusで判定する
 - ノーツの「方向」と「形状」によって奏法を表現する
-- MusicXMLを標準的な楽譜インポート形式とする
+- MusicXMLを標準形式とし、NotePan schema 6/8も直接インポート可能にする
 - 楽譜、楽器構成、ゲーム固有情報を分離する
 - ゲームを上達することが実際の演奏習得につながる設計とする
 
@@ -505,7 +505,7 @@ MVPではVelocityを基本判定条件には含めない。
 
 # 17. 楽譜・譜面アーキテクチャ
 
-MusicXMLをPanBeatの標準的な楽譜インポート形式とする。
+MusicXMLをPanBeatの標準的な楽譜インポート形式とし、NotePan schema 6/8の非圧縮`.pan` tablatureも直接インポートできるようにする。
 
 ```text id="htk5nc"
 MusicXML
@@ -522,6 +522,8 @@ PanBeat Game Engine
 ```
 
 MusicXMLをゲーム中に直接処理するのではなく、ロード時にGame Chartへ変換する。
+
+NotePanもゲーム中に直接処理せず、ロード時に同じMusical EventsとGame Chartへ正規化する。
 
 ---
 
@@ -648,7 +650,11 @@ MusicXMLでSlapをどのように表現・識別するかについては、Music
 
 ハンドパン譜が実音より1オクターブ高く記譜されている場合、import時に明示的なoctave-down mappingを選択できる。自動推測は通常記譜との音域重複で誤mappingを起こすため行わず、MusicXMLの原音高は保持したままtarget解決時だけ12 semitone下げる。
 
-NotePan由来の`<unpitched>`は、NotePan lyricのprimary labelを使用する。`g`（Ghost）はMood Panで再現できないため時刻だけ保持してRuntime Noteを生成せず、`S`はSlap、`T`はDingへ変換する。`T+1`や`S+6`の`+`以降はMusicXMLの直後の`<chord/>` pitched noteとして個別にimport・判定する。
+NotePan由来の`<unpitched>`は、NotePan lyricのprimary labelを使用する。`g`（Ghost）はMood Panで再現できないため時刻だけ保持してRuntime Noteを生成せず、`S`と`T`はSlapへ変換する。`T+1`や`S+6`の`+`以降はMusicXMLの直後の`<chord/>` pitched noteとして個別にimport・判定する。
+
+NotePan `.pan` schema 6およびschema 8の直接importでは、単一trackの非圧縮tablatureだけを対象とする。埋め込みの実音pitchをInstrument Profileへ解決し、`S`と`T`はSlap、`d`、`P`、`F`はDing、`g`は時刻のみとして扱う。tempo rampは開始BPMから終了BPMまで96 TPQのtick単位で線形展開し、決定的なtempo mapへ変換する。bundle、圧縮stream、未対応schema、複数track、不完全・重複・譜面外のtempo rampは推測または黙った欠落を行わず明示的に拒否する。ゲームに表現先がない装飾は基礎attackへ縮退し、再生可能なwarningとしてpackageに保持する。
+
+譜面が想定するハンドパンのスケール名は音符列から推測しない。MusicXMLではsource checksumに結び付いたPanBeat overlayの任意メタデータ`handpan_scale_name`で明示し、NotePanでは`.pan`に格納されたscale名を使用する。インポート後は曲packageのメタデータとして保持し、曲選択画面の一覧と詳細に表示する。未指定の既存曲は有効なまま`Not specified`と表示する。
 
 ---
 

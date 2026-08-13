@@ -14,9 +14,12 @@ the Unity and Godot PoCs:
 - `panbeat-overlay.schema.json`: source-bound explicit gameplay annotations
 - `song-package.schema.json`: immutable imported source/chart/audio package metadata
 
-All instances require `schema_version` with the exact value `1.0.0`. A breaking
-change requires a new schema version and new fixtures; consumers must reject an
-unknown version rather than guessing.
+All instances require an explicit supported `schema_version`. Most contracts
+remain at `1.0.0`. PanBeat overlay supports `1.1.0` for optional
+`handpan_scale_name` metadata. Imported song packages support that metadata in
+`1.1.0` and add score-source format/path plus persistent NotePan import warnings
+in `1.2.0`. Existing `1.0.0` documents remain valid. A breaking change requires
+a new schema version and fixtures; consumers reject unknown versions.
 
 ## Cross-language representation rules
 

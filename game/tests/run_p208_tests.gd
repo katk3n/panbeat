@@ -13,9 +13,10 @@ func _initialize() -> void:
 	_check(service.loading_state()["state"] == "loading", "loading state is textual", failures)
 	var empty := service.query(repository_root, repositories.songs, "profile-a")
 	_check(empty.get("ok") and empty.get("state") == "empty" and "EMPTY" in empty.get("label", ""), "empty state is textual", failures)
-	_make_package(files, repository_root, "z-song", "Zulu", "profile-a", true)
+	_make_package(files, repository_root, "z-song", "Zulu", "profile-a", true, true, "D Kurd 9")
 	_make_package(files, repository_root, "a-song", "alpha", "profile-b", true)
 	_make_package(files, repository_root, "silent-song", "Silent", "profile-a", true, false)
+	_make_package(files, repository_root, "broken", "Broken", "profile-a", true, true, " D Kurd 9 ")
 	var index := {"schema_version":"1.0.0", "songs":[_entry("z-song", "Zulu"), _entry("broken", "Broken"), _entry("a-song", "alpha"), _entry("silent-song", "Silent")]}
 	repositories.songs.save(index)
 	var query := service.query(repository_root, repositories.songs, "profile-a")
@@ -23,13 +24,13 @@ func _initialize() -> void:
 	_check(query["songs"][0]["song_id"] == "a-song" and query["songs"][1]["song_id"] == "broken" and query["songs"][2]["song_id"] == "silent-song" and query["songs"][3]["song_id"] == "z-song", "library ordering is deterministic title then ID", failures)
 	var alpha: Dictionary = query["songs"][0]; var broken: Dictionary = query["songs"][1]
 	_check(alpha["display_status"] == "warning" and alpha["profile_compatibility"] == "incompatible", "profile mismatch is non-color warning", failures)
-	_check(broken["display_status"] == "invalid" and not broken["diagnostics"].is_empty(), "corrupt package is isolated with diagnostics", failures)
-	_check(query["songs"][2]["display_status"] == "valid", "package without backing audio remains playable", failures)
+	_check(broken["display_status"] == "invalid" and broken["diagnostics"][0]["code"] == "invalid_handpan_scale_name", "invalid package scale metadata is isolated with diagnostics", failures)
+	_check(query["songs"][2]["display_status"] == "valid" and query["songs"][2]["handpan_scale_name"].is_empty(), "package without backing audio or scale remains playable", failures)
 	var zulu: Dictionary = query["songs"][3]
-	_check(zulu["display_status"] == "valid" and zulu["duration_us"] == 1250000 and zulu["chart_schema_version"] == "1.0.0" and zulu["artwork_label"] == "No artwork", "library exposes required metadata", failures)
+	_check(zulu["display_status"] == "valid" and zulu["duration_us"] == 1250000 and zulu["chart_schema_version"] == "1.0.0" and zulu["artwork_label"] == "No artwork" and zulu["handpan_scale_name"] == "D Kurd 9", "library exposes required metadata including handpan scale", failures)
 	var source := root.path_join("original.musicxml"); files.write_text(source, "original source")
 	var preview := service.delete_preview(repository_root, repositories.songs, "z-song")
-	_check(preview.get("ok") and "packages/z-song" in preview["message"] and "Original MusicXML and audio are not changed" in preview["message"], "delete preview names exact cache and source policy", failures)
+	_check(preview.get("ok") and "packages/z-song" in preview["message"] and "Original score and audio are not changed" in preview["message"], "delete preview names exact cache and source policy", failures)
 	var not_confirmed := service.delete_song(repository_root, repositories.songs, "z-song", false)
 	_check(not_confirmed.get("confirmation_required") and files.directory_exists(repository_root.path_join("packages/z-song")), "delete requires confirmation", failures)
 	var deleted := service.delete_song(repository_root, repositories.songs, "z-song", true)
@@ -40,9 +41,10 @@ func _initialize() -> void:
 	_check(unsafe["display_status"] == "invalid" and unsafe["diagnostics"][0]["code"] == "unsafe_repository_path", "index path traversal is isolated", failures)
 	files.remove_tree(root); _finish(failures, 13)
 
-func _make_package(files: RefCounted, root: String, song_id: String, title: String, profile_id: String, assets: bool, has_audio: bool = true) -> void:
+func _make_package(files: RefCounted, root: String, song_id: String, title: String, profile_id: String, assets: bool, has_audio: bool = true, handpan_scale_name: String = "") -> void:
 	var relative := "packages/%s/v1-cache" % song_id; var path := root.path_join(relative); DirAccess.make_dir_recursive_absolute(path)
-	var package := {"schema_version":"1.0.0", "song_id":song_id, "import_version":1, "title":title, "artist":"Artist", "duration_us":1250000, "chart_schema_version":"1.0.0", "artwork_path":"", "profile_id":profile_id, "chart_path":"chart.json", "audio":{"present":has_audio, "runtime_path":"runtime.ogg" if has_audio else ""}}
+	var package := {"schema_version":"1.1.0" if not handpan_scale_name.is_empty() else "1.0.0", "song_id":song_id, "import_version":1, "title":title, "artist":"Artist", "duration_us":1250000, "chart_schema_version":"1.0.0", "artwork_path":"", "profile_id":profile_id, "chart_path":"chart.json", "audio":{"present":has_audio, "runtime_path":"runtime.ogg" if has_audio else ""}}
+	if not handpan_scale_name.is_empty(): package["handpan_scale_name"] = handpan_scale_name
 	files.write_text(path.path_join("package.json"), Canonical.encode(package) + "\n")
 	if assets: files.write_text(path.path_join("chart.json"), "{}\n")
 	if assets and has_audio: files.write_text(path.path_join("runtime.ogg"), "fixture")

@@ -31,7 +31,7 @@ static func destructive_confirmation(action: String, target: String, count: int 
 static func state_fixture(kind: String) -> Dictionary:
 	match kind:
 		"loading": return {"label":"LOADING", "message":"Reading local songs…", "action_enabled":false, "tone":"info"}
-		"empty": return {"label":"EMPTY", "message":"No local songs. Import MusicXML and audio to begin.", "action_enabled":false, "tone":"info"}
+		"empty": return {"label":"EMPTY", "message":"No local songs. Import MusicXML or NotePan to begin.", "action_enabled":false, "tone":"info"}
 		"disabled": return {"label":"PLAY UNAVAILABLE", "message":"Select a compatible valid song first.", "action_enabled":false, "tone":"warning"}
 		"warning": return {"label":"PROFILE WARNING", "message":"Re-import with the active Instrument Profile before playing.", "action_enabled":false, "tone":"warning"}
 		_: return {"label":"IMPORT FAILED", "message":"The file was not changed. Review diagnostics and retry.", "action_enabled":true, "tone":"error"}

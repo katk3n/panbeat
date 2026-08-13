@@ -15,6 +15,18 @@ func _initialize() -> void:
 	var overlay := JSON.parse_string(FileAccess.get_file_as_string(ProjectSettings.globalize_path("res://../shared/fixtures/musicxml/p205-slap-overlay.json"))) as Dictionary
 	var slap := Merger.merge(compiled["chart"], overlay, SOURCE_SHA, profile)
 	_check(slap.get("ok") == true and slap["chart"]["notes"][0]["technique"] == "slap" and slap["chart"]["notes"][0]["target_id"] == "outer-hit-radius", "explicit Slap annotation", failures)
+	_check(slap.get("song_metadata", {}).get("handpan_scale_name") == "D Kurd 9", "overlay handpan scale metadata is returned outside Runtime Chart", failures)
+	var legacy := overlay.duplicate(true); legacy["schema_version"] = "1.0.0"; legacy.erase("handpan_scale_name")
+	_check(Merger.merge(compiled["chart"], legacy, SOURCE_SHA, profile).get("song_metadata", {}).is_empty(), "legacy overlay without scale remains supported", failures)
+	var maximum_scale := overlay.duplicate(true); maximum_scale["handpan_scale_name"] = "x".repeat(80)
+	_check(Merger.merge(compiled["chart"], maximum_scale, SOURCE_SHA, profile).get("song_metadata", {}).get("handpan_scale_name", "").length() == 80, "maximum-length handpan scale name accepted", failures)
+	var invalid_scale := overlay.duplicate(true); invalid_scale["handpan_scale_name"] = " D Kurd 9 "
+	_check(_code(Merger.merge(compiled["chart"], invalid_scale, SOURCE_SHA, profile)) == "invalid_handpan_scale_name", "untrimmed handpan scale name rejected", failures)
+	var invalid_scale_forms_ok := true
+	for invalid_name: String in ["", "D Kurd\n9", "x".repeat(81)]:
+		var invalid_form := overlay.duplicate(true); invalid_form["handpan_scale_name"] = invalid_name
+		invalid_scale_forms_ok = invalid_scale_forms_ok and _code(Merger.merge(compiled["chart"], invalid_form, SOURCE_SHA, profile)) == "invalid_handpan_scale_name"
+	_check(invalid_scale_forms_ok, "empty multiline and overlong handpan scale names rejected", failures)
 	var tone := Merger.merge(compiled["chart"], {}, SOURCE_SHA, profile)
 	_check(tone.get("ok") == true and tone["chart"]["notes"][0]["technique"] == "tone" and tone["chart"]["notes"][0]["target_id"] == "tone-4", "overlay-free Tone resolved by profile MIDI pitch", failures)
 	var ding_chart := _chart_with_notes([_timed_note("ding-note", "D", 3, 0)])
@@ -51,7 +63,7 @@ func _initialize() -> void:
 	var slap_pitch_chart := _chart_with_notes([_timed_note("a6", "A", 6, 0)])
 	_check(_code(Merger.merge(slap_pitch_chart, {}, SOURCE_SHA, profile)) == "unsupported_pitch", "Slap is not inferred from MusicXML pitch", failures)
 	_check(slap.get("ok") and slap["canonical_json"] == Merger.merge(compiled["chart"], overlay, SOURCE_SHA, profile)["canonical_json"], "overlay merge canonical output deterministic", failures)
-	_finish(failures, 15)
+	_finish(failures, 20)
 
 func _chart_with_notes(notes: Array[Dictionary]) -> RefCounted:
 	return TimedChart.new("test", "panbeat-musicxml-importer-v1", 4, 4, 500000, [{"tick":0,"bpm_milli":120000,"start_us":0}], [], notes)
