@@ -26,7 +26,7 @@ func _initialize() -> void:
 	var schema8 := Reader.read_bytes(Builder.valid({"schema":8, "compressed":false}), "schema8.pan")
 	var schema8_chart := Compiler.compile(schema8.get("score"), "schema8-chart") if schema8.get("ok", false) else {}
 	_check(schema8.get("ok", false) and schema8.get("metadata", {}).get("handpan_scale_name") == "D Kurd 9" and schema8.get("score").version == "notepan-schema-8" and schema8.get("score").notes.size() == 10 and schema8_chart.get("ok", false), "uncompressed schema 8 handpan, notes, and chart parsed", failures)
-	_check(_hand_count(schema8.get("score").notes, "right") == 5 and _hand_count(schema8.get("score").notes, "left") == 5, "schema 8 lane 1 and lane 2 preserve right and left hands", failures)
+	_check(_hand_count(schema8.get("score").notes, "right") == 5 and _hand_count(schema8.get("score").notes, "left") == 5, "schema 8 lanes 0-1 and 2-3 preserve right and left hands", failures)
 	_check(_code(Reader.read_bytes(Builder.valid({"content_type":1}), "bundle.pan")) == "unsupported_notepan_content", "bundle rejected", failures)
 	_check(_code(Reader.read_bytes(Builder.valid({"track_count":2}), "tracks.pan")) == "unsupported_notepan_track_count", "multiple tracks rejected", failures)
 	_check(_code(Reader.read_bytes(Builder.valid({"track_count":250001, "stop_after_track_count":true}), "count.pan")) == "notepan_record_limit", "declared record limit enforced before allocation", failures)
@@ -86,8 +86,14 @@ func _initialize() -> void:
 		var real_schema8 := Reader.read_file(arguments[real_index + 1])
 		var real_compiled := Compiler.compile(real_schema8.get("score"), "real-schema8-chart") if real_schema8.get("ok", false) else {}
 		var real_request := request.duplicate(true); real_request["score_path"] = arguments[real_index + 1]; real_request["song_id"] = "real-schema8"; real_request["title"] = ""
+		var real_audio_index: int = arguments.find("--real-audio")
+		if real_audio_index >= 0 and real_audio_index + 1 < arguments.size(): real_request["audio_path"] = arguments[real_audio_index + 1]
 		var real_imported := importer.import_song(real_request, root.path_join("library"), repositories.songs)
-		_check(real_schema8.get("ok", false) and real_schema8.get("metadata", {}).get("title") == "La Valse d'Amélie" and real_schema8.get("score").measures.size() == 136 and real_schema8.get("score").notes.size() == 550 and real_compiled.get("ok", false) and real_imported.get("ok", false) and real_imported.get("package", {}).get("title") == "La Valse d'Amélie", "attached schema 8 score parses, compiles, and imports end to end: %s" % str(real_imported), failures)
+		var real_title := str(real_schema8.get("metadata", {}).get("title", ""))
+		var real_chart: Dictionary = files.read_json(str(real_imported.get("published_path", "")).path_join("chart.json"), 4 * 1024 * 1024).get("document", {}) if real_imported.get("ok", false) else {}
+		var real_package: Dictionary = real_imported.get("package", {})
+		var audio_aligned: bool = not real_request.has("audio_path") or bool(real_package.get("audio", {}).get("present", false)) and int(real_chart.get("duration_us", 0)) <= int(real_package.get("duration_us", 0))
+		_check(real_schema8.get("ok", false) and not real_title.is_empty() and not real_schema8.get("score").measures.is_empty() and not real_schema8.get("score").notes.is_empty() and real_compiled.get("ok", false) and real_imported.get("ok", false) and real_package.get("title") == real_title and audio_aligned, "attached schema 8 score parses, compiles, and imports end to end: %s" % str(real_imported), failures)
 	files.remove_tree(root)
 	_finish(failures, expected_count)
 

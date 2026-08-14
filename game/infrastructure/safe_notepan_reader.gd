@@ -226,8 +226,8 @@ static func _read_track_v8(reader: ByteReader) -> Dictionary:
 		var effect := reader.u8()
 		var grace := reader.boolean()
 		var finger_roll := reader.boolean()
-		if lane not in [1, 2]: reader.fail("invalid_notepan_lane", "Schema 8 lane %d must be 1 (right) or 2 (left)." % lane)
-		notes.append({"column":column, "lane":lane - 1, "hand":"right" if lane == 1 else "left", "background":background, "background_only":code == 0, "note":_legacy_note_code(code), "nuance":0 if nuance == 2 else nuance, "effect":effect, "grace":grace, "finger_roll":finger_roll})
+		if lane < 0 or lane > 3: reader.fail("invalid_notepan_lane", "Schema 8 lane %d is outside the supported range 0 through 3." % lane)
+		notes.append({"column":column, "lane":lane, "hand":"right" if lane < 2 else "left", "background":background, "background_only":code == 0, "note":_legacy_note_code(code), "nuance":0 if nuance == 2 else nuance, "effect":effect, "grace":grace, "finger_roll":finger_roll})
 	track["notes"] = notes
 	var annotations: Array[Dictionary] = []
 	for _index: int in reader.count("annotations"): annotations.append({"column":reader.i16(), "text":reader.string()})

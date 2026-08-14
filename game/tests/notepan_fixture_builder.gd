@@ -77,14 +77,14 @@ static func _track_v8(writer: Writer, track_index: int, options: Dictionary) -> 
 		writer.i16(0); writer.u8(beat); writer.u8(5 if options.get("unsupported_grid", false) and beat == 0 else 2)
 	writer.i32(1); writer.i16(0); writer.u8(0); writer.u8(1)
 	var notes: Array[Dictionary] = [
-		{"column":0, "lane":1, "note":51}, {"column":1, "lane":2, "note":150},
+		{"column":0, "lane":0, "note":51}, {"column":1, "lane":2, "note":150},
 		{"column":2, "lane":1, "note":151}, {"column":3, "lane":2, "note":171},
 		{"column":4, "lane":1, "note":54}, {"column":5, "lane":2, "note":161},
 		{"column":6, "lane":1, "note":153}, {"column":7, "lane":2, "note":1},
-		{"column":8, "lane":1, "note":2}, {"column":8, "lane":2, "note":151},
+		{"column":8, "lane":1, "note":2}, {"column":8, "lane":3, "note":151},
 	]
 	if options.get("bad_column", false): notes[0]["column"] = 999
-	if options.get("bad_lane", false): notes[0]["lane"] = 3
+	if options.get("bad_lane", false): notes[0]["lane"] = 4
 	writer.i32(notes.size() + 1)
 	for note: Dictionary in notes:
 		writer.i16(int(note["column"])); writer.u8(int(note["lane"])); writer.i32(0); writer.u8(int(note["note"])); writer.u8(2); writer.u8(0); writer.boolean(false); writer.boolean(false)

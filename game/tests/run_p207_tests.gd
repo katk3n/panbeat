@@ -28,6 +28,10 @@ func _initialize() -> void:
 	var source_before := FileAccess.get_sha256(xml); var audio_before := FileAccess.get_sha256(audio)
 	var repositories := Repositories.new(root.path_join("documents"))
 	var importer := Importer.new(files, Audio.new())
+	var aligned := importer.reconcile_chart_audio_duration({"duration_us":1_000_007, "notes":[{"timestamp_us":900_000}], "tempo_map":[{"start_us":0}]}, 1_000_000)
+	_check(aligned.get("ok", false) and aligned.get("chart", {}).get("duration_us") == 1_000_000, "sub-10ms score/audio end rounding is aligned to audio duration", failures)
+	_check(_code(importer.reconcile_chart_audio_duration({"duration_us":1_010_001, "notes":[], "tempo_map":[]}, 1_000_000)) == "chart_exceeds_audio_duration", "material score overrun remains rejected", failures)
+	_check(_code(importer.reconcile_chart_audio_duration({"duration_us":1_000_007, "notes":[{"timestamp_us":1_000_001}], "tempo_map":[]}, 1_000_000)) == "chart_exceeds_audio_duration", "an attack beyond audio remains rejected inside end tolerance", failures)
 	var request := {"score_path":xml, "audio_path":audio, "profile":profile, "song_id":"p207-song", "title":"P207 Fixture", "artist":"PanBeat"}
 	var imported := importer.import_song(request, root.path_join("library"), repositories.songs)
 	_check(imported.get("ok") and not imported.get("duplicate") and int(imported.get("song", {}).get("import_version", 0)) == 1, "valid MusicXML/audio imported: %s" % str(imported), failures)
@@ -99,7 +103,7 @@ func _initialize() -> void:
 	var audio_request := request.duplicate(true); audio_request["song_id"] = "bad-audio"; audio_request["audio_path"] = corrupt_audio
 	_check(_code(importer.import_song(audio_request, root.path_join("bad-audio-root"), repositories.songs)) == "corrupt_or_unreadable_audio", "corrupt audio rejected before publication", failures)
 	files.remove_tree(root)
-	_finish(failures, 25)
+	_finish(failures, 28)
 
 func _create_mxl(path: String, score: PackedByteArray, include_container: bool) -> void:
 	var packer := ZIPPacker.new(); packer.open(path)

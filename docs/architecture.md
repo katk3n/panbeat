@@ -428,7 +428,7 @@ MusicXMLのChordは、base noteと`<chord/>` memberを同じtimestampに持つ�
 
 NotePan lyricを持つMusicXML `<unpitched>`は、primary label（`+`より前）をauthoring techniqueへ変換する。`g`はGhostとしてscore cursorを進めるがRuntime Noteを作らない。`S`と`T`は`slap:outer-hit-radius`とする。複合ラベルの追加Toneは後続のMusicXML `<chord/>` noteから独立Runtime Noteとして得るため、lyric文字列からToneを二重生成しない。未知labelは位置付きdiagnosticで拒否する。
 
-NotePan `.pan`の直接importでは埋め込みpitchをそのままInstrument Profileへ解決し、MusicXML向けoctave shiftを適用しない。`S/T`はSlap、`d/P/F`はDingへ変換し、profile内でtechnique targetが一意でない場合は拒否する。装飾の縮退warningはpackageへ永続化し、profile不一致とは別の再生可能状態として扱う。
+NotePan `.pan`の直接importでは埋め込みpitchをそのままInstrument Profileへ解決し、MusicXML向けoctave shiftを適用しない。schema 6/8のlane 0–1をright、lane 2–3をleftとして保持する。`S/T`はSlap、`d/P/F`はDingへ変換し、profile内でtechnique targetが一意でない場合は拒否する。装飾の縮退warningはpackageへ永続化し、profile不一致とは別の再生可能状態として扱う。
 
 ### 6.5 Pause / Resume / Seek
 
@@ -444,7 +444,7 @@ Phase 1のruntime音源は、48 kHz、mono、signed 16-bit PCMのRIFF/WAVEに固
 
 Phase 2のユーザーimportではMP3等を入力として許可してもよいが、runtime assetはWAVまたはseek/loop精度を別途検証したOGGへ変換する。長時間曲の容量、変換時間、loop継ぎ目を測るまでは、Phase 1のWAV決定を全MVP曲へ無条件に拡張しない。
 
-P206の6分素材比較により、Phase 2 import曲のcanonical runtime形式は48 kHz stereo Ogg Vorbis（FFmpeg 8.1 built-in Vorbis encoder、quality 5、bitexact metadata/mux設定）に決定した。同条件WAVは69,120,078 bytes、OGGは1,960,462 bytesで、OGGは3回のfull decodeが約198.5〜200.6 ms、Godot loadが約4.0〜4.9 msだった。WAVはfull decode約83.5〜84.8 ms、Godot load約184.1〜195.3 msだった。両形式とも3回のstart、pause/resume、180秒seek、loop、終了遷移を通過し、reported durationは360秒、seek観測誤差はDummy driver上で約2.67 msだった。これはheadless lifecycle baselineであり、CoreAudio出力同期や聴感上のloop seamを合格させる証拠ではない。Phase 1固定曲WAVは回帰fixtureとして変更しない。詳細は[`adr-002-runtime-audio.md`](./adr-002-runtime-audio.md)を参照する。
+P206の6分素材比較により、Phase 2 import曲のcanonical runtime形式は48 kHz stereo Ogg Vorbis（FFmpeg 8.1 built-in Vorbis encoder、quality 5、bitexact metadata/mux設定）に決定した。同条件WAVは69,120,078 bytes、OGGは1,960,462 bytesで、OGGは3回のfull decodeが約198.5〜200.6 ms、Godot loadが約4.0〜4.9 msだった。WAVはfull decode約83.5〜84.8 ms、Godot load約184.1〜195.3 msだった。両形式とも3回のstart、pause/resume、180秒seek、loop、終了遷移を通過し、reported durationは360秒、seek観測誤差はDummy driver上で約2.67 msだった。これはheadless lifecycle baselineであり、CoreAudio出力同期や聴感上のloop seamを合格させる証拠ではない。Phase 1固定曲WAVは回帰fixtureとして変更しない。譜面とaudioの終端丸め差が10 ms以内で、全attackとtempo eventがaudio内に収まる場合に限りchart durationをaudio終端へ揃える。詳細は[`adr-002-runtime-audio.md`](./adr-002-runtime-audio.md)を参照する。
 
 伴奏audioを含むimport packageの`duration_us`とaudio-backed transportの終了時刻は、変換後audioをffprobeした実時間とする。譜面の`duration_us`はnote範囲の検証用に保持し、譜面がbacking audioより短くてもaudio再生中にGameplayを完了させない。逆に譜面がaudioより長いimportは診断付きで拒否する。伴奏audioを指定しない曲は、Mood Pan本体の発音だけで演奏できるよう譜面の`duration_us`をpackage durationとし、pauseを差し引くmonotonic clockを時刻基準にする。いずれもframe countを時刻基準にしない。
 

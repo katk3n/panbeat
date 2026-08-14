@@ -11,6 +11,7 @@ const IMPORTER_VERSION := "panbeat-musicxml-importer-v1"
 const NOTEPAN_IMPORTER_VERSION := "panbeat-score-importer-v2"
 const PACKAGE_VERSION := "1.2.0"
 const CACHE_CONTRACT_VERSION := "notepan-hand-lanes-v2"
+const AUDIO_END_TOLERANCE_US := 10_000
 
 var _files: RefCounted
 var _audio: RefCounted
@@ -100,11 +101,14 @@ func import_song(request: Dictionary, repository_root: String, song_repository: 
 	var source_asset := "source.pan" if source_format == "notepan" else "source.musicxml"
 	if result.is_empty(): result = _files.write_bytes(staging.path_join(source_asset), score_bytes)
 	if result.get("ok", false) and not overlay_bytes.is_empty(): result = _files.write_bytes(staging.path_join("overlay.json"), overlay_bytes)
-	if result.get("ok", false): result = _files.write_text(staging.path_join("chart.json"), merged["canonical_json"])
 	if result.get("ok", false) and has_audio: result = _audio.convert(audio_path, staging.path_join("runtime.ogg"))
 	var runtime_duration_us := roundi(float(result.get("duration_sec", 0.0)) * 1_000_000.0) if result.get("ok", false) and has_audio else int(merged["chart"].get("duration_us", 0))
-	if result.get("ok", false) and has_audio and int(merged["chart"].get("duration_us", 0)) > runtime_duration_us:
-		result = _failure("chart_exceeds_audio_duration", score_location, "The score extends beyond the selected audio file.", "Choose matching audio or shorten the score.")
+	var runtime_chart: Dictionary = merged["chart"]
+	if result.get("ok", false) and has_audio:
+		var reconciled := reconcile_chart_audio_duration(runtime_chart, runtime_duration_us, score_location)
+		if reconciled.get("ok", false): runtime_chart = reconciled["chart"]
+		else: result = reconciled
+	if result.get("ok", false): result = _files.write_text(staging.path_join("chart.json"), Canonical.encode(runtime_chart) + "\n")
 	if result.get("ok", false) and _cancelled(cancelled): result = _failure("import_cancelled", score_location, "Import was cancelled after conversion.", "No song was published.")
 	var package := {"schema_version":PACKAGE_VERSION, "song_id":chart_id, "import_version":import_version, "title":title, "artist":artist, "duration_us":runtime_duration_us, "chart_schema_version":str(merged["chart"].get("schema_version", "1.0.0")), "artwork_path":"", "status":"valid", "importer_version":importer_version, "profile_id":profile.get("profile_id", ""), "cache_key":cache_key, "notation_octave_shift":notation_octave_shift, "source":{"format":source_format, "stored_path":source_asset, "original_name":str(request["score_path"]).get_file(), "archive_rootfile":score_location.get_slice("#", 1) if "#" in score_location else "", "extension":score_file["extension"], "sha256":source_sha, "bytes":score_bytes.size(), "archive_entries":archive_manifest}, "overlay_sha256":overlay_sha, "audio":{"present":has_audio, "source_sha256":audio_file["sha256"], "runtime_path":"runtime.ogg" if has_audio else ""}, "chart_path":"chart.json", "import_diagnostics":import_diagnostics}
 	if not merged.get("song_metadata", {}).is_empty(): package.merge(merged["song_metadata"])
@@ -131,6 +135,21 @@ func import_song(request: Dictionary, repository_root: String, song_repository: 
 			completed = true; result = {"ok":true, "duplicate":false, "song":entry, "package":package, "published_path":final_path, "diagnostics":import_diagnostics}
 	if not completed and _files.directory_exists(staging): _files.remove_tree(staging)
 	return result
+
+func reconcile_chart_audio_duration(chart: Dictionary, audio_duration_us: int, source: String = "score") -> Dictionary:
+	var chart_duration_us := int(chart.get("duration_us", 0))
+	if chart_duration_us <= audio_duration_us: return {"ok":true, "chart":chart}
+	if chart_duration_us - audio_duration_us > AUDIO_END_TOLERANCE_US:
+		return _failure("chart_exceeds_audio_duration", source, "The score extends beyond the selected audio file.", "Choose matching audio or shorten the score.")
+	for note: Dictionary in chart.get("notes", []):
+		if int(note.get("timestamp_us", 0)) > audio_duration_us:
+			return _failure("chart_exceeds_audio_duration", source, "A score attack occurs beyond the selected audio file.", "Choose matching audio or shorten the score.")
+	for tempo: Dictionary in chart.get("tempo_map", []):
+		if int(tempo.get("start_us", 0)) > audio_duration_us:
+			return _failure("chart_exceeds_audio_duration", source, "A score tempo event occurs beyond the selected audio file.", "Choose matching audio or shorten the score.")
+	var aligned := chart.duplicate(true)
+	aligned["duration_us"] = audio_duration_us
+	return {"ok":true, "chart":aligned}
 
 func _cancelled(callback: Callable) -> bool:
 	return callback.is_valid() and bool(callback.call())

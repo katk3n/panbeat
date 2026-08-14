@@ -8,6 +8,8 @@ scripts/check-phase2-p207 phase2-p207-import-YYYYMMDD
 
 The Application service inspects extensions, byte limits, source format, and SHA-256 without modifying sources. MusicXML and NotePan dispatch through their safe readers into the same Symbolic Score, compiler, selected Instrument Profile, and canonical Runtime Chart path. MusicXML may use a source-bound overlay; NotePan may not. When backing audio is supplied, FFmpeg converts it into 48 kHz stereo Ogg Vorbis using the accepted P206 settings. Without backing audio, package duration comes from the score and Gameplay uses a monotonic clock.
 
+When a compiled score ends no more than 10 ms after its backing audio solely because of score/audio endpoint rounding, import aligns the Runtime Chart duration to the probed audio duration. Every attack and tempo event must still fall within the audio, and overruns greater than 10 ms remain `chart_exceeds_audio_duration` errors.
+
 ## MXL security limits
 
 An MXL archive is rejected before rootfile parsing when it exceeds 32 MiB, 256 entries, 64 MiB expanded data, or a 100:1 compression ratio. The central directory is inspected for encrypted entries, duplicate names, absolute/drive/backslash paths, `.` or `..` traversal, Unix symlinks, and special files. `META-INF/container.xml` must contain exactly one safe `.xml` or `.musicxml` rootfile. DTD and entity declarations are forbidden.
