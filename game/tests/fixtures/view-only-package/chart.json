@@ -1,0 +1,16 @@
+{
+  "schema_version": "1.0.0",
+  "chart_id": "view-only-fixture",
+  "clock_domain": "song_time",
+  "time_unit": "microseconds",
+  "duration_us": 2000000,
+  "notes": [
+    {
+      "note_id": "view-only-note",
+      "timestamp_us": 1000000,
+      "technique": "ding",
+      "target_id": "ding",
+      "hand": "right"
+    }
+  ]
+}

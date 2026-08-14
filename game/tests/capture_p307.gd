@@ -23,6 +23,7 @@ func _capture() -> void:
 	var detail := "audio backend unavailable · code AUDIO-07" if state == "failed" else ""
 	var complete := state == "completed"
 	var now := -2_100_000 if state == "scheduled" else 8_750_000
-	hud.present(hud_values, now, state, "midi", detail, complete)
+	var input_name := "midi_unavailable" if state == "midi-unavailable" else "midi"
+	hud.present(hud_values, now, state, input_name, detail, complete)
 	for _frame: int in 6: await process_frame
 	var error := root.get_texture().get_image().save_png(args[output_index + 1]); quit(0 if error == OK else 1)

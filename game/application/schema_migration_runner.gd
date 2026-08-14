@@ -41,6 +41,10 @@ static func validate(document_type: String, document: Dictionary) -> Dictionary:
 				return _failure("invalid_settings_note_scroll_speed", "note_scroll_speed_id must be a string")
 			if document.has("song_note_scroll_speeds") and document.get("song_note_scroll_speeds") is not Dictionary:
 				return _failure("invalid_settings_note_scroll_speed_map", "song_note_scroll_speeds must be an object")
+			if document.has("practice_tempo_id") and document.get("practice_tempo_id") is not String:
+				return _failure("invalid_settings_practice_tempo", "practice_tempo_id must be a string")
+			if document.has("song_practice_tempos") and document.get("song_practice_tempos") is not Dictionary:
+				return _failure("invalid_settings_practice_tempo_map", "song_practice_tempos must be an object")
 		"song_index":
 			if document.get("songs") is not Array:
 				return _failure("invalid_song_index", "song index requires songs")
@@ -54,7 +58,7 @@ static func validate(document_type: String, document: Dictionary) -> Dictionary:
 static func empty_document(document_type: String) -> Dictionary:
 	match document_type:
 		"settings":
-			return {"schema_version": CURRENT_VERSION, "selected_midi_port": "", "profile_id": "roland-mn10-handpan-minor-v1", "offsets": [], "background_preset_id":"deep_resonance", "song_background_presets":{}, "note_scroll_speed_id":"normal", "song_note_scroll_speeds":{}}
+			return {"schema_version": CURRENT_VERSION, "selected_midi_port": "", "profile_id": "roland-mn10-handpan-minor-v1", "offsets": [], "background_preset_id":"deep_resonance", "song_background_presets":{}, "note_scroll_speed_id":"normal", "song_note_scroll_speeds":{}, "practice_tempo_id":"tempo_100", "song_practice_tempos":{}}
 		"song_index":
 			return {"schema_version": CURRENT_VERSION, "songs": []}
 		"result_history":
@@ -73,6 +77,8 @@ static func _migrate_0_1_to_1_0(document_type: String, source: Dictionary) -> Di
 			if not migrated.has("song_background_presets"): migrated["song_background_presets"] = {}
 			if not migrated.has("note_scroll_speed_id"): migrated["note_scroll_speed_id"] = "normal"
 			if not migrated.has("song_note_scroll_speeds"): migrated["song_note_scroll_speeds"] = {}
+			if not migrated.has("practice_tempo_id"): migrated["practice_tempo_id"] = "tempo_100"
+			if not migrated.has("song_practice_tempos"): migrated["song_practice_tempos"] = {}
 		"song_index":
 			if not migrated.has("songs"): migrated["songs"] = []
 		"result_history":

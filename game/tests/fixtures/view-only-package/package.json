@@ -1,0 +1,17 @@
+{
+  "schema_version": "1.0.0",
+  "song_id": "view-only-fixture",
+  "package_id": "view-only-fixture",
+  "import_version": 1,
+  "importer_version": "test-fixture-v1",
+  "title": "View Only Fixture",
+  "artist": "PanBeat",
+  "duration_us": 2000000,
+  "chart_schema_version": "1.0.0",
+  "profile_id": "roland-mn10-handpan-minor-v1",
+  "chart_path": "chart.json",
+  "audio": {
+    "present": false,
+    "runtime_path": ""
+  }
+}

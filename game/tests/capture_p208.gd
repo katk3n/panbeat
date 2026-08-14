@@ -14,5 +14,5 @@ func _capture() -> void:
 	root.size = Vector2i(1280, 720); RenderingServer.set_default_clear_color(Color("101620"))
 	var view := View.new(); view.repository_root = test_root.path_join("songs"); view.repositories = repositories; view.library = Library.new(files); root.add_child(view)
 	for _frame: int in 5: await process_frame
-	view._list.select(0); view._on_selected(0); await process_frame
+	view._select_song_row(0); await process_frame
 	var error := root.get_texture().get_image().save_png(arguments[index + 1]); files.remove_tree(test_root); quit(0 if error == OK else 1)

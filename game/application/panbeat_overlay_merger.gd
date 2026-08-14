@@ -78,14 +78,19 @@ static func merge(timed_chart: RefCounted, overlay: Dictionary, source_sha256: S
 		if mapping.is_empty():
 			mapping = _resolve_pitch(note["pitch"], profile, explicit_pitch_mapping, notation_octave_shift)
 			if not mapping.get("ok", false):
-				diagnostics.append(_diagnostic(mapping.get("code", "unsupported_pitch"), mapping.get("error", "pitch is not mapped"), -1, note.get("source", {}))); continue
+				var code := str(mapping.get("code", "unsupported_pitch"))
+				if code == "unsupported_pitch":
+					diagnostics.append(_unsupported_pitch_warning(str(mapping.get("error", "pitch is not mapped")), note.get("source", {})))
+				else:
+					diagnostics.append(_diagnostic(code, str(mapping.get("error", "pitch is not mapped")), -1, note.get("source", {})))
+				continue
 			mapping.erase("ok")
 		if mapping.get("technique") == "slap" and not selected.has(note["note_id"]) and note.get("authoring_technique") != "slap":
 			diagnostics.append(_diagnostic("slap_requires_overlay", "Slap must be explicitly annotated in the PanBeat overlay", -1, note.get("source", {}))); continue
 		gameplay_notes.append({"note_id":note["note_id"], "timestamp_us":note["timestamp_us"], "duration_us":note["duration_us"], "technique":mapping["technique"], "target_id":mapping["target_id"], "hand":mapping.get("hand", note.get("hand", "unspecified")), "source":note["source"], "pitch":note["pitch"]})
-	if not diagnostics.is_empty(): return {"ok":false, "diagnostics":diagnostics}
+	if _has_error_diagnostics(diagnostics): return {"ok":false, "diagnostics":diagnostics}
 	var chart := {"schema_version":"1.0.0", "chart_id":timed_chart.chart_id, "importer_version":timed_chart.importer_version, "overlay_id":overlay.get("overlay_id", "none"), "profile_id":profile.get("profile_id", ""), "duration_us":timed_chart.duration_us, "tempo_map":timed_chart.tempo_map.duplicate(true), "notes":gameplay_notes}
-	return {"ok":true, "chart":chart, "canonical_json":Canonical.encode(chart) + "\n", "song_metadata":song_metadata, "diagnostics":[]}
+	return {"ok":true, "chart":chart, "canonical_json":Canonical.encode(chart) + "\n", "song_metadata":song_metadata, "diagnostics":diagnostics}
 
 static func _resolve_pitch(pitch: Dictionary, profile: Dictionary, explicit: Dictionary, notation_octave_shift: int) -> Dictionary:
 	var key := "%s%s%s" % [pitch.get("step", ""), "#" if int(pitch.get("alter", 0)) == 1 else "b" if int(pitch.get("alter", 0)) == -1 else "", pitch.get("octave", "")]
@@ -132,6 +137,14 @@ static func _source_matches(source: Dictionary, selector: Dictionary) -> bool:
 
 static func _diagnostic(code: String, message: String, annotation_index: int, source: Dictionary = {}) -> Dictionary:
 	return {"severity":"error", "code":code, "file":"overlay" if annotation_index >= 0 else "MusicXML", "annotation_index":annotation_index, "part":source.get("part", ""), "measure":source.get("measure", ""), "element":"annotation" if annotation_index >= 0 else "note", "message":message, "remediation":"Correct the overlay selector, target, source checksum, or explicit pitch mapping."}
+
+static func _unsupported_pitch_warning(message: String, source: Dictionary) -> Dictionary:
+	return {"severity":"warning", "code":"unsupported_pitch", "file":"MusicXML", "annotation_index":-1, "part":source.get("part", ""), "measure":source.get("measure", ""), "element":"note", "message":"Ignored unsupported note: %s" % message, "remediation":"No action is required, or map this pitch explicitly to include it in Gameplay."}
+
+static func _has_error_diagnostics(diagnostics: Array[Dictionary]) -> bool:
+	for diagnostic: Dictionary in diagnostics:
+		if diagnostic.get("severity") == "error": return true
+	return false
 
 static func _metadata_diagnostic(code: String, message: String) -> Dictionary:
 	return {"severity":"error", "code":code, "file":"overlay", "annotation_index":-1, "part":"", "measure":"", "element":"handpan_scale_name", "message":message, "remediation":"Use overlay schema_version 1.1.0 and a trimmed single-line handpan scale name of at most 80 characters."}

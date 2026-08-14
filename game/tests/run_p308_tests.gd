@@ -3,6 +3,7 @@ extends SceneTree
 const Presenter := preload("res://presentation/product_screen_presenter.gd")
 const ThemeFactory := preload("res://presentation/panbeat_theme.gd")
 const ResultsView := preload("res://presentation/results_view.gd")
+const PracticeTempos := preload("res://application/practice_tempo_catalog.gd")
 
 func _initialize() -> void:
 	var failures: Array[String] = []
@@ -28,7 +29,20 @@ func _initialize() -> void:
 	_check(theme.get_type_variation_base("PrimaryButton") == "Button" and theme.has_stylebox("normal", "PrimaryButton"), "primary Play action has shared visual variation", failures)
 	var completion_actions := ResultsView.completion_action_contract()
 	_check(completion_actions["primary"] == "play_again" and completion_actions["secondary"] == "song_library" and not completion_actions["process_restart_required"] and completion_actions["preserves_result_history"], "completed Results supports replay and song selection in the same process", failures)
-	_finish(failures, 16)
+	var tempo_presets := PracticeTempos.all()
+	_check(tempo_presets.size() == 6 and tempo_presets[0]["multiplier"] == 0.5 and tempo_presets[-1]["multiplier"] == 1.0, "practice tempo exposes stable 50 through 100 percent presets", failures)
+	var tempo_settings := {"practice_tempo_id":"tempo_90", "song_practice_tempos":{"quiet-forge":"tempo_60"}}
+	_check(PracticeTempos.resolve({"song_id":"quiet-forge"}, tempo_settings) == "tempo_60" and PracticeTempos.resolve({"song_id":"other"}, tempo_settings) == "tempo_90" and PracticeTempos.resolve({}, {}) == "tempo_100", "per-song practice tempo overrides the global preference with an original-tempo fallback", failures)
+	var assigned_tempo := PracticeTempos.assign_to_song(tempo_settings, "new-song", "tempo_70")
+	_check(assigned_tempo["song_practice_tempos"]["new-song"] == "tempo_70" and not tempo_settings["song_practice_tempos"].has("new-song"), "practice tempo assignment preserves input settings", failures)
+	var tempo_record := _record(); tempo_record["metadata"]["practice_tempo_multiplier"] = 0.7
+	_check(Presenter.result_sections(tempo_record)["technical"].contains("practice tempo 70%"), "Results retains the practice tempo used for the session", failures)
+	var library_source := FileAccess.get_file_as_string("res://presentation/song_library_view.gd")
+	var main_source := FileAccess.get_file_as_string("res://presentation/main.gd")
+	_check(library_source.contains("tempo_label.text = \"TEMPO\"") and not library_source.contains("tempo_label.text = \"PRACTICE TEMPO\"") and not library_source.contains("LIBRARY MANAGEMENT") and library_source.contains("_on_practice_tempo_selected") and main_source.contains("audio_player.pitch_scale = playback_speed") and main_source.contains("_pitch_preserver.configure") and main_source.contains("SilentClockBackend.new(int(package[\"duration_us\"]), null, playback_speed)"), "Song Library keeps concise actionable controls without a non-interactive management heading, persists tempo, and Gameplay applies pitch-preserved audio or a slowed silent clock", failures)
+	var row := preload("res://presentation/song_library_view.gd").song_row_values({"display_status":"warning", "title":"Quiet Forge", "artist":"PanBeat Studio", "handpan_scale_name":"D Kurd 9", "duration_us":96_000_000})
+	_check(row == PackedStringArray(["WARN", "Quiet Forge", "PanBeat Studio", "D Kurd 9", "96.0 s"]) and library_source.contains("_list = Tree.new()") and library_source.contains("_list.columns = 5") and library_source.contains("size_flags_stretch_ratio = 2.0"), "Song Library presents a larger five-column song table with concise deterministic row values", failures)
+	_finish(failures, 22)
 
 func _record() -> Dictionary:
 	return {"result_id":"result-17","metadata":{"song_id":"orbit","importer_version":"import-v1","chart_version":"chart-v1","profile_id":"profile-v1","judgement_rule_id":"judge-v1","score_rule_id":"score-v1"},"summary":{"score":45000,"accuracy":0.985,"max_combo":41,"breakdown":{"perfect":40,"great":3,"good":1,"miss":1,"extra_hit":0}},"timing_distribution":{"early_count":8,"on_time_count":26,"late_count":11,"median_delta_us":4000},"error_breakdown":{"wrong_target":1,"wrong_technique":0,"no_candidate":0}}

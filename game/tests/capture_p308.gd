@@ -48,7 +48,7 @@ func _capture() -> void:
 		"songs":
 			var view := SongView.new(); view.repositories = FakeRepositories.new(); view.library = FakeLibrary.new(); view.repository_root = "/tmp/panbeat-p308-fixture"; root.add_child(view)
 			for _frame: int in 3: await process_frame
-			view._list.select(0); view._on_selected(0)
+			view._select_song_row(0)
 		"device":
 			var view := DeviceView.new(); view.repositories = FakeRepositories.new(); view._adapter = FakeAdapter.new(); root.add_child(view)
 		"calibration":

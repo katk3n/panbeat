@@ -35,10 +35,12 @@ class MemoryBackend extends RefCounted:
 func _initialize() -> void:
 	var failures: Array[String] = []
 	var migrated := MigrationRunner.migrate("settings", {"schema_version":"0.1.0", "selected_port":"MN-10", "profile_id":"profile", "offsets":[]})
-	_check(migrated.get("ok") == true and migrated["document"].get("selected_midi_port") == "MN-10" and not migrated["document"].has("selected_port"), "known schema migration", failures)
+	_check(migrated.get("ok") == true and migrated["document"].get("selected_midi_port") == "MN-10" and migrated["document"].get("practice_tempo_id") == "tempo_100" and migrated["document"].get("song_practice_tempos") == {} and not migrated["document"].has("selected_port"), "known schema migration includes practice-tempo defaults", failures)
 	_check(MigrationRunner.migrate("settings", {"schema_version":"2.0.0"}).get("code") == "unknown_schema_major", "unknown major rejected", failures)
 	_check(MigrationRunner.migrate("song_index", {"songs":[]}).get("code") == "missing_schema_version", "missing version rejected", failures)
 	_check(MigrationRunner.migrate("settings", {"schema_version":"1.0.0", "profile_id":"profile"}).get("code") == "invalid_settings", "missing field diagnostic", failures)
+	var invalid_tempo_settings := MigrationRunner.empty_document("settings"); invalid_tempo_settings["song_practice_tempos"] = []
+	_check(MigrationRunner.migrate("settings", invalid_tempo_settings).get("code") == "invalid_settings_practice_tempo_map", "invalid practice-tempo preference map rejected", failures)
 
 	var memory := MemoryBackend.new()
 	var repositories := Repositories.new("/isolated", memory)
@@ -85,7 +87,7 @@ func _initialize() -> void:
 	var native_load: Dictionary = restarted_repositories.results.load()
 	_check(native_load.get("ok") == true and native_load.get("document", {}).get("records", []).size() == 1, "native persistence survives repository restart: %s" % native_load, failures)
 	_remove_tree(temporary_root)
-	_finish(failures, 15)
+	_finish(failures, 16)
 
 func _remove_tree(path: String) -> void:
 	var directory := DirAccess.open(path)

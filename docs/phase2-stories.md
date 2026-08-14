@@ -246,7 +246,7 @@ P202、P203、P206、P209はP201後に並行してよい。P210とP211も依存�
 - Tone pitch、Ding、Slapをcanonical target/techniqueへ解決できる
 - 「1オクターブ高く記譜」を選んだ場合だけtarget解決pitchを12 semitone下げ、選択内容をcache keyとpackage metadataへ保持する
 - NotePan `<unpitched>`の`g`を無視し、単独の`S`と`T`をSlapへ解決する。`S+6`や`T+1`等ではMood PanでTone Fieldとの和音を演奏できないため`S`/`T`側を無視し、pitched chord memberだけを保持する
-- 未対応pitch、存在しないtarget、重複selector、複数一致、未使用annotationを具体的に診断する
+- 未対応pitchはsource位置付きwarningとして対象noteだけを無視し、対応pitchのimportを継続する。存在しないtarget、重複selector、複数一致、未使用annotationは具体的なerrorとして拒否する
 - overlayなしで表現可能なTone/Ding譜面と、overlay付きSlap譜面のgolden testがある
 
 ### P206: runtime音源形式と変換pipelineを決定する
@@ -301,7 +301,7 @@ P202、P203、P206、P209はP201後に並行してよい。P210とP211も依存�
 
 ### P209: Device Setupとreconnect導線を実装する
 
-**ストーリー:** Mood Pan利用者として、利用可能なMIDI portとprofileを確認し、入力monitorを見ながら接続を復旧したい。`no ports`や無音状態で原因が分からないままGameplayへ進まないためである。
+**ストーリー:** Mood Pan利用者として、利用可能なMIDI portとprofileを確認し、入力monitorを見ながら接続を復旧したい。`no ports`や無音状態で原因が分からないまま判定付きGameplayへ進まず、必要なら未接続エラーを表示したview-only Gameplayでノートだけを確認できるようにするためである。
 
 **実施内容:** Device Setup画面、open-before-enumerate lifecycle、port/profile selection、入力monitor、reopen、diagnostic history、必要時のrelaunch案内を実装する。
 

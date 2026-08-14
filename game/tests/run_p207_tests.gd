@@ -54,6 +54,11 @@ func _initialize() -> void:
 	var silent_chart_result: Dictionary = files.read_json(str(silent_imported.get("published_path", "")).path_join("chart.json"), 1024 * 1024) if silent_imported.get("ok") else {}
 	var silent_notes: Array = silent_chart_result.get("document", {}).get("notes", [])
 	_check(silent_imported.get("ok") and not FileAccess.file_exists(str(silent_imported.get("published_path", "")).path_join("runtime.ogg")) and not silent_package.get("audio", {}).get("present", true) and silent_notes.size() == 3 and silent_notes[0]["timestamp_us"] == silent_notes[1]["timestamp_us"], "MusicXML chord imports as simultaneous notes without optional backing audio", failures)
+	var mixed_pitch_request := {"score_path":ProjectSettings.globalize_path("res://../shared/fixtures/musicxml/mixed-supported-unsupported-pitch.musicxml"), "profile":profile, "song_id":"p207-mixed-pitch", "title":"P207 Mixed Pitch"}
+	var mixed_pitch_imported := importer.import_song(mixed_pitch_request, root.path_join("library"), repositories.songs)
+	var mixed_pitch_chart_result: Dictionary = files.read_json(str(mixed_pitch_imported.get("published_path", "")).path_join("chart.json"), 1024 * 1024) if mixed_pitch_imported.get("ok") else {}
+	var mixed_pitch_diagnostics: Array = mixed_pitch_imported.get("package", {}).get("import_diagnostics", [])
+	_check(mixed_pitch_imported.get("ok") and mixed_pitch_chart_result.get("document", {}).get("notes", []).size() == 1 and mixed_pitch_diagnostics.size() == 1 and mixed_pitch_diagnostics[0].get("severity") == "warning" and mixed_pitch_diagnostics[0].get("code") == "unsupported_pitch" and mixed_pitch_diagnostics[0].get("file") == "mixed-supported-unsupported-pitch.musicxml", "unsupported MusicXML pitch is omitted and persisted as a source-located warning", failures)
 	var octave_request := {"score_path":xml, "profile":profile, "notation_octave_shift":-1, "song_id":"p207-octave-high", "title":"P207 Written Octave High"}
 	var octave_imported := importer.import_song(octave_request, root.path_join("library"), repositories.songs)
 	var octave_chart_result: Dictionary = files.read_json(str(octave_imported.get("published_path", "")).path_join("chart.json"), 1024 * 1024) if octave_imported.get("ok") else {}
@@ -103,7 +108,7 @@ func _initialize() -> void:
 	var audio_request := request.duplicate(true); audio_request["song_id"] = "bad-audio"; audio_request["audio_path"] = corrupt_audio
 	_check(_code(importer.import_song(audio_request, root.path_join("bad-audio-root"), repositories.songs)) == "corrupt_or_unreadable_audio", "corrupt audio rejected before publication", failures)
 	files.remove_tree(root)
-	_finish(failures, 28)
+	_finish(failures, 29)
 
 func _create_mxl(path: String, score: PackedByteArray, include_container: bool) -> void:
 	var packer := ZIPPacker.new(); packer.open(path)

@@ -5,6 +5,8 @@ const Judgement := preload("res://domain/judgement_engine.gd")
 const ObjectPool := preload("res://domain/fixed_object_pool.gd")
 const Kinematics := preload("res://domain/note_visual_kinematics.gd")
 const AudioTransport := preload("res://application/audio_transport_service.gd")
+const AudioBackend := preload("res://infrastructure/godot_audio_backend.gd")
+const PitchPreserver := preload("res://infrastructure/practice_pitch_preserver.gd")
 const SilentClockBackend := preload("res://infrastructure/silent_clock_backend.gd")
 const InputQueue := preload("res://application/normalized_input_queue.gd")
 const ChartFactory := preload("res://application/runtime_chart_factory.gd")
@@ -79,6 +81,16 @@ func _initialize() -> void:
 	backend.audio_position = 0.4
 	_check(transport.now_us() == 400_000, "frame stall does not accumulate delta", failures)
 	_check(transport.diagnostics()["sample_rate_hz"] == 48000, "transport diagnostics", failures)
+	_check(is_equal_approx(AudioBackend.corrected_audio_position_seconds(2.0, 0.02, 0.01, 0.5), 2.005), "audio clock interpolation converts wall latency into slowed song time", failures)
+	var pitch_player := AudioStreamPlayer.new(); var pitch_preserver := PitchPreserver.new(); var original_bus_count := AudioServer.get_bus_count()
+	var original_pitch := pitch_preserver.configure(pitch_player, 1.0)
+	_check(original_pitch.get("ok") and not original_pitch.get("active") and AudioServer.get_bus_count() == original_bus_count, "original tempo bypasses PitchShift without creating an audio bus", failures)
+	var preserved := pitch_preserver.configure(pitch_player, 0.7); var practice_bus_index := AudioServer.get_bus_index(StringName(preserved.get("bus_name", ""))); var pitch_effect: AudioEffect = AudioServer.get_bus_effect(practice_bus_index, 0) if practice_bus_index >= 0 else null
+	_check(preserved.get("ok") and preserved.get("active") and AudioServer.get_bus_count() == original_bus_count + 1 and pitch_effect is AudioEffectPitchShift and is_equal_approx((pitch_effect as AudioEffectPitchShift).pitch_scale, 1.0 / 0.7), "slowed audio uses an inverse PitchShift on an isolated practice bus", failures)
+	_check(pitch_preserver.estimated_latency_seconds() > 0.0 and is_equal_approx(PitchPreserver.compensation_scale(0.5), 2.0), "pitch preservation exposes FFT latency and deterministic inverse compensation", failures)
+	pitch_preserver.release(pitch_player)
+	_check(AudioServer.get_bus_count() == original_bus_count and pitch_player.bus == &"Master" and pitch_preserver.estimated_latency_seconds() == 0.0, "practice audio bus is removed after the session", failures)
+	pitch_player.free()
 	backend.audio_position = 2.0
 	backend.playing = false
 	transport.update()
@@ -92,6 +104,10 @@ func _initialize() -> void:
 	_check(silent_transport.schedule_start(0.0).get("ok"), "silent clock transport schedules", failures)
 	silent_transport.update(); clock.now = 5.4
 	_check(silent_transport.now_us() == 400_000, "silent clock transport advances without audio", failures)
+	var slow_clock := FakeClock.new(); slow_clock.now = 10.0
+	var slow_transport := AudioTransport.new(SilentClockBackend.new(1_000_000, slow_clock, 0.5), 1_000_000)
+	slow_transport.schedule_start(0.0); slow_transport.update(); slow_clock.now = 10.4
+	_check(slow_transport.now_us() == 200_000, "practice tempo slows the silent transport musical clock", failures)
 	silent_transport.pause(); clock.now = 6.0; silent_transport.resume(); clock.now = 6.6; silent_transport.update()
 	_check(silent_transport.state() == AudioTransport.COMPLETED and silent_transport.now_us() == 1_000_000, "silent clock transport pauses and completes at score duration", failures)
 	var midi_backend := FakeMidiPortBackend.new()
@@ -165,7 +181,7 @@ func _initialize() -> void:
 	_check(hud == {"current_score":3250,"current_combo":0,"current_accuracy":3.25 / 6.0,"latest_grade":"extra_hit","latest_direction":"late"}, "HUD score combo accuracy grade and direction model", failures)
 	_check(InputMode.from_arguments(PackedStringArray(["--input-mode", "midi"]))["mode"] == "midi" and InputMode.from_arguments(PackedStringArray(["--input-mode=replay"]))["mode"] == "replay", "exclusive MIDI or replay startup selection", failures)
 	_check(InputMode.from_arguments(PackedStringArray(["--input-mode", "mixed"])).get("ok") == false, "mixed or unknown input mode rejected", failures)
-	_finish(failures, 49)
+	_finish(failures, 55)
 
 func _check(condition: bool, label: String, failures: Array[String]) -> void:
 	if not condition:

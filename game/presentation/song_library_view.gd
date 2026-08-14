@@ -13,12 +13,13 @@ const Importer := preload("res://application/song_import_service.gd")
 const AudioConverter := preload("res://infrastructure/ffmpeg_audio_converter.gd")
 const BackgroundPresets := preload("res://application/background_preset_catalog.gd")
 const NoteScrollSpeeds := preload("res://application/note_scroll_speed_catalog.gd")
+const PracticeTempos := preload("res://application/practice_tempo_catalog.gd")
 
 var repository_root := ""
 var repositories: RefCounted
 var library: RefCounted
 var _status: Label
-var _list: ItemList
+var _list: Tree
 var _details: RichTextLabel
 var _delete: Button
 var _pending_delete := ""
@@ -33,6 +34,7 @@ var _overlay_button: Button
 var _play: Button
 var _background_picker: OptionButton
 var _note_scroll_speed_picker: OptionButton
+var _practice_tempo_picker: OptionButton
 var _written_octave_high: CheckBox
 
 func _ready() -> void:
@@ -70,7 +72,13 @@ func _build_ui() -> void:
 	_note_scroll_speed_picker.tooltip_text = "Faster speeds reduce overlapping notes; saved per song"
 	_note_scroll_speed_picker.item_selected.connect(_on_note_scroll_speed_selected); settings_row.add_child(_note_scroll_speed_picker)
 	_select_note_scroll_speed_id(_global_note_scroll_speed_id())
-	var manage_label := Label.new(); manage_label.text = "LIBRARY MANAGEMENT — IMPORT / RE-IMPORT / DELETE"; manage_label.add_theme_color_override("font_color", Color("aaa79f")); layout.add_child(manage_label)
+	var tempo_label := Label.new(); tempo_label.text = "TEMPO"; tempo_label.add_theme_color_override("font_color", Color("d6b66d")); settings_row.add_child(tempo_label)
+	_practice_tempo_picker = OptionButton.new(); _practice_tempo_picker.custom_minimum_size.x = 190
+	for preset: Dictionary in PracticeTempos.all():
+		_practice_tempo_picker.add_item(str(preset["label"])); _practice_tempo_picker.set_item_metadata(_practice_tempo_picker.item_count - 1, preset["id"])
+	_practice_tempo_picker.tooltip_text = "Slow audio without changing pitch, with notes and judgement kept in sync; saved per song"
+	_practice_tempo_picker.item_selected.connect(_on_practice_tempo_selected); settings_row.add_child(_practice_tempo_picker)
+	_select_practice_tempo_id(_global_practice_tempo_id())
 	var notation_row := HBoxContainer.new(); notation_row.add_theme_constant_override("separation", 12); layout.add_child(notation_row)
 	var notation_label := Label.new(); notation_label.text = "PITCH NOTATION"; notation_label.add_theme_color_override("font_color", Color("d6b66d")); notation_row.add_child(notation_label)
 	_written_octave_high = CheckBox.new(); _written_octave_high.text = "Written 1 octave high"; _written_octave_high.tooltip_text = "Map every written pitch to the Mood Pan note one octave lower"; notation_row.add_child(_written_octave_high)
@@ -83,8 +91,15 @@ func _build_ui() -> void:
 	var import_button := Button.new(); import_button.text = "Import"; import_button.tooltip_text = "Validate and import the selected MusicXML or NotePan score with optional audio"; import_button.pressed.connect(func() -> void: _run_import(false)); actions.add_child(import_button)
 	var reimport := Button.new(); reimport.text = "Re-import"; reimport.pressed.connect(func() -> void: _run_import(true)); actions.add_child(reimport)
 	_delete = Button.new(); _delete.text = "Delete…"; _delete.pressed.connect(_on_delete); actions.add_child(_delete)
-	_list = ItemList.new(); _list.custom_minimum_size.y = 110; _list.item_selected.connect(_on_selected); layout.add_child(_list)
-	_details = RichTextLabel.new(); _details.fit_content = false; _details.size_flags_vertical = Control.SIZE_EXPAND_FILL; _details.custom_minimum_size.y = 100; _details.text = "Select a song to view validation diagnostics."; layout.add_child(_details)
+	_list = Tree.new(); _list.columns = 5; _list.column_titles_visible = true; _list.hide_root = true; _list.select_mode = Tree.SELECT_ROW; _list.custom_minimum_size.y = 150; _list.size_flags_vertical = Control.SIZE_EXPAND_FILL; _list.size_flags_stretch_ratio = 2.0
+	for column: int in 5: _list.set_column_title(column, ["STATUS", "TITLE", "ARTIST", "SCALE", "DURATION"][column])
+	_list.set_column_expand(0, false); _list.set_column_custom_minimum_width(0, 105)
+	_list.set_column_expand(1, true); _list.set_column_custom_minimum_width(1, 260)
+	_list.set_column_expand(2, true); _list.set_column_custom_minimum_width(2, 190)
+	_list.set_column_expand(3, false); _list.set_column_custom_minimum_width(3, 155)
+	_list.set_column_expand(4, false); _list.set_column_custom_minimum_width(4, 95)
+	_list.item_selected.connect(_on_list_selected); layout.add_child(_list)
+	_details = RichTextLabel.new(); _details.fit_content = false; _details.size_flags_vertical = Control.SIZE_EXPAND_FILL; _details.size_flags_stretch_ratio = 1.0; _details.custom_minimum_size.y = 80; _details.text = "Select a song to view validation diagnostics."; layout.add_child(_details)
 	import_button.grab_focus()
 
 func _choose_file(kind: String) -> void:
@@ -146,18 +161,35 @@ func refresh() -> void:
 	_status.text = str(queried.get("label", "LIBRARY ERROR")); _songs.clear()
 	for value: Variant in queried.get("songs", []):
 		if value is Dictionary: _songs.append((value as Dictionary).duplicate(true))
-	_list.clear(); _pending_delete = ""; _play.disabled = true
+	_list.clear(); var tree_root := _list.create_item(); _pending_delete = ""; _play.disabled = true
 	_select_background_id(_global_background_id())
 	_select_note_scroll_speed_id(_global_note_scroll_speed_id())
-	for song: Dictionary in _songs:
-		var marker: String = str({"valid":"VALID", "warning":"WARNING", "invalid":"INVALID"}.get(song.get("display_status", "invalid"), "INVALID"))
-		var duration := float(song.get("duration_us", 0)) / 1000000.0
-		var scale_name := str(song.get("handpan_scale_name", ""))
-		var scale_label := "Scale %s" % scale_name if not scale_name.is_empty() else "Scale not specified"
-		var artist := str(song.get("artist", ""))
-		var item_text := "%s — %s · %s · %s · %.1fs" % [marker, song.get("title", song.get("song_id", "Untitled")), artist if not artist.is_empty() else "Unknown artist", scale_label, duration]
-		_list.add_item(item_text); _list.set_item_tooltip(_list.item_count - 1, item_text)
+	_select_practice_tempo_id(_global_practice_tempo_id())
+	for index: int in _songs.size():
+		var song := _songs[index]; var values := song_row_values(song); var item := _list.create_item(tree_root); item.set_metadata(0, index)
+		for column: int in values.size(): item.set_text(column, values[column]); item.set_tooltip_text(column, values[column])
+		item.set_custom_color(0, _status_color(str(song.get("display_status", "invalid"))))
 	if _songs.is_empty(): _details.text = "EMPTY — No local songs. Import MusicXML or NotePan to begin."
+
+static func song_row_values(song: Dictionary) -> PackedStringArray:
+	var marker: String = str({"valid":"VALID", "warning":"WARN", "invalid":"INVALID"}.get(song.get("display_status", "invalid"), "INVALID"))
+	var title := str(song.get("title", song.get("song_id", "Untitled")))
+	var artist := str(song.get("artist", "")); if artist.is_empty(): artist = "Unknown artist"
+	var scale := str(song.get("handpan_scale_name", "")); if scale.is_empty(): scale = "Not specified"
+	var duration := "%.1f s" % (float(song.get("duration_us", 0)) / 1000000.0)
+	return PackedStringArray([marker, title, artist, scale, duration])
+
+static func _status_color(status: String) -> Color:
+	return {"valid":Color("8fd3a7"), "warning":Color("e0bc67"), "invalid":Color("ef8f8f")}.get(status, Color("ef8f8f"))
+
+func _on_list_selected() -> void:
+	var selected := _list.get_selected()
+	if selected != null: _on_selected(int(selected.get_metadata(0)))
+
+func _select_song_row(index: int) -> void:
+	var root_item := _list.get_root()
+	if root_item == null or index < 0 or index >= root_item.get_child_count(): return
+	root_item.get_child(index).select(0); _on_selected(index)
 
 func _on_selected(index: int) -> void:
 	if index < 0 or index >= _songs.size(): return
@@ -168,6 +200,7 @@ func _on_selected(index: int) -> void:
 	lines.append("TECHNICAL — chart %s · profile %s (%s) · %s" % [song.get("chart_schema_version", "unknown"), song.get("profile_id", "unknown"), song.get("profile_compatibility", "unknown"), song.get("artwork_label", "No artwork")])
 	var selected_background := _resolved_background_id(_pending_delete); _select_background_id(selected_background); lines.append("BACKGROUND — %s" % BackgroundPresets.preset(selected_background).get("label", selected_background))
 	var selected_speed := _resolved_note_scroll_speed_id(_pending_delete); _select_note_scroll_speed_id(selected_speed); lines.append("NOTE SPEED — %s" % NoteScrollSpeeds.preset(selected_speed).get("label", selected_speed))
+	var selected_tempo := _resolved_practice_tempo_id(_pending_delete); _select_practice_tempo_id(selected_tempo); lines.append("TEMPO — %s" % PracticeTempos.preset(selected_tempo).get("label", selected_tempo))
 	_details.text = "\n".join(lines)
 
 func _play_selected() -> void:
@@ -223,6 +256,30 @@ func _select_note_scroll_speed_id(preset_id: String) -> void:
 	if _note_scroll_speed_picker == null: return
 	for index: int in _note_scroll_speed_picker.item_count:
 		if str(_note_scroll_speed_picker.get_item_metadata(index)) == preset_id: _note_scroll_speed_picker.select(index); return
+
+func _on_practice_tempo_selected(index: int) -> void:
+	if index < 0 or index >= _practice_tempo_picker.item_count: return
+	var preset_id := str(_practice_tempo_picker.get_item_metadata(index))
+	var loaded: Dictionary = repositories.settings.load()
+	if not loaded.get("ok", false): _status.text = "PRACTICE TEMPO SAVE FAILED — Settings unavailable."; return
+	var settings: Dictionary = loaded["document"]
+	if _pending_delete.is_empty(): settings["practice_tempo_id"] = preset_id
+	else: settings = PracticeTempos.assign_to_song(settings, _pending_delete, preset_id)
+	var saved: Dictionary = repositories.settings.save(settings)
+	_status.text = "PRACTICE TEMPO SAVED — %s%s" % [PracticeTempos.preset(preset_id).get("label", preset_id), " for %s" % _pending_delete if not _pending_delete.is_empty() else " as default"] if saved.get("ok", false) else "PRACTICE TEMPO SAVE FAILED — %s" % saved.get("error", "storage error")
+
+func _global_practice_tempo_id() -> String:
+	var loaded: Dictionary = repositories.settings.load()
+	return PracticeTempos.resolve({}, loaded.get("document", {}) if loaded.get("ok", false) else {})
+
+func _resolved_practice_tempo_id(song_id: String) -> String:
+	var loaded: Dictionary = repositories.settings.load()
+	return PracticeTempos.resolve({"song_id":song_id}, loaded.get("document", {}) if loaded.get("ok", false) else {})
+
+func _select_practice_tempo_id(preset_id: String) -> void:
+	if _practice_tempo_picker == null: return
+	for index: int in _practice_tempo_picker.item_count:
+		if str(_practice_tempo_picker.get_item_metadata(index)) == preset_id: _practice_tempo_picker.select(index); return
 
 func _on_delete() -> void:
 	if _pending_delete.is_empty(): _details.text = "Select a song before deleting."; return

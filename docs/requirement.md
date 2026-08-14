@@ -655,6 +655,10 @@ NotePan由来の`<unpitched>`は、NotePan lyricのprimary labelを使用する�
 
 NotePan `.pan` schema 6およびschema 8の直接importでは、単一trackの非圧縮tablatureだけを対象とする。埋め込みの実音pitchをInstrument Profileへ解決し、`S`と`T`はSlap、`d`、`P`、`F`はDing、`g`は時刻のみとして扱う。tempo rampは開始BPMから終了BPMまで96 TPQのtick単位で線形展開し、決定的なtempo mapへ変換する。bundle、圧縮stream、未対応schema、複数track、不完全・重複・譜面外のtempo rampは推測または黙った欠落を行わず明示的に拒否する。ゲームに表現先がない装飾は基礎attackへ縮退し、再生可能なwarningとしてpackageに保持する。
 
+練習時は曲ごとに50〜100%のテンポを選択できる。伴奏音源の音程は原音を維持し、audio-backed transport、audioなしのclock、ノーツ表示、MIDI判定、進捗、完了時刻は同じ倍率の楽曲時刻を使用する。これはノーツの見た目だけを変える速度設定とは分離する。
+
+Mood Panが未接続でも、MIDIエラーとview-only状態を演奏画面へ明示したうえで、音源、楽曲時刻、ノーツ表示を開始できる。未接続中はMIDI判定入力を利用できないが、譜面のノート配置確認を妨げない。
+
 譜面が想定するハンドパンのスケール名は音符列から推測しない。MusicXMLではsource checksumに結び付いたPanBeat overlayの任意メタデータ`handpan_scale_name`で明示し、NotePanでは`.pan`に格納されたscale名を使用する。インポート後は曲packageのメタデータとして保持し、曲選択画面の一覧と詳細に表示する。未指定の既存曲は有効なまま`Not specified`と表示する。
 
 ---

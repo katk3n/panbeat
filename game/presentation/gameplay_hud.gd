@@ -10,6 +10,7 @@ const FIELD_DISC_RADIUS_FACTOR := 0.47
 
 var song_title: String = ""
 var duration_us: int = 0
+var practice_tempo_label: String = "100% · Original"
 var score_hud: Dictionary = {"current_score":0, "current_combo":0, "current_accuracy":0.0, "latest_grade":"", "latest_direction":"none"}
 var song_time_us: int = 0
 var transport_state: String = "idle"
@@ -48,9 +49,10 @@ func _ensure_pause_actions() -> void:
 	_pause_actions.add_child(song_library)
 	add_child(_pause_actions)
 
-func configure(title: String, song_duration_us: int) -> void:
+func configure(title: String, song_duration_us: int, tempo_label: String = "100% · Original") -> void:
 	song_title = title
 	duration_us = maxi(song_duration_us, 0)
+	practice_tempo_label = tempo_label
 	queue_redraw()
 
 func present(hud: Dictionary, now_us: int, state: String, input_name: String, failure_detail: String = "", complete: bool = false) -> void:
@@ -105,8 +107,15 @@ func _draw() -> void:
 	draw_string(font, right.position + Vector2(18, 122), "LATEST", HORIZONTAL_ALIGNMENT_LEFT, right.size.x - 36, Tokens.FONT_SIZE["caption"], muted)
 	draw_string(font, right.position + Vector2(18, 158), grade, HORIZONTAL_ALIGNMENT_LEFT, right.size.x - 36, 26, primary)
 	draw_string(font, right.position + Vector2(18, 184), String(score_hud.get("latest_direction", "none")).replace("_", " ").to_upper(), HORIZONTAL_ALIGNMENT_LEFT, right.size.x - 36, Tokens.FONT_SIZE["caption"], muted)
-	var source := "MIDI READY" if input_label == "midi" else "REPLAY INPUT"
-	draw_string(font, right.position + Vector2(18, 233), "◆  %s" % source, HORIZONTAL_ALIGNMENT_LEFT, right.size.x - 36, Tokens.FONT_SIZE["caption"], primary if monochrome or high_contrast else Tokens.color("success"))
+	var input_status := input_status_model(input_label)
+	var input_color: Color = primary if monochrome or high_contrast else Tokens.color(input_status["color"])
+	var input_font_size := 12 if not str(input_status["detail"]).is_empty() else int(Tokens.FONT_SIZE["caption"])
+	draw_string(font, right.position + Vector2(18, 233), input_status["label"], HORIZONTAL_ALIGNMENT_LEFT, right.size.x - 36, input_font_size, input_color)
+	var tempo_y := 263.0
+	if not str(input_status["detail"]).is_empty():
+		draw_string(font, right.position + Vector2(18, 254), input_status["detail"], HORIZONTAL_ALIGNMENT_LEFT, right.size.x - 36, input_font_size, input_color)
+		tempo_y = 284.0
+	draw_string(font, right.position + Vector2(18, tempo_y), "TEMPO  %s" % practice_tempo_label, HORIZONTAL_ALIGNMENT_LEFT, right.size.x - 36, Tokens.FONT_SIZE["caption"], accent)
 	draw_string(font, Vector2(24, size.y - 22), "SPACE  PAUSE / RESUME", HORIZONTAL_ALIGNMENT_LEFT, 260, Tokens.FONT_SIZE["caption"], muted)
 
 	var overlay := overlay_model(transport_state, song_time_us, technical_failure, results_pending)
@@ -153,6 +162,12 @@ static func layout_for_size(size: Vector2) -> Dictionary:
 static func progress_ratio(now_us: int, song_duration_us: int) -> float:
 	if song_duration_us <= 0: return 0.0
 	return clampf(float(maxi(now_us, 0)) / float(song_duration_us), 0.0, 1.0)
+
+static func input_status_model(input_name: String) -> Dictionary:
+	match input_name:
+		"midi": return {"label":"◆  MIDI READY", "detail":"", "color":"success"}
+		"midi_unavailable": return {"label":"!  MOOD PAN NOT CONNECTED", "detail":"MIDI ERROR · VIEW ONLY", "color":"error"}
+		_: return {"label":"◆  REPLAY INPUT", "detail":"", "color":"success"}
 
 static func format_time(value_us: int) -> String:
 	var seconds := maxi(value_us, 0) / 1_000_000

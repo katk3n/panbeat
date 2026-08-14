@@ -287,6 +287,7 @@ P302とP303はP301後に並行してよい。P304とP305もP303後に並行で�
 - count-inは開始時刻をaudio transportから表示し、frame積算しない
 - pause中は停止状態とresume操作が明確で、resume後の判定結果が回帰しない
 - failureは利用者向け要約と回復または終了操作を持ち、診断詳細と分離される
+- Mood Pan未接続時はMIDIエラーとview-only状態をHUDへ常時表示し、判定入力なしでもaudio-backed transportとノート描画を継続する
 - complete後にResultsへの遷移が一度だけ行われ、演奏画面だけが予期せず消えない
 - 720p、wide、long title、最大桁Score / Comboで重なりがない
 - HUD表示あり／なしで同一replayの判定recordが一致する
@@ -300,7 +301,9 @@ P302とP303はP301後に並行してよい。P304とP305もP303後に並行で�
 **受け入れ条件:**
 
 - Song Libraryでは曲選択とPlayをprimary actionとし、import、reimport、deleteを二次操作として区別する
+- Song Libraryの曲一覧は詳細欄より広い可変領域を優先し、状態、曲名、作者、スケール、長さを見出し付きの列で表示する
 - Song Libraryでノーツ速度を曲ごとに選択・保存でき、再起動後のGameplayへ反映される
+- Song Libraryで練習テンポを50〜100%から曲ごとに選択・保存でき、伴奏音源の音程を維持したまま、audio-backed transport、audioなしclock、ノーツ、判定を同じ楽曲時刻で同期して遅くする
 - import diagnostics、profile compatibility、invalid songの修復案へ到達できる
 - Device Setupではselected port、profile、MIDI ready / no ports / relaunch案内、入力monitorを区別して表示する
 - CalibrationではStart、cue入力、Analyze、Apply & Saveを段階として示し、5 valid hits未満やvariation過大の理由と再試行方法を日本語で説明する

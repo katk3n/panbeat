@@ -2,6 +2,7 @@ extends SceneTree
 
 const Hud := preload("res://presentation/gameplay_hud.gd")
 const ScoreEngine := preload("res://domain/score_engine.gd")
+const Main := preload("res://presentation/main.gd")
 
 func _initialize() -> void:
 	var failures: Array[String] = []
@@ -38,7 +39,12 @@ func _initialize() -> void:
 	for key: String in ["current_score","current_combo","current_accuracy","latest_grade","latest_direction"]:
 		contract_complete = contract_complete and engine_hud.has(key)
 	_check(contract_complete, "HUD contract contains all engine-derived performance fields", failures)
-	_finish(failures, 18)
+	hud_view = Hud.new(); hud_view.configure("Practice", 10_000_000, "70%"); _check(hud_view.practice_tempo_label == "70%", "HUD retains the active practice tempo label", failures); hud_view.free()
+	var unavailable_input := Hud.input_status_model("midi_unavailable")
+	_check(unavailable_input["label"].contains("MOOD PAN NOT CONNECTED") and unavailable_input["detail"].contains("MIDI ERROR") and unavailable_input["color"] == "error", "HUD keeps a persistent non-obstructive MIDI error in view-only Gameplay", failures)
+	var no_midi_policy := Main.midi_startup_policy({"ok":false, "code":"no_ports"}); var ready_midi_policy := Main.midi_startup_policy({"ok":true, "code":"opened"})
+	_check(no_midi_policy["allow_gameplay"] and not no_midi_policy["available"] and no_midi_policy["input_label"] == "midi_unavailable" and no_midi_policy["diagnostic"].contains("no_ports") and ready_midi_policy["available"], "MIDI startup errors permit view-only Gameplay while ready MIDI retains normal input", failures)
+	_finish(failures, 21)
 
 func _check(condition: bool, label: String, failures: Array[String]) -> void:
 	if not condition: failures.append(label)

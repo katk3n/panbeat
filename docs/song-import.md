@@ -37,3 +37,5 @@ For NotePan-authored `<unpitched>` notes, the first NotePan lyric token is autho
 - Re-importing older content after another version became active creates a new version rather than silently rolling the index backward.
 
 Diagnostics contain severity, code, file, part, measure, element or overlay/archive location, message, and remediation. Unknown schema major versions are rejected by the owning MusicXML, overlay, profile, or persistence contract.
+
+An `unsupported_pitch` produced during profile mapping is a non-blocking warning. The importer omits that note from the Runtime Chart, persists the warning with its source location, and continues importing all supported notes. Other invalid or ambiguous mappings remain blocking errors.

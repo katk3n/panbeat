@@ -28,7 +28,7 @@ func _capture() -> void:
 	var view := SongView.new(); view.repositories = FakeRepositories.new(); view.library = FakeLibrary.new(); view.repository_root = "/tmp/panbeat-p401-capture"; root.add_child(view)
 	for _frame: int in 3: await process_frame
 	view._score_path = "/tmp/schema-six.pan"; view._score_button.text = "schema-six.pan"; view._update_score_options()
-	view._list.select(0); view._on_selected(0)
+	view._select_song_row(0)
 	for _frame: int in 20: await process_frame
 	await create_timer(1.0).timeout
 	for _frame: int in 4: await process_frame

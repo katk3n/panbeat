@@ -72,6 +72,10 @@ func import_song(request: Dictionary, repository_root: String, song_repository: 
 	if notation_octave_shift not in [-1, 0]: return _failure("invalid_notation_octave_shift", "request", "notation_octave_shift must be 0 or -1.", "Use -1 only when the score is written one octave above sounding pitch.")
 	var merged := Merger.merge(compiled["chart"], overlay, source_sha, profile, request.get("pitch_mapping", {}), notation_octave_shift)
 	if not merged.get("ok", false): return merged
+	for diagnostic: Dictionary in merged.get("diagnostics", []):
+		var persisted_diagnostic := diagnostic.duplicate(true)
+		if persisted_diagnostic.get("file") == "MusicXML": persisted_diagnostic["file"] = score_path.get_file()
+		import_diagnostics.append(persisted_diagnostic)
 	var audio_path := str(request.get("audio_path", ""))
 	var has_audio := not audio_path.is_empty()
 	var audio_file: Dictionary = {"sha256":"none"}
@@ -86,7 +90,7 @@ func import_song(request: Dictionary, repository_root: String, song_repository: 
 	if not loaded.get("ok", false): return _repository_failure(loaded)
 	var index: Dictionary = loaded["document"]
 	for value: Variant in index.get("songs", []):
-		if value is Dictionary and value.get("cache_key") == cache_key: return {"ok":true, "duplicate":true, "song":value, "diagnostics":[]}
+		if value is Dictionary and value.get("cache_key") == cache_key: return {"ok":true, "duplicate":true, "song":value, "diagnostics":import_diagnostics}
 	var import_version := 1
 	for value: Variant in index.get("songs", []):
 		if value is Dictionary and value.get("song_id") == chart_id: import_version = maxi(import_version, int(value.get("import_version", 0)) + 1)

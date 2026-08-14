@@ -7,6 +7,7 @@ const ChartSource := preload("res://infrastructure/json_chart_source.gd")
 const ChartFactory := preload("res://application/runtime_chart_factory.gd")
 const Session := preload("res://application/game_session.gd")
 const AudioBackend := preload("res://infrastructure/godot_audio_backend.gd")
+const PitchPreserver := preload("res://infrastructure/practice_pitch_preserver.gd")
 const SilentClockBackend := preload("res://infrastructure/silent_clock_backend.gd")
 const AudioTransport := preload("res://application/audio_transport_service.gd")
 const Pipeline := preload("res://application/judgement_pipeline.gd")
@@ -26,6 +27,7 @@ const CalibrationLogic := preload("res://application/calibration_service.gd")
 const GameplayHudView := preload("res://presentation/gameplay_hud.gd")
 const Accessibility := preload("res://presentation/accessibility_presenter.gd")
 const NoteScrollSpeeds := preload("res://application/note_scroll_speed_catalog.gd")
+const PracticeTempos := preload("res://application/practice_tempo_catalog.gd")
 
 var midi_adapter: Node
 var audio_player: AudioStreamPlayer
@@ -65,6 +67,8 @@ var _song_duration_us := 0
 var _results_opened := false
 var _active_package_path := ""
 var _completed_results_view: ResultsView
+var _pitch_preserver: RefCounted
+var _midi_available := true
 
 func _ready() -> void:
 	super._ready()
@@ -92,6 +96,9 @@ func _maximize_window() -> void:
 	if DisplayServer.get_name() == "headless" or OS.get_cmdline_user_args().has("--windowed"):
 		return
 	DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_MAXIMIZED)
+
+func _exit_tree() -> void:
+	if _pitch_preserver != null: _pitch_preserver.release(audio_player)
 
 func _initialize_gameplay(imported_package_path: String = "") -> void:
 	_prepare_gameplay_state(imported_package_path)
@@ -144,6 +151,9 @@ func _initialize_gameplay(imported_package_path: String = "") -> void:
 	set_background_preset(BackgroundPresets.resolve(package, persisted_settings, _argument("--background-preset=")))
 	var note_scroll_speed_id := NoteScrollSpeeds.resolve(package, persisted_settings, _argument("--note-scroll-speed="))
 	var note_scroll_speed: Dictionary = NoteScrollSpeeds.preset(note_scroll_speed_id)
+	var practice_tempo_id := PracticeTempos.resolve(package, persisted_settings, _argument("--practice-tempo="))
+	var practice_tempo: Dictionary = PracticeTempos.preset(practice_tempo_id)
+	var playback_speed := float(practice_tempo["multiplier"]) * _replay_speed
 	var package_root: String = "res://content/phase1-fixed-song-v1/" if imported_package_path.is_empty() else imported_package_path.path_join("")
 	var chart_name: String = str(package.get("chart_file", package.get("chart_path", "")))
 	var loaded_chart: Dictionary = ChartSource.load_chart(ProjectSettings.globalize_path(package_root + chart_name) if imported_package_path.is_empty() else package_root.path_join(chart_name))
@@ -175,15 +185,20 @@ func _initialize_gameplay(imported_package_path: String = "") -> void:
 		midi_adapter.record_received.connect(_on_midi_record)
 		add_child(midi_adapter)
 		var lifecycle: Dictionary = midi_adapter.lifecycle_diagnostics.back() if not midi_adapter.lifecycle_diagnostics.is_empty() else {}
-		if not lifecycle.get("ok", false):
-			_fail("MIDI initialization failed: %s" % lifecycle.get("code", lifecycle.get("error", "unknown")))
-			return
+		var midi_policy := midi_startup_policy(lifecycle); _midi_available = bool(midi_policy["available"])
+		if not _midi_available:
+			var diagnostic := str(midi_policy["diagnostic"]); developer_diagnostics.append(diagnostic); push_error(diagnostic)
 	if has_audio:
 		audio_player = AudioStreamPlayer.new()
 		audio_player.stream = audio
-		audio_player.pitch_scale = _replay_speed
+		audio_player.pitch_scale = playback_speed
 		if not _measurement_output.is_empty(): audio_player.volume_db = -60.0
 		add_child(audio_player)
+		_pitch_preserver = PitchPreserver.new()
+		var pitch_setup: Dictionary = _pitch_preserver.configure(audio_player, float(practice_tempo["multiplier"]))
+		if not pitch_setup.get("ok", false):
+			_fail("practice pitch preservation failed: %s" % pitch_setup.get("error", "unknown"))
+			return
 	_effective_input_offset_sec = float(settings["input_offset_sec"]) if _input_offset_override == null else float(_input_offset_override)
 	_effective_audio_offset_sec = float(settings["audio_offset_sec"]) if _audio_offset_override == null else float(_audio_offset_override)
 	if _imported_product_session:
@@ -193,7 +208,7 @@ func _initialize_gameplay(imported_package_path: String = "") -> void:
 			_effective_input_offset_sec = int(saved_offset["input_offset_us"]) / 1000000.0; _effective_audio_offset_sec = int(saved_offset["audio_offset_us"]) / 1000000.0
 	var offsets: Dictionary = TimingOffsets.from_seconds(_effective_input_offset_sec, _effective_audio_offset_sec)
 	judgement_pipeline = Pipeline.new(runtime_result["chart"], judgement_rules, offsets)
-	_active_result_metadata = {"song_id":_package_id, "importer_version":str(package.get("importer_version", "phase1-fixed-package-v1")), "chart_version":str(package.get("chart_schema_version", loaded_chart["chart"].get("schema_version", "1.0.0"))), "profile_id":str(profile.get("profile_id", "")), "judgement_rule_id":str(judgement_rules.get("rule_id", "")), "score_rule_id":str(_score_rules.get("rule_id", ""))}
+	_active_result_metadata = {"song_id":_package_id, "importer_version":str(package.get("importer_version", "phase1-fixed-package-v1")), "chart_version":str(package.get("chart_schema_version", loaded_chart["chart"].get("schema_version", "1.0.0"))), "profile_id":str(profile.get("profile_id", "")), "judgement_rule_id":str(judgement_rules.get("rule_id", "")), "score_rule_id":str(_score_rules.get("rule_id", "")), "practice_tempo_id":practice_tempo_id, "practice_tempo_multiplier":float(practice_tempo["multiplier"])}
 	configure(runtime_result["chart"], profile, 64, int(note_scroll_speed["lookahead_us"]))
 	var accessibility_defaults := _load_json("res://config/accessibility-settings-v1.json")
 	var accessibility := Accessibility.resolve(accessibility_defaults, OS.get_cmdline_user_args())
@@ -205,14 +220,15 @@ func _initialize_gameplay(imported_package_path: String = "") -> void:
 	_gameplay_hud.monochrome = monochrome
 	_gameplay_hud.high_contrast = high_contrast
 	_gameplay_hud.visible = not OS.get_cmdline_user_args().has("--hide-hud")
-	_gameplay_hud.configure(_song_title, _song_duration_us)
+	_gameplay_hud.configure(_song_title, _song_duration_us, str(practice_tempo["label"]))
 	_gameplay_hud.pause_retry_requested.connect(_retry_paused_gameplay)
 	_gameplay_hud.pause_song_library_requested.connect(_return_to_song_library)
 	add_child(_gameplay_hud)
-	var transport_backend: RefCounted = AudioBackend.new(audio_player) if has_audio else SilentClockBackend.new(int(package["duration_us"]), null, _replay_speed)
+	var pitch_latency_seconds: float = float(_pitch_preserver.estimated_latency_seconds()) if _pitch_preserver != null else 0.0
+	var transport_backend: RefCounted = AudioBackend.new(audio_player, pitch_latency_seconds) if has_audio else SilentClockBackend.new(int(package["duration_us"]), null, playback_speed)
 	transport = AudioTransport.new(transport_backend, int(package["duration_us"]), session)
 	if not _measurement_output.is_empty():
-		_metrics = MetricsRecorder.new(_measurement_output, _replay_speed, {"input_mode":input_mode,"profile_id":profile["profile_id"],"package_id":package["package_id"],"stall_at_seconds":_stall_at_seconds})
+		_metrics = MetricsRecorder.new(_measurement_output, playback_speed, {"input_mode":input_mode,"profile_id":profile["profile_id"],"package_id":package["package_id"],"stall_at_seconds":_stall_at_seconds})
 	if not session.transition(Session.READY).get("ok", false):
 		_fail("session could not become ready")
 		return
@@ -221,7 +237,7 @@ func _initialize_gameplay(imported_package_path: String = "") -> void:
 		_fail("audio schedule failed: %s" % scheduled.get("error", "unknown"))
 		return
 	_record_session_event("scheduled")
-	developer_diagnostics.append("ready input_mode=%s replay_speed=%.2f chart_notes=%d duration_us=%d clock=%s note_scroll_speed=%s" % [input_mode, _replay_speed, runtime_result["chart"].note_count(), package["duration_us"], "audio" if has_audio else "monotonic", note_scroll_speed_id])
+	developer_diagnostics.append("ready input_mode=%s replay_speed=%.2f practice_tempo=%s playback_speed=%.2f chart_notes=%d duration_us=%d clock=%s note_scroll_speed=%s" % [input_mode, _replay_speed, practice_tempo_id, playback_speed, runtime_result["chart"].note_count(), package["duration_us"], "audio" if has_audio else "monotonic", note_scroll_speed_id])
 	queue_redraw()
 
 func _open_device_setup() -> void:
@@ -365,7 +381,13 @@ func _update_gameplay_hud() -> void:
 	var state: String = transport.state() if transport != null else "idle"
 	var now: int = transport.now_us() if transport != null else 0
 	var failure: String = session.failure_reason() if session != null and session.state() == Session.FAILED else ""
-	_gameplay_hud.present(_hud, now, state, input_mode, failure, _summary_emitted)
+	var hud_input := "midi_unavailable" if input_mode == InputMode.MIDI and not _midi_available else input_mode
+	_gameplay_hud.present(_hud, now, state, hud_input, failure, _summary_emitted)
+
+static func midi_startup_policy(lifecycle: Dictionary) -> Dictionary:
+	if lifecycle.get("ok", false): return {"allow_gameplay":true, "available":true, "input_label":"midi", "diagnostic":""}
+	var code := str(lifecycle.get("code", lifecycle.get("error", "unknown")))
+	return {"allow_gameplay":true, "available":false, "input_label":"midi_unavailable", "diagnostic":"MIDI initialization error: %s. Continuing Gameplay in view-only mode; notes and transport remain active, but judgement input is unavailable." % code}
 
 func _load_json(path: String) -> Dictionary:
 	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(ProjectSettings.globalize_path(path)))
@@ -468,9 +490,11 @@ func _prepare_gameplay_state(imported_package_path: String) -> void:
 	_session_events = []
 	_active_result_metadata = {}
 	_results_opened = false
+	_midi_available = true
 	combo_value = 0
 
 func _teardown_gameplay_runtime() -> void:
+	if _pitch_preserver != null: _pitch_preserver.release(audio_player)
 	if is_instance_valid(audio_player):
 		audio_player.stop()
 		remove_child(audio_player)
@@ -489,6 +513,7 @@ func _teardown_gameplay_runtime() -> void:
 	session = null
 	scheduler = null
 	_metrics = null
+	_pitch_preserver = null
 
 func _fail(reason: String) -> void:
 	developer_diagnostics.append(reason)

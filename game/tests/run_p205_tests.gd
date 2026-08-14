@@ -59,13 +59,18 @@ func _initialize() -> void:
 	var c_chart := _chart_with_notes([_timed_note("c-sharp", "C", 4, 0, 1)])
 	var explicit := Merger.merge(c_chart, {}, SOURCE_SHA, profile, {"C#4":{"technique":"tone", "target_id":"tone-1"}})
 	_check(explicit.get("ok") == true and explicit["chart"]["notes"][0]["target_id"] == "tone-1", "explicit pitch mapping", failures)
-	_check(_code(Merger.merge(c_chart, {}, SOURCE_SHA, profile)) == "unsupported_pitch", "unsupported pitch diagnosed", failures)
+	var unsupported := Merger.merge(c_chart, {}, SOURCE_SHA, profile)
+	_check(unsupported.get("ok") == true and unsupported["chart"]["notes"].is_empty() and _code(unsupported) == "unsupported_pitch" and unsupported["diagnostics"][0]["severity"] == "warning", "unsupported pitch is warned and omitted", failures)
+	var mixed_chart := _chart_with_notes([_timed_note("supported", "D", 4, 0), _timed_note("unsupported", "C", 4, 4, 1)])
+	var mixed := Merger.merge(mixed_chart, {}, SOURCE_SHA, profile)
+	_check(mixed.get("ok") == true and mixed["chart"]["notes"].size() == 1 and mixed["chart"]["notes"][0]["note_id"] == "supported" and _code(mixed) == "unsupported_pitch", "supported notes remain when an unsupported pitch is omitted", failures)
 	var future := overlay.duplicate(true); future["schema_version"] = "2.0.0"
 	_check(_code(Merger.merge(compiled["chart"], future, SOURCE_SHA, profile)) == "unsupported_overlay_version", "unknown overlay major rejected", failures)
 	var slap_pitch_chart := _chart_with_notes([_timed_note("a6", "A", 6, 0)])
-	_check(_code(Merger.merge(slap_pitch_chart, {}, SOURCE_SHA, profile)) == "unsupported_pitch", "Slap is not inferred from MusicXML pitch", failures)
+	var slap_pitch := Merger.merge(slap_pitch_chart, {}, SOURCE_SHA, profile)
+	_check(slap_pitch.get("ok") and slap_pitch["chart"]["notes"].is_empty() and _code(slap_pitch) == "unsupported_pitch", "Slap is not inferred from MusicXML pitch and the note is omitted", failures)
 	_check(slap.get("ok") and slap["canonical_json"] == Merger.merge(compiled["chart"], overlay, SOURCE_SHA, profile)["canonical_json"], "overlay merge canonical output deterministic", failures)
-	_finish(failures, 21)
+	_finish(failures, 22)
 
 func _chart_with_notes(notes: Array[Dictionary]) -> RefCounted:
 	return TimedChart.new("test", "panbeat-musicxml-importer-v1", 4, 4, 500000, [{"tick":0,"bpm_milli":120000,"start_us":0}], [], notes)
