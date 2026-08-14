@@ -17,7 +17,8 @@
         {"type": "object", "additionalProperties": false, "required": ["part", "measure", "tick", "voice"], "properties": {"part": {"type": "string", "minLength": 1}, "measure": {"type": "string", "minLength": 1}, "tick": {"type": "integer", "minimum": 0}, "voice": {"type": "string", "minLength": 1}}}
       ]},
       "technique": {"enum": ["tone", "ding", "slap"]},
-      "target_id": {"type": "string", "minLength": 1}
+      "target_id": {"type": "string", "minLength": 1},
+      "hand": {"enum": ["right", "left"]}
     }}}
   },
   "allOf": [{"if": {"properties": {"schema_version": {"const": "1.0.0"}}, "required": ["schema_version"]}, "then": {"properties": {"handpan_scale_name": false}}}]

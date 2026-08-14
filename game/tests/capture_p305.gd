@@ -14,6 +14,8 @@ func _capture() -> void:
 	var profile: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(ProjectSettings.globalize_path("res://config/default-instrument-profile.json")))
 	var package: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(ProjectSettings.globalize_path("res://content/phase1-fixed-song-v1/package.json")))
 	var loaded := ChartSource.load_chart(ProjectSettings.globalize_path("res://content/phase1-fixed-song-v1/%s" % package["chart_file"]))
+	if args.has("--tempo-pulse"):
+		loaded["chart"]["tempo_map"] = [{"start_us":0,"bpm_milli":120_000}]
 	var built := ChartFactory.build(loaded["chart"], profile, int(package["duration_us"]))
 	var view := View.new(); view.configure(built["chart"], profile); view.set_preview_song_time_us(8_750_000)
 	view.monochrome = mode == "wide-monochrome-no-glow"; view.glow_enabled = mode == "normal"; view.decoration_enabled = mode != "judgement-only"; view.judgement_layer_enabled = true; root.add_child(view)

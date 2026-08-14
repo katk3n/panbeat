@@ -10,6 +10,8 @@ Nuance, effect, grace, finger-roll, background-only, annotation, and unknown tra
 
 The `.pan` title and artist are defaults when the import request leaves them blank. Its explicit scale string becomes `handpan_scale_name` when it is a trimmed single-line value of at most 80 characters; invalid source metadata is warned and omitted. PanBeat overlay and `notation_octave_shift` are not accepted for `.pan` sources. Optional WAV/Ogg backing audio follows the existing atomic import path.
 
+NotePan striking-hand lanes are preserved as Runtime Chart `hand` values. In schema 6, lanes 0–1 map to `right` and lanes 2–3 map to `left`. Schema 8 encodes the hand directly as lane 1 for `right` and lane 2 for `left`; other values are rejected. Hand is copied from the source lane and is never inferred from pitch, target position, or note order.
+
 Run the focused contract with:
 
 ```sh

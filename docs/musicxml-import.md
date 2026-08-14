@@ -10,6 +10,8 @@ PanBeat overlay `1.0.0` and `1.1.0` bind to the exact source MusicXML SHA-256. E
 
 Overlay `1.1.0` may add a trimmed, single-line `handpan_scale_name` of 1–80 characters, for example `"handpan_scale_name": "D Kurd 9"`. It is an author-supplied display name: the importer does not infer or normalize scale naming. An overlay with an empty `annotations` array is valid when it is used only to carry this source-bound metadata. Overlay `1.0.0` remains supported but cannot contain the new field.
 
+An annotation may also declare `"hand": "right"` or `"hand": "left"`. The value is copied into the Runtime Chart and drives the hand color of Tone notes and Ding / Slap rings. PanBeat never infers a hand from target position or note order. An older annotation without `hand` remains readable as `unspecified` and uses the technique-color fallback.
+
 Run the story verification with:
 
 ```sh

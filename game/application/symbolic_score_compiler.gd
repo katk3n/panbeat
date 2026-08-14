@@ -110,9 +110,9 @@ static func _runtime_note(note: Dictionary) -> Dictionary:
 	var voice := str(note.get("voice", "1"))
 	var source := {"part":str(note.get("part", "")), "measure":str(note.get("measure", "")), "tick":int(note["tick"]), "voice":voice, "line":int(note.get("line", 0))}
 	if note.get("is_unpitched", false):
-		return {"note_id":"%s:m%s:t%d:v%s:unpitched:%s" % [source.part, source.measure, source.tick, voice, note.get("authoring_technique", "unknown")], "tick":int(note["tick"]), "duration_ticks":int(note["duration_ticks"]), "pitch":{}, "source":source, "authoring_technique":str(note.get("authoring_technique", "")), "authoring_target_id":str(note.get("authoring_target_id", "")), "notepan_label":str(note.get("notepan_label", ""))}
+		return {"note_id":"%s:m%s:t%d:v%s:unpitched:%s" % [source.part, source.measure, source.tick, voice, note.get("authoring_technique", "unknown")], "tick":int(note["tick"]), "duration_ticks":int(note["duration_ticks"]), "pitch":{}, "source":source, "authoring_technique":str(note.get("authoring_technique", "")), "authoring_target_id":str(note.get("authoring_target_id", "")), "hand":str(note.get("hand", "unspecified")), "notepan_label":str(note.get("notepan_label", ""))}
 	var pitch := {"step":str(note.get("step", "")), "alter":int(note.get("alter", 0)), "octave":int(note.get("octave", 0))}
-	return {"note_id":"%s:m%s:t%d:v%s:%s%d:%d" % [source.part, source.measure, source.tick, voice, pitch.step, pitch.octave, pitch.alter], "tick":int(note["tick"]), "duration_ticks":int(note["duration_ticks"]), "pitch":pitch, "source":source}
+	return {"note_id":"%s:m%s:t%d:v%s:%s%d:%d" % [source.part, source.measure, source.tick, voice, pitch.step, pitch.octave, pitch.alter], "tick":int(note["tick"]), "duration_ticks":int(note["duration_ticks"]), "pitch":pitch, "source":source, "hand":str(note.get("hand", "unspecified"))}
 
 static func _pitch_key(note: Dictionary) -> String:
 	return "%s:%s:%s:%s" % [note.get("voice", "1"), note.get("step", ""), note.get("alter", 0), note.get("octave", 0)]

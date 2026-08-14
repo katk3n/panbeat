@@ -6,7 +6,7 @@
 
 Phase 3の終了条件は、**Phase 2で成立したmacOS MVPの機能、audio-backed transport、判定結果、実機配置を変えず、放射・収束・拡大というPanBeat固有の視覚文法を要件どおり実装し、ハンドパン音楽ゲームとして一貫した外観、読みやすいゲームプレイ、明確な製品画面flowを、自動試験、screenshot、性能測定、Mood Pan実機確認付きで成立させること**である。
 
-従来Phase 3候補だったPractice Mode、左右手ガイド、苦手箇所分析、Free Play、Pressure / dynamicsは発展的な学習機能であり、2026-08-12の製品判断により本Phaseでは実施しない。未実装をPhase 3のblockerまたはFinal Phaseの必須作業として扱わない。
+従来Phase 3候補だったPractice Mode、苦手箇所分析、Free Play、Pressure / dynamicsは発展的な学習機能であり、2026-08-12の製品判断により本Phaseでは実施しない。左右手ガイドは2026-08-14の製品判断により、譜面へ明示した手をノート色へ反映する範囲だけP306へ追加する。
 
 Phase 3はrelease許可ではない。長時間driftとMIDI dispatch p95を含むrelease gateは、引き続き`docs/final-phase-stories.md`で扱う。
 
@@ -19,6 +19,7 @@ Phase 3はrelease許可ではない。長時間driftとMIDI dispatch p95を含�
 - 現行画面と代表状態のvisual baseline、UI token、デザイン仕様
 - Dingノーツを全周リング＋内向き収束へ直す要件適合修正
 - Tone / Ding / Slapの形状、方向、移動、HIT位置による視覚的識別
+- 譜面に明示された右手 / 左手によるノートとリングの色分け
 - 幻想的な瞑想背景に半透明の銅色ハンドパンが浮かぶゲームフィールド
 - 共通Theme、font、color、spacing、focus、button、panel、status表現
 - PanBeat共通アプリシェルとnavigation
@@ -46,7 +47,7 @@ Phase 3はrelease許可ではない。長時間driftとMIDI dispatch p95を含�
 ### 2.3 Phase 3で対応しないもの
 
 - Practice Mode、BPM変更、seek、区間loop、metronome
-- 左右手ガイド、苦手箇所分析、練習推薦
+- 左右手の自動推定、苦手箇所分析、練習推薦
 - Free Play
 - Pressure、dynamics、Mute、Ghost Note、Rollと、それらのschema拡張
 - 新しいscore、judgement、combo、offsetルール
@@ -265,6 +266,7 @@ P302とP303はP301後に並行してよい。P304とP305もP303後に並行で�
 - 同時Tone / Ding / Slap、連打、最大active note fixtureで重なりとpool overflowを検証する
 - ノーツ速度はSlow 0.75×、Normal 1.0×、Fast 1.5×、Very Fast 2.0×から選択でき、高速設定ほどvisual lookaheadと同時表示数が減る
 - ノーツ速度の変更は判定時刻、判定窓、score、audio、transportへ影響しない
+- `hand: right / left`は譜面に明示し、右手と左手でToneノートおよびDing / Slapリングの色が異なる。未指定のlegacy譜面では奏法別の中立fallbackを使い、手を推測しない
 - Glow無効でもTechniqueと判定情報を失わない
 - deterministic replayのjudgement recordがPhase 2 baselineと一致する
 

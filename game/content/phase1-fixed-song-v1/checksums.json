@@ -2,9 +2,9 @@
   "schema_version": "1.0.0",
   "algorithm": "sha256",
   "files": {
-    "source.json": "e13c1d9e47c9b712fb0238dbc12172987cce0cdc2d50b5882076b3ec5d6438cd",
+    "source.json": "dfd177c9ec3d8718c87e9fe3a493b810dc381811e56264ed1c7acf728f6c655d",
     "package.json": "6b9af4af0dfaef17128aa210402a28e47e4cb8838773da4cc9250d33f493f0db",
-    "chart.json": "04e9b186a0214da5b484c0519648d68f24d23b1d9941469b7cb67515934efc9f",
+    "chart.json": "92d5531cb692a4b6ef73b5312fd5a5262de3c8ecf0e845d7e34c5325f4e36441",
     "expected-events.json": "eed768adc6c61e39b1aa22801d5166987823db8a5c5c236798aa23f36255c052",
     "expected-summary.json": "9309c6e6eecee462026847cf09385f699581b9d8001de226793328fedb121ada",
     "audio-provenance.json": "5494397b1a2c23f95fd4772b82baaa38662f4d4d5894ac064602ef2e5c851f6f",

@@ -206,6 +206,8 @@ func _initialize_gameplay(imported_package_path: String = "") -> void:
 	_gameplay_hud.high_contrast = high_contrast
 	_gameplay_hud.visible = not OS.get_cmdline_user_args().has("--hide-hud")
 	_gameplay_hud.configure(_song_title, _song_duration_us)
+	_gameplay_hud.pause_retry_requested.connect(_retry_paused_gameplay)
+	_gameplay_hud.pause_song_library_requested.connect(_return_to_song_library)
 	add_child(_gameplay_hud)
 	var transport_backend: RefCounted = AudioBackend.new(audio_player) if has_audio else SilentClockBackend.new(int(package["duration_us"]), null, _replay_speed)
 	transport = AudioTransport.new(transport_backend, int(package["duration_us"]), session)
@@ -310,6 +312,13 @@ func _unhandled_input(event: InputEvent) -> void:
 		elif (event as InputEventKey).keycode == KEY_ESCAPE:
 			get_tree().quit(1)
 		return
+	if transport != null and transport.state() == AudioTransport.PAUSED:
+		if (event as InputEventKey).keycode == KEY_R:
+			_retry_paused_gameplay.call_deferred()
+			return
+		if (event as InputEventKey).keycode == KEY_ESCAPE:
+			_return_to_song_library.call_deferred()
+			return
 	if (event as InputEventKey).keycode == KEY_SPACE:
 		if transport != null and transport.state() == AudioTransport.PLAYING:
 			var paused: Dictionary = transport.pause()
@@ -406,13 +415,33 @@ func _play_again() -> void:
 	visible = true; set_process(true); set_process_unhandled_input(true)
 	_initialize_gameplay(_active_package_path)
 
+func _retry_paused_gameplay() -> void:
+	if _product_flow == null or transport == null or transport.state() != AudioTransport.PAUSED:
+		return
+	var package_path := _active_package_path
+	_record_session_event("retry_requested")
+	var cancelled: Dictionary = _product_flow.cancel_session()
+	if not cancelled.get("ok", false): _fail(cancelled.get("error", "retry cancellation failed")); return
+	_teardown_gameplay_runtime()
+	var moved: Dictionary = _product_flow.transition(ProductFlow.GAMEPLAY)
+	if not moved.get("ok", false): _fail(moved.get("error", "retry transition failed")); return
+	var started: Dictionary = _product_flow.begin_session()
+	if not started.get("ok", false): _fail(started.get("error", "retry session failed")); return
+	visible = true; set_process(true); set_process_unhandled_input(true)
+	_initialize_gameplay(package_path)
+
 func _return_to_song_library() -> void:
 	if _product_flow == null:
 		return
 	_close_completed_results()
-	_teardown_gameplay_runtime()
-	var moved: Dictionary = _product_flow.transition(ProductFlow.SONG_LIBRARY)
+	var moved: Dictionary
+	if _product_flow.session_active():
+		_record_session_event("song_library_requested")
+		moved = _product_flow.cancel_session()
+	else:
+		moved = _product_flow.transition(ProductFlow.SONG_LIBRARY)
 	if not moved.get("ok", false): _fail(moved.get("error", "song library transition failed")); return
+	_teardown_gameplay_runtime()
 	visible = false; set_process(false); set_process_unhandled_input(false)
 	var view := ProductFlowView.new()
 	view.flow = _product_flow

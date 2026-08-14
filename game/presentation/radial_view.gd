@@ -8,6 +8,7 @@ const BackgroundPresets := preload("res://application/background_preset_catalog.
 const OUTER_RADIUS_FACTOR: float = 0.425
 const SPAWN_RADIUS_FACTOR: float = 0.225
 const DING_RADIUS_FACTOR: float = 0.085
+const INSTRUMENT_DECORATION_RING_FACTORS := [0.46, 0.34]
 
 var monochrome: bool = false
 var glow_enabled: bool = true
@@ -15,6 +16,7 @@ var high_contrast: bool = false
 var decoration_enabled: bool = true
 var judgement_layer_enabled: bool = true
 var combo_visual_enabled: bool = true
+var beat_pulse_enabled: bool = true
 var combo_value: int = 0
 var scheduler: GameplayNoteScheduler
 var transport: RefCounted
@@ -25,6 +27,9 @@ var _field_shader_rect: ColorRect
 var _field_shader_material: ShaderMaterial
 var _dense_visual_load: bool = false
 var _orb_mesh: ArrayMesh
+var _tempo_map: Array[Dictionary] = []
+var _beat_times_us := PackedInt64Array()
+var _note_lookahead_us: int = 1_000_000
 
 func _ready() -> void:
 	_orb_mesh = _build_orb_mesh()
@@ -37,8 +42,11 @@ func _ready() -> void:
 	add_child(_field_shader_rect)
 	_sync_field_shader()
 
-func configure(chart: RefCounted, profile: Dictionary, note_capacity: int = 64, note_lookahead_us: int = 2_000_000) -> void:
+func configure(chart: RefCounted, profile: Dictionary, note_capacity: int = 64, note_lookahead_us: int = 1_000_000) -> void:
 	_profile = profile.duplicate(true)
+	_tempo_map = chart.tempo_map() if chart.has_method("tempo_map") else []
+	_note_lookahead_us = note_lookahead_us
+	_beat_times_us = build_beat_times(_tempo_map, chart.duration_us())
 	scheduler = Scheduler.new(chart, _profile, note_capacity, note_lookahead_us)
 	queue_redraw()
 
@@ -76,6 +84,8 @@ func _draw() -> void:
 	_draw_background(geometry)
 	if decoration_enabled:
 		_draw_instrument_decoration(geometry, guide)
+	if beat_pulse_enabled:
+		_draw_beat_pulse(geometry, guide)
 	if judgement_layer_enabled:
 		_draw_judgement_guides(geometry, guide)
 	_draw_notes(geometry, ink)
@@ -107,8 +117,37 @@ func _draw_instrument_decoration(geometry: Dictionary, guide: Color) -> void:
 		for index: int in 10:
 			var amount := float(index) / 9.0
 			draw_circle(center, disc_radius - index * short_side * 0.018, metal_outer.lerp(metal_inner, amount))
-	for factor: float in [0.46, 0.34, 0.22, 0.11]:
+	for factor: float in INSTRUMENT_DECORATION_RING_FACTORS:
 		draw_arc(center, short_side * factor, 0.0, TAU, 144, Color(guide, 0.20), 1.0)
+
+func _draw_beat_pulse(geometry: Dictionary, guide: Color) -> void:
+	if _beat_times_us.is_empty():
+		return
+	var center: Vector2 = geometry["center"]
+	var song_time_us := _song_time_us()
+	var window_end_us := song_time_us + _note_lookahead_us
+	var index := _beat_lower_bound(song_time_us)
+	while index < _beat_times_us.size():
+		var hit_us := int(_beat_times_us[index])
+		if hit_us > window_end_us:
+			break
+		var progress := beat_pulse_progress(song_time_us, hit_us, _note_lookahead_us)
+		var radii := beat_pulse_radii(progress, geometry["spawn_radius"], geometry["short_side"] * DING_RADIUS_FACTOR, geometry["outer_radius"])
+		var pulse_color := Color(guide, lerpf(0.28, 0.10, progress))
+		draw_arc(center, radii.x, 0.0, TAU, 144, pulse_color, 2.5)
+		draw_arc(center, radii.y, 0.0, TAU, 160, pulse_color, 2.5)
+		index += 1
+
+func _beat_lower_bound(song_time_us: int) -> int:
+	var low := 0
+	var high := _beat_times_us.size()
+	while low < high:
+		var middle := (low + high) / 2
+		if int(_beat_times_us[middle]) < song_time_us:
+			low = middle + 1
+		else:
+			high = middle
+	return low
 
 func _draw_judgement_guides(geometry: Dictionary, guide: Color) -> void:
 	var center: Vector2 = geometry["center"]
@@ -141,21 +180,17 @@ func _draw_notes(geometry: Dictionary, ink: Color) -> void:
 		var visual: Vector3 = scheduler.visual_state(slot, song_time_us)
 		var radius: float = visual.x * short_side * 0.5
 		var position: Vector2 = tone_center_for(center, radius, visual.y)
-		var progress: float = visual.z
-		if progress < 0.12:
-			var spawn_alpha := (0.12 - progress) / 0.12
-			_draw_luminous_arc(center, geometry["spawn_radius"] + short_side * progress * 0.035, Tokens.color("spawn_luminous"), 2.0, 128, spawn_alpha * 0.72)
 		match note["technique"]:
 			"ding":
-				var ding_color := _technique_color("ding", ink)
+				var ding_color := _note_color(note, ink)
 				_draw_luminous_arc(center, radius, ding_color, 5.0, 128, 1.0)
 				_draw_direction_ticks(center, radius, true, ding_color)
 			"slap":
-				var slap_color := _technique_color("slap", ink)
+				var slap_color := _note_color(note, ink)
 				_draw_luminous_arc(center, radius, slap_color, 6.0, 128, 1.0)
 				_draw_direction_ticks(center, radius, false, slap_color)
 			_:
-				var tone_color := _technique_color("tone", ink)
+				var tone_color := _note_color(note, ink)
 				_draw_luminous_orb(position, short_side * 0.025, tone_color)
 		if not (slot["feedback"] as String).is_empty() and song_time_us <= int(slot["feedback_expires_us"]):
 			var feedback_duration_us := maxi(1, int(slot["feedback_expires_us"]) - int(slot["feedback_started_us"]))
@@ -221,6 +256,18 @@ func _technique_color(technique: String, fallback: Color) -> Color:
 		"slap": return Tokens.color("slap_luminous")
 		_: return Tokens.color("tone_luminous")
 
+func _note_color(note: Dictionary, fallback: Color) -> Color:
+	if monochrome or high_contrast:
+		return fallback
+	var explicit := hand_color(str(note.get("hand", "unspecified")), Color.TRANSPARENT)
+	return explicit if explicit.a > 0.0 else _technique_color(str(note.get("technique", "tone")), fallback)
+
+static func hand_color(hand: String, fallback: Color = Color.WHITE) -> Color:
+	match hand:
+		"right": return Tokens.color("right_hand_luminous")
+		"left": return Tokens.color("left_hand_luminous")
+		_: return fallback
+
 func _sync_field_shader() -> void:
 	if _field_shader_rect == null or _field_shader_material == null:
 		return
@@ -258,7 +305,7 @@ func _sync_note_bloom() -> void:
 		if note["technique"] == "tone":
 			note_center = tone_center_for(center, note_radius, visual.y)
 			ring_radius = -short_side * 0.025
-		var color := _technique_color(note["technique"], Color.WHITE)
+		var color := _note_color(note, Color.WHITE)
 		var bloom_energy := 0.38
 		var bloom_sigma := short_side * 0.013
 		if note["technique"] == "tone":
@@ -314,7 +361,39 @@ static func tone_center_for(center: Vector2, radius: float, angle_degrees: float
 	return center + Vector2(sin(radians), -cos(radians)) * radius
 
 static func layer_contract() -> Dictionary:
-	return {"decoration_independent":true, "judgement_independent":true, "notes_always_visible":true, "material":"translucent_forged_copper", "background_transmission":0.76, "opaque_accessibility_fallback":true, "per_frame_node_creation":0, "per_frame_resource_creation":0}
+	return {"decoration_independent":true, "judgement_independent":true, "beat_pulse_independent":true, "notes_always_visible":true, "material":"translucent_forged_copper", "background_transmission":0.76, "opaque_accessibility_fallback":true, "per_frame_node_creation":0, "per_frame_resource_creation":0}
+
+static func build_beat_times(tempo_map: Array[Dictionary], duration_us: int) -> PackedInt64Array:
+	var beat_times := PackedInt64Array()
+	if tempo_map.is_empty() or duration_us < 0:
+		return beat_times
+	var cumulative_beats := 0.0
+	for index: int in tempo_map.size():
+		var segment: Dictionary = tempo_map[index]
+		var segment_start_us := int(segment.get("start_us", 0))
+		var segment_end_us := duration_us if index + 1 >= tempo_map.size() else int(tempo_map[index + 1].get("start_us", duration_us))
+		segment_end_us = mini(segment_end_us, duration_us)
+		if segment_end_us < segment_start_us:
+			continue
+		if beat_times.is_empty() and segment_start_us == 0:
+			beat_times.append(0)
+		var beat_duration_us := 60_000_000_000.0 / float(maxi(1, int(segment.get("bpm_milli", 120_000))))
+		var segment_end_beats := cumulative_beats + float(segment_end_us - segment_start_us) / beat_duration_us
+		var next_beat := floori(cumulative_beats + 0.0000001) + 1
+		while float(next_beat) <= segment_end_beats + 0.0000001:
+			var beat_time_us := segment_start_us + roundi((float(next_beat) - cumulative_beats) * beat_duration_us)
+			if beat_time_us <= duration_us and (beat_times.is_empty() or beat_time_us > int(beat_times[-1])):
+				beat_times.append(beat_time_us)
+			next_beat += 1
+		cumulative_beats = segment_end_beats
+	return beat_times
+
+static func beat_pulse_progress(song_time_us: int, hit_us: int, lookahead_us: int) -> float:
+	return clampf(float(song_time_us - (hit_us - lookahead_us)) / float(maxi(1, lookahead_us)), 0.0, 1.0)
+
+static func beat_pulse_radii(phase: float, spawn_radius: float, ding_radius: float, outer_radius: float) -> Vector2:
+	var progress := clampf(phase, 0.0, 1.0)
+	return Vector2(lerpf(spawn_radius, ding_radius, progress), lerpf(spawn_radius, outer_radius, progress))
 
 static func accessibility_contract() -> Dictionary:
 	return {"full_screen_flash":false, "constant_camera_shake":false, "technique_uses_shape_and_direction":true, "grade_uses_shape_strength_and_text":true, "lightweight_fallback":["glow_disabled","monochrome"]}
@@ -339,4 +418,4 @@ static func feedback_origin_for(technique: String, center: Vector2, note_positio
 	return center if technique in ["ding", "slap"] else note_position
 
 static func visual_quality_contract() -> Dictionary:
-	return {"procedural_field_shader":true, "audio_time_driven_shader":true, "deterministic_shader":true, "handpan_material":"translucent_forged_copper", "background_transmission":0.76, "copper_patina":true, "note_bloom_shader":"integrated_sdf_gaussian", "tone_note_shape":"foreground_emissive_orb", "orb_shading":"saturated_cyan_center_hot_gradient", "orb_draw_order":"above_handpan_and_targets", "orb_bloom_strength":"strong_atmospheric_spill", "bloom_profile":"luminous_core_diffused_mist_atmospheric_spill", "bloom_shader_capacity":16, "normal_glow_layers":1, "smooth_bloom_falloff":"continuous_gaussian", "single_note_ring":false, "hollow_note_core":false, "black_note_core":false, "white_impact_fill":false, "impact_rays":false, "bloom_strength":"pronounced", "hit_bloom_strength":"bright_surge", "background_presets":["silent_resonance","breath_of_dawn","deep_resonance"], "background_motion":"visible_audio_time", "background_motion_strength":"dramatic", "deep_resonance_identity":"jade_mist_caustics", "cyber_grid":false, "static_outer_gold_ring":false, "legacy_highlight_arc":false, "dense_load_threshold":16, "dense_load_halo_layers":1, "note_trails":false, "technique_palette":["tone_luminous","ding_luminous","slap_luminous"], "reference_window":[1600,900], "launch_mode":"maximized", "stretch_aspect":"expand"}
+	return {"procedural_field_shader":true, "audio_time_driven_shader":true, "deterministic_shader":true, "handpan_material":"translucent_forged_copper", "background_transmission":0.76, "copper_patina":true, "note_bloom_shader":"integrated_sdf_gaussian", "tone_note_shape":"foreground_emissive_orb", "orb_shading":"saturated_cyan_center_hot_gradient", "orb_draw_order":"above_handpan_and_targets", "orb_bloom_strength":"strong_atmospheric_spill", "bloom_profile":"luminous_core_diffused_mist_atmospheric_spill", "bloom_shader_capacity":16, "normal_glow_layers":1, "smooth_bloom_falloff":"continuous_gaussian", "single_note_ring":false, "spawn_ring_pulse":false, "hollow_note_core":false, "black_note_core":false, "white_impact_fill":false, "impact_rays":false, "bloom_strength":"pronounced", "hit_bloom_strength":"bright_surge", "background_presets":["silent_resonance","breath_of_dawn","deep_resonance"], "background_motion":"visible_audio_time", "background_motion_strength":"dramatic", "deep_resonance_identity":"jade_mist_caustics", "cyber_grid":false, "static_outer_gold_ring":false, "legacy_highlight_arc":false, "dense_load_threshold":16, "dense_load_halo_layers":1, "note_trails":false, "technique_palette":["tone_luminous","ding_luminous","slap_luminous"], "hand_palette":{"right":"right_hand_luminous","left":"left_hand_luminous"}, "reference_window":[1600,900], "launch_mode":"maximized", "stretch_aspect":"expand"}

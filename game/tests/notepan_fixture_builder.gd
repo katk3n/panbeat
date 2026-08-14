@@ -57,6 +57,7 @@ static func _track(writer: Writer, track_index: int, options: Dictionary) -> voi
 		{"column":8, "lane":1, "note":39},
 	]
 	if options.get("bad_column", false): notes[0]["column"] = 999
+	if options.get("bad_lane", false): notes[0]["lane"] = 4
 	writer.i32(notes.size() + 1)
 	for note: Dictionary in notes:
 		writer.i16(int(note["column"])); writer.u8(int(note["lane"])); writer.u8(0); writer.boolean(false)
@@ -83,6 +84,7 @@ static func _track_v8(writer: Writer, track_index: int, options: Dictionary) -> 
 		{"column":8, "lane":1, "note":2}, {"column":8, "lane":2, "note":151},
 	]
 	if options.get("bad_column", false): notes[0]["column"] = 999
+	if options.get("bad_lane", false): notes[0]["lane"] = 3
 	writer.i32(notes.size() + 1)
 	for note: Dictionary in notes:
 		writer.i16(int(note["column"])); writer.u8(int(note["lane"])); writer.i32(0); writer.u8(int(note["note"])); writer.u8(2); writer.u8(0); writer.boolean(false); writer.boolean(false)

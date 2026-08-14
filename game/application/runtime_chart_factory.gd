@@ -3,6 +3,7 @@ extends RefCounted
 
 const RuntimeChart := preload("res://domain/runtime_chart.gd")
 const TECHNIQUES: Array[String] = ["tone", "ding", "slap"]
+const HANDS: Array[String] = ["right", "left", "unspecified"]
 
 static func build(chart: Dictionary, profile: Dictionary, audio_duration_us: int) -> Dictionary:
 	var errors: Array[String] = []
@@ -33,6 +34,29 @@ static func build(chart: Dictionary, profile: Dictionary, audio_duration_us: int
 	var ids: Dictionary = {}
 	var previous_timestamp_us: int = -1
 	var validated_notes: Array[Dictionary] = []
+	var validated_tempo_map: Array[Dictionary] = []
+	var tempo_values: Variant = chart.get("tempo_map", [])
+	if tempo_values is not Array:
+		errors.append("tempo_map must be an array")
+	else:
+		var previous_tempo_start_us: int = -1
+		for index: int in (tempo_values as Array).size():
+			var tempo_value: Variant = (tempo_values as Array)[index]
+			if tempo_value is not Dictionary:
+				errors.append("tempo_map[%d] must be an object" % index)
+				continue
+			var tempo: Dictionary = tempo_value as Dictionary
+			var start_us: Variant = tempo.get("start_us")
+			var bpm_milli: Variant = tempo.get("bpm_milli")
+			if not _is_integer_value(start_us) or int(start_us) < 0 or int(start_us) <= previous_tempo_start_us:
+				errors.append("tempo_map[%d].start_us must be a strictly increasing non-negative integer" % index)
+			elif not _is_integer_value(bpm_milli) or int(bpm_milli) <= 0:
+				errors.append("tempo_map[%d].bpm_milli must be a positive integer" % index)
+			else:
+				previous_tempo_start_us = int(start_us)
+				validated_tempo_map.append({"start_us":int(start_us), "bpm_milli":int(bpm_milli)})
+		if not validated_tempo_map.is_empty() and int(validated_tempo_map[0]["start_us"]) != 0:
+			errors.append("tempo_map must start at zero")
 	for index: int in (note_values as Array).size():
 		var value: Variant = (note_values as Array)[index]
 		if value is not Dictionary:
@@ -43,6 +67,7 @@ static func build(chart: Dictionary, profile: Dictionary, audio_duration_us: int
 		var timestamp: Variant = note.get("timestamp_us")
 		var technique: Variant = note.get("technique")
 		var target_id: Variant = note.get("target_id")
+		var hand: Variant = note.get("hand", "unspecified")
 		if note_id is not String or (note_id as String).is_empty():
 			errors.append("notes[%d].note_id must be a non-empty string" % index)
 		elif ids.has(note_id):
@@ -63,11 +88,13 @@ static func build(chart: Dictionary, profile: Dictionary, audio_duration_us: int
 			errors.append("unknown note technique: %s" % technique)
 		elif target_id is not String or not allowed_pairs.has("%s:%s" % [technique, target_id]):
 			errors.append("target is not available in canonical profile: %s:%s" % [technique, target_id])
-		if note_id is String and _is_integer_value(timestamp) and technique is String and target_id is String:
-			validated_notes.append({"note_id": note_id, "timestamp_us": int(timestamp), "technique": technique, "target_id": target_id})
+		if hand is not String or not HANDS.has(hand as String):
+			errors.append("unknown note hand: %s" % hand)
+		if note_id is String and _is_integer_value(timestamp) and technique is String and target_id is String and hand is String:
+			validated_notes.append({"note_id": note_id, "timestamp_us": int(timestamp), "technique": technique, "target_id": target_id, "hand": hand})
 	if not errors.is_empty():
 		return {"ok": false, "errors": errors}
-	return {"ok": true, "chart": RuntimeChart.new(chart_id, duration_us, validated_notes)}
+	return {"ok": true, "chart": RuntimeChart.new(chart_id, duration_us, validated_notes, validated_tempo_map)}
 
 static func _allowed_profile_pairs(profile: Dictionary) -> Dictionary:
 	var pairs: Dictionary = {}

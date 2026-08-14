@@ -55,9 +55,11 @@ static func merge(timed_chart: RefCounted, overlay: Dictionary, source_sha256: S
 			diagnostics.append(_diagnostic("duplicate_selector", "more than one annotation selects %s" % note_id, index)); continue
 		var technique := str(annotation.get("technique", ""))
 		var target_id := str(annotation.get("target_id", ""))
+		var hand := str(annotation.get("hand", "unspecified"))
 		if not ["tone", "ding", "slap"].has(technique): diagnostics.append(_diagnostic("invalid_technique", "unknown technique: %s" % technique, index)); continue
 		if not _profile_has_pair(profile, technique, target_id): diagnostics.append(_diagnostic("unknown_target", "profile has no %s:%s target" % [technique, target_id], index)); continue
-		selected[note_id] = {"technique":technique, "target_id":target_id, "annotation_index":index}
+		if not ["right", "left", "unspecified"].has(hand): diagnostics.append(_diagnostic("invalid_hand", "unknown hand: %s" % hand, index)); continue
+		selected[note_id] = {"technique":technique, "target_id":target_id, "hand":hand, "annotation_index":index}
 	if not diagnostics.is_empty(): return {"ok":false, "diagnostics":diagnostics}
 	var gameplay_notes: Array[Dictionary] = []
 	for note: Dictionary in timed_chart.notes:
@@ -80,7 +82,7 @@ static func merge(timed_chart: RefCounted, overlay: Dictionary, source_sha256: S
 			mapping.erase("ok")
 		if mapping.get("technique") == "slap" and not selected.has(note["note_id"]) and note.get("authoring_technique") != "slap":
 			diagnostics.append(_diagnostic("slap_requires_overlay", "Slap must be explicitly annotated in the PanBeat overlay", -1, note.get("source", {}))); continue
-		gameplay_notes.append({"note_id":note["note_id"], "timestamp_us":note["timestamp_us"], "duration_us":note["duration_us"], "technique":mapping["technique"], "target_id":mapping["target_id"], "source":note["source"], "pitch":note["pitch"]})
+		gameplay_notes.append({"note_id":note["note_id"], "timestamp_us":note["timestamp_us"], "duration_us":note["duration_us"], "technique":mapping["technique"], "target_id":mapping["target_id"], "hand":mapping.get("hand", note.get("hand", "unspecified")), "source":note["source"], "pitch":note["pitch"]})
 	if not diagnostics.is_empty(): return {"ok":false, "diagnostics":diagnostics}
 	var chart := {"schema_version":"1.0.0", "chart_id":timed_chart.chart_id, "importer_version":timed_chart.importer_version, "overlay_id":overlay.get("overlay_id", "none"), "profile_id":profile.get("profile_id", ""), "duration_us":timed_chart.duration_us, "tempo_map":timed_chart.tempo_map.duplicate(true), "notes":gameplay_notes}
 	return {"ok":true, "chart":chart, "canonical_json":Canonical.encode(chart) + "\n", "song_metadata":song_metadata, "diagnostics":[]}

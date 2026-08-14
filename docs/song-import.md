@@ -24,7 +24,7 @@ Overlay `1.1.0` `handpan_scale_name` is validated during merge. NotePan uses its
 
 ## Duplicate and update policy
 
-The cache key covers importer version, cache contract version, source format and content SHA-256, overlay SHA-256, Instrument Profile SHA-256, explicit pitch mapping SHA-256, notation octave shift, and audio SHA-256. NotePan uses importer `panbeat-score-importer-v2`; existing MusicXML continues to identify charts as `panbeat-musicxml-importer-v1`.
+The cache key covers importer version, cache contract version, source format and content SHA-256, overlay SHA-256, Instrument Profile SHA-256, explicit pitch mapping SHA-256, notation octave shift, and audio SHA-256. NotePan uses importer `panbeat-score-importer-v2`; existing MusicXML continues to identify charts as `panbeat-musicxml-importer-v1`. The NotePan cache contract is `notepan-hand-lanes-v2`, so packages created before schema 8 right/left lane preservation are regenerated instead of being returned as duplicates.
 It also covers `notation_octave_shift`. Song Library exposes “Written 1 octave high”; when selected, mapping resolves each written pitch one octave lower while preserving the source MusicXML pitch in the chart. This is explicit rather than auto-detected because the written and sounding ranges can overlap.
 
 For NotePan-authored `<unpitched>` notes, the first NotePan lyric token is authoritative: `g` advances score time but is omitted from Gameplay, while standalone `S` and `T` both map to Slap. Mood Pan cannot play a Slap and Tone Field chord, so compound labels such as `T+1` and `S+6` omit the unpitched `T`/`S` member; only the pitched member from the following MusicXML chord note is imported and judged.

@@ -22,13 +22,16 @@ func _initialize() -> void:
 	_check(configured.finish_session().get("state") == Flow.RESULTS and not configured.session_active(), "completed session transitions once to Results", failures)
 	_check(configured.transition(Flow.GAMEPLAY).get("ok") and configured.begin_session().get("ok") and configured.finish_session().get("state") == Flow.RESULTS, "completed session can start the same song again without restarting the process", failures)
 	var automation := Flow.new(); _check(automation.begin_session(true).get("ok") and automation.state() == Flow.GAMEPLAY, "CLI/replay automation uses product flow service", failures)
+	var paused_exit := Flow.new(); paused_exit.begin_session(true)
+	_check(paused_exit.cancel_session().get("state") == Flow.SONG_LIBRARY and not paused_exit.session_active(), "paused Song Library action cancels the active session", failures)
+	_check(paused_exit.transition(Flow.GAMEPLAY).get("ok") and paused_exit.begin_session().get("ok") and paused_exit.state() == Flow.GAMEPLAY, "paused retry can start a fresh session in the same process", failures)
 	var cleaned: Array[String] = []; var cleanup_flow := Flow.new(); cleanup_flow.register_resource("midi", func() -> void: cleaned.append("midi")); cleanup_flow.transition(Flow.DEVICE_SETUP)
 	_check(cleaned == ["midi"], "transition cleans registered resources", failures)
 	_check(cleanup_flow.register_resource("temporary-import", func() -> void: pass).get("ok") and cleanup_flow.register_resource("temporary-import", func() -> void: pass).get("code") == "duplicate_resource", "resource double registration rejected", failures)
 	var recoverable := cleanup_flow.failure("import", "Import failed.", "zip traversal", true); _check(recoverable["severity"] == "recoverable" and recoverable["actions"] == ["retry", "cancel", "back"] and recoverable["technical_detail"] == "zip traversal", "recoverable error has explanation details and recovery actions", failures)
 	var fatal := cleanup_flow.failure("settings", "Settings unavailable.", "permission denied", false); _check(fatal["severity"] == "fatal" and fatal["actions"].has("diagnostics") and not fatal["actions"].has("retry"), "fatal error stops with diagnostics", failures)
 	var bad_settings := Flow.new().initial_route({"ok":false, "error":"permission"}, songs_empty); _check(bad_settings["severity"] == "fatal" and bad_settings["category"] == "settings", "settings startup error classified fatal", failures)
-	_finish(failures, 18)
+	_finish(failures, 20)
 
 func _check(condition: bool, label: String, failures: Array[String]) -> void: if not condition: failures.append(label)
 func _finish(failures: Array[String], count: int) -> void:

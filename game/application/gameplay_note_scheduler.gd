@@ -14,7 +14,7 @@ var overflow_count: int = 0
 var activated_count: int = 0
 var retired_count: int = 0
 
-func _init(chart: RefCounted, profile: Dictionary, capacity: int = 64, lookahead_us: int = 2_000_000, retire_after_us: int = 120_000) -> void:
+func _init(chart: RefCounted, profile: Dictionary, capacity: int = 64, lookahead_us: int = 1_000_000, retire_after_us: int = 120_000) -> void:
 	assert(capacity > 0 and lookahead_us > 0 and retire_after_us >= 0)
 	_lookahead_us = lookahead_us
 	_retire_after_us = retire_after_us

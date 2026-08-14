@@ -9,7 +9,7 @@ func _initialize() -> void:
 	_check(Tokens.VERSION == "phase3-quiet-forge-v3", "approved visual-quality token version", failures)
 	_check(Tokens.color("accent") == Color("e4b45f") and Tokens.color("focus") == Color("ffe29b"), "Quiet Forge accent and focus", failures)
 	_check(Tokens.spacing("page") == 48 and Tokens.FONT_SIZE["body"] == 19, "spacing and typography tokens", failures)
-	_check(Tokens.color("tone_luminous") == Color("2fd4ff") and Tokens.color("ding_luminous") == Color("ffc45f") and Tokens.color("slap_luminous") == Color("ff806f") and Tokens.MOTION_MS["hit"] == 180, "saturated cyan technique and motion tokens", failures)
+	_check(Tokens.color("tone_luminous") == Color("2fd4ff") and Tokens.color("ding_luminous") == Color("ffc45f") and Tokens.color("slap_luminous") == Color("ff806f") and Tokens.color("right_hand_luminous") == Color("38d9ff") and Tokens.color("left_hand_luminous") == Color("ff72b6") and Tokens.MOTION_MS["hit"] == 180, "technique fallback, hand, and motion tokens", failures)
 	for type: String in ["Button", "OptionButton"]:
 		for state: String in ["normal", "hover", "pressed", "focus", "disabled"]:
 			_check(theme.has_stylebox(state, type), "%s %s style" % [type, state], failures)

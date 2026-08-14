@@ -65,7 +65,7 @@ GodotはMIT Licenseである。Unityのライセンス調査結果はPhase 0のd
 4. 音源再生と独立しない、再現可能なタイミング判定
 5. MusicXMLまたはNotePanを原譜とし、ゲーム固有情報を別データに保つ変換パイプライン
 6. Input Offset / Audio Offsetの調整
-7. 将来のPressure、Aftertouch、CC、Roll、Mute、左右手ガイドへの拡張
+7. 将来のPressure、Aftertouch、CC、Roll、Muteへの拡張
 
 ### 3.2 非機能要件として追加する目標値
 
@@ -824,7 +824,7 @@ Input OffsetとAudio Offsetは、この分解結果と利用者のキャリブ�
 - Device Setup、Song Library、Calibration、Resultsの情報設計と状態表現を改善
 - Glowなし、monochrome、resize、keyboard操作、描画性能を検証。通常起動はmaximized、reference captureは1600×900、下限検証は1280×720とする
 
-従来候補だったPractice Mode、左右手ガイド、苦手箇所分析、Free Play、Pressure / dynamicsは、2026-08-12の製品判断により発展的な学習機能として本Phaseでは実施しない。Final Phaseの必須作業にも含めない。
+従来候補だったPractice Mode、苦手箇所分析、Free Play、Pressure / dynamicsは、2026-08-12の製品判断により発展的な学習機能として本Phaseでは実施しない。左右手ガイドは2026-08-14の製品判断により、譜面の明示的な`hand`をノート色へ反映する範囲だけ採用した。位置やノート順からの手の推定は行わない。
 
 ### Phase 4: Web評価
 
@@ -968,5 +968,5 @@ Input OffsetとAudio Offsetは、この分解結果と利用者のキャリブ�
 
 - **Status:** Accepted（2026-08-12）
 - **Context:** 高密度の譜面では、固定2秒のlookaheadに多数のノートが滞在して重なり、対象と順序を読み取りにくい。一方、表示速度を判定や音声時刻へ結合するとGameplayの決定性を損なう。
-- **Decision:** `slow`（0.75× / 2,666,667µs）、`normal`（1.0× / 2,000,000µs）、`fast`（1.5× / 1,333,333µs）、`very_fast`（2.0× / 1,000,000µs）を安定IDとする。`NoteScrollSpeedCatalog`がCLI override、settingsの曲別map、global defaultの順で解決し、schedulerの生成時lookaheadへだけ渡す。Song Libraryで曲ごとに保存する。
+- **Decision:** 従来の2.0×（1,000,000µs lookahead）を新しい`normal`の基準速度とし、`slow`（0.75× / 1,333,333µs）、`normal`（1.0× / 1,000,000µs）、`fast`（1.5× / 666,667µs）、`very_fast`（2.0× / 500,000µs）を安定IDとする。`NoteScrollSpeedCatalog`がCLI override、settingsの曲別map、global defaultの順で解決し、schedulerの生成時lookaheadへだけ渡す。Song Libraryで曲ごとに保存する。
 - **Consequences:** 高速設定はノートの画面内滞在時間と同時表示数を減らすが、Runtime Chart、audio-backed transport、judgement pipeline、score recordは変更しない。再生中ではなく曲開始前に速度を確定するため、既にactiveなノートの巻き戻し処理は不要となる。

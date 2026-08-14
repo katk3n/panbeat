@@ -1,7 +1,11 @@
 class_name GameplayHud
 extends Node2D
 
+signal pause_retry_requested
+signal pause_song_library_requested
+
 const Tokens := preload("res://presentation/ui_tokens.gd")
+const AppTheme := preload("res://presentation/panbeat_theme.gd")
 const FIELD_DISC_RADIUS_FACTOR := 0.47
 
 var song_title: String = ""
@@ -14,6 +18,35 @@ var technical_failure: String = ""
 var results_pending: bool = false
 var monochrome: bool = false
 var high_contrast: bool = false
+var _pause_actions: HBoxContainer
+
+func _ready() -> void:
+	_ensure_pause_actions()
+	_sync_pause_actions()
+
+func _ensure_pause_actions() -> void:
+	if _pause_actions != null:
+		return
+	_pause_actions = HBoxContainer.new()
+	_pause_actions.name = "PauseActions"
+	_pause_actions.theme = AppTheme.shared()
+	_pause_actions.add_theme_constant_override("separation", 12)
+	_pause_actions.z_index = 50
+	var retry := Button.new()
+	retry.name = "RetryButton"
+	retry.text = "↻  RETRY · R"
+	retry.tooltip_text = "Restart this song from the beginning (R)"
+	retry.custom_minimum_size = Vector2(150, 44)
+	retry.pressed.connect(func() -> void: pause_retry_requested.emit())
+	_pause_actions.add_child(retry)
+	var song_library := Button.new()
+	song_library.name = "SongLibraryButton"
+	song_library.text = "SONG LIBRARY · ESC"
+	song_library.tooltip_text = "Stop this session and choose another song (Esc)"
+	song_library.custom_minimum_size = Vector2(180, 44)
+	song_library.pressed.connect(func() -> void: pause_song_library_requested.emit())
+	_pause_actions.add_child(song_library)
+	add_child(_pause_actions)
 
 func configure(title: String, song_duration_us: int) -> void:
 	song_title = title
@@ -21,13 +54,24 @@ func configure(title: String, song_duration_us: int) -> void:
 	queue_redraw()
 
 func present(hud: Dictionary, now_us: int, state: String, input_name: String, failure_detail: String = "", complete: bool = false) -> void:
+	_ensure_pause_actions()
 	score_hud = hud
 	song_time_us = now_us
 	transport_state = state
 	input_label = input_name
 	technical_failure = failure_detail
 	results_pending = complete
+	_sync_pause_actions()
 	queue_redraw()
+
+func _sync_pause_actions() -> void:
+	if _pause_actions == null:
+		return
+	_pause_actions.visible = transport_state == "paused" and technical_failure.is_empty() and not results_pending
+	if not _pause_actions.visible or not is_inside_tree():
+		return
+	var viewport_size := get_viewport_rect().size
+	_pause_actions.position = Vector2((viewport_size.x - 342.0) * 0.5, viewport_size.y * 0.5 + 48.0)
 
 func _draw() -> void:
 	var size := get_viewport_rect().size
@@ -83,7 +127,7 @@ func _draw_panel(rect: Rect2) -> void:
 func _draw_overlay(size: Vector2, overlay: Dictionary) -> void:
 	var font := ThemeDB.fallback_font
 	var width := minf(440.0, size.x - 48.0)
-	var height := 190.0 if not String(overlay["detail"]).is_empty() else 154.0
+	var height := 220.0 if overlay.get("pause_actions", false) else (190.0 if not String(overlay["detail"]).is_empty() else 154.0)
 	var rect := Rect2(Vector2((size.x - width) * 0.5, (size.y - height) * 0.5), Vector2(width, height))
 	draw_rect(rect, Color(Tokens.color("surface_raised"), 0.97))
 	draw_line(rect.position, rect.position + Vector2(rect.size.x, 0), Tokens.color(overlay["color"]), 4.0)
@@ -145,5 +189,8 @@ static func overlay_model(state: String, now_us: int, failure_detail: String = "
 		var beats := maxi(1, ceili(float(-now_us) / 1_000_000.0))
 		return {"visible":true, "title":str(beats), "message":"GET READY", "action":"Audio starts at zero", "detail":"", "color":"accent"}
 	if state == "paused":
-		return {"visible":true, "title":"PAUSED", "message":"Playback and judgement are stopped.", "action":"SPACE  RESUME", "detail":"", "color":"accent"}
+		return {"visible":true, "title":"PAUSED", "message":"Playback and judgement are stopped.", "action":"SPACE  RESUME", "detail":"", "color":"accent", "pause_actions":true}
 	return {"visible":false, "title":"", "message":"", "action":"", "detail":"", "color":"accent"}
+
+static func pause_action_contract() -> Dictionary:
+	return {"resume":"space", "retry":"r", "song_library":"escape", "abandons_result":true, "process_restart_required":false}

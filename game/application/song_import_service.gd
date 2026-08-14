@@ -10,7 +10,7 @@ const Canonical := preload("res://application/canonical_json.gd")
 const IMPORTER_VERSION := "panbeat-musicxml-importer-v1"
 const NOTEPAN_IMPORTER_VERSION := "panbeat-score-importer-v2"
 const PACKAGE_VERSION := "1.2.0"
-const CACHE_CONTRACT_VERSION := "notepan-schema8-direct-v1"
+const CACHE_CONTRACT_VERSION := "notepan-hand-lanes-v2"
 
 var _files: RefCounted
 var _audio: RefCounted

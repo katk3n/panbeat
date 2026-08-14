@@ -22,6 +22,7 @@ function validateSource(source) {
     if ((event.technique === "ding") !== (event.target_id === "ding")) throw new Error("ding target mismatch");
     if ((event.technique === "slap") !== (event.target_id === "outer-hit-radius")) throw new Error("slap target mismatch");
     if (event.technique === "tone" && !event.target_id.startsWith("tone-")) throw new Error("tone target mismatch");
+    if (!new Set(["right", "left"]).has(event.hand)) throw new Error(`event hand must be explicit: ${event.hand}`);
     previousBeat = event.beat;
   }
 }
@@ -72,7 +73,8 @@ export function buildPackage(source) {
     note_id: `orbit-${String(index + 1).padStart(3, "0")}`,
     timestamp_us: event.beat * beatUs,
     technique: event.technique,
-    target_id: event.target_id
+    target_id: event.target_id,
+    hand: event.hand
   }));
   if (!notes.every((note) => Number.isSafeInteger(note.timestamp_us))) throw new Error("note timestamp is not an integer microsecond");
   const lastNoteUs = notes.at(-1).timestamp_us;

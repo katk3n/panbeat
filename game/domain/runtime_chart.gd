@@ -6,12 +6,14 @@ const RuntimeNote := preload("res://domain/runtime_note.gd")
 var _chart_id: String
 var _duration_us: int
 var _notes: Array[RuntimeChartNote] = []
+var _tempo_map: Array[Dictionary] = []
 
-func _init(chart_id: String, duration_us: int, note_values: Array[Dictionary]) -> void:
+func _init(chart_id: String, duration_us: int, note_values: Array[Dictionary], tempo_values: Array[Dictionary] = []) -> void:
 	_chart_id = chart_id
 	_duration_us = duration_us
+	_tempo_map = tempo_values.duplicate(true)
 	for value: Dictionary in note_values:
-		_notes.append(RuntimeNote.new(value["note_id"], value["timestamp_us"], value["technique"], value["target_id"]))
+		_notes.append(RuntimeNote.new(value["note_id"], value["timestamp_us"], value["technique"], value["target_id"], value.get("hand", "unspecified")))
 
 func chart_id() -> String:
 	return _chart_id
@@ -21,6 +23,9 @@ func duration_us() -> int:
 
 func note_count() -> int:
 	return _notes.size()
+
+func tempo_map() -> Array[Dictionary]:
+	return _tempo_map.duplicate(true)
 
 func note_at(index: int) -> Dictionary:
 	return _notes[index].to_dictionary()

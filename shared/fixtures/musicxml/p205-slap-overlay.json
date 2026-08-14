@@ -5,6 +5,6 @@
   "handpan_scale_name": "D Kurd 9",
   "difficulty": {"id": "normal", "label": "Normal"},
   "annotations": [
-    {"selector": {"note_id": "P1:m1:t0:v1:D4:0"}, "technique": "slap", "target_id": "outer-hit-radius"}
+    {"selector": {"note_id": "P1:m1:t0:v1:D4:0"}, "technique": "slap", "target_id": "outer-hit-radius", "hand": "right"}
   ]
 }

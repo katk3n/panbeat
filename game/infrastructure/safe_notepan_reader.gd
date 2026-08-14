@@ -226,7 +226,8 @@ static func _read_track_v8(reader: ByteReader) -> Dictionary:
 		var effect := reader.u8()
 		var grace := reader.boolean()
 		var finger_roll := reader.boolean()
-		notes.append({"column":column, "lane":maxi(0, lane - 1), "background":background, "background_only":code == 0, "note":_legacy_note_code(code), "nuance":0 if nuance == 2 else nuance, "effect":effect, "grace":grace, "finger_roll":finger_roll})
+		if lane not in [1, 2]: reader.fail("invalid_notepan_lane", "Schema 8 lane %d must be 1 (right) or 2 (left)." % lane)
+		notes.append({"column":column, "lane":lane - 1, "hand":"right" if lane == 1 else "left", "background":background, "background_only":code == 0, "note":_legacy_note_code(code), "nuance":0 if nuance == 2 else nuance, "effect":effect, "grace":grace, "finger_roll":finger_roll})
 	track["notes"] = notes
 	var annotations: Array[Dictionary] = []
 	for _index: int in reader.count("annotations"): annotations.append({"column":reader.i16(), "text":reader.string()})
@@ -375,7 +376,10 @@ static func _build_score(source: String, app_version: String, schema: int, title
 
 static func _convert_note(source: String, raw: Dictionary, column: Dictionary, duration_ticks: int, pitch_by_code: Dictionary, has_pitched: bool) -> Dictionary:
 	var code := int(raw["note"])
-	var note := {"part":"NotePan", "measure":str(int(column["bar"]) + 1), "measure_index":int(column["bar"]), "tick":int(column["tick"]), "duration_ticks":duration_ticks, "voice":str(int(raw["lane"]) + 1), "line":0, "tie_types":[], "notepan_label":str(SPECIAL_LABELS.get(code, code))}
+	var lane := int(raw["lane"])
+	if lane < 0 or lane > 3: return _failed("invalid_notepan_lane", source, "NotePan lane %d is outside the supported right/left lane range." % lane, "Repair or re-save the NotePan tablature with a lane from 0 through 3.")
+	var hand := str(raw.get("hand", "right" if lane < 2 else "left"))
+	var note := {"part":"NotePan", "measure":str(int(column["bar"]) + 1), "measure_index":int(column["bar"]), "tick":int(column["tick"]), "duration_ticks":duration_ticks, "voice":str(lane + 1), "hand":hand, "line":0, "tie_types":[], "notepan_label":str(SPECIAL_LABELS.get(code, code))}
 	match code:
 		35: note["is_unpitched"] = true; note["is_ignored"] = true
 		37, 39:

@@ -14,7 +14,7 @@ func _initialize() -> void:
 	var compiled := Compiler.compile(parsed["score"], "p205")
 	var overlay := JSON.parse_string(FileAccess.get_file_as_string(ProjectSettings.globalize_path("res://../shared/fixtures/musicxml/p205-slap-overlay.json"))) as Dictionary
 	var slap := Merger.merge(compiled["chart"], overlay, SOURCE_SHA, profile)
-	_check(slap.get("ok") == true and slap["chart"]["notes"][0]["technique"] == "slap" and slap["chart"]["notes"][0]["target_id"] == "outer-hit-radius", "explicit Slap annotation", failures)
+	_check(slap.get("ok") == true and slap["chart"]["notes"][0]["technique"] == "slap" and slap["chart"]["notes"][0]["target_id"] == "outer-hit-radius" and slap["chart"]["notes"][0]["hand"] == "right", "explicit Slap and hand annotation", failures)
 	_check(slap.get("song_metadata", {}).get("handpan_scale_name") == "D Kurd 9", "overlay handpan scale metadata is returned outside Runtime Chart", failures)
 	var legacy := overlay.duplicate(true); legacy["schema_version"] = "1.0.0"; legacy.erase("handpan_scale_name")
 	_check(Merger.merge(compiled["chart"], legacy, SOURCE_SHA, profile).get("song_metadata", {}).is_empty(), "legacy overlay without scale remains supported", failures)
@@ -54,6 +54,8 @@ func _initialize() -> void:
 	_check(_code(Merger.merge(duplicate_source_chart, source_selector, SOURCE_SHA, profile)) == "selector_multiple_matches", "multiple-match source selector rejected", failures)
 	var unknown_target := overlay.duplicate(true); unknown_target["annotations"][0]["target_id"] = "tone-99"
 	_check(_code(Merger.merge(compiled["chart"], unknown_target, SOURCE_SHA, profile)) == "unknown_target", "unknown target rejected", failures)
+	var invalid_hand := overlay.duplicate(true); invalid_hand["annotations"][0]["hand"] = "both"
+	_check(_code(Merger.merge(compiled["chart"], invalid_hand, SOURCE_SHA, profile)) == "invalid_hand", "unknown hand rejected", failures)
 	var c_chart := _chart_with_notes([_timed_note("c-sharp", "C", 4, 0, 1)])
 	var explicit := Merger.merge(c_chart, {}, SOURCE_SHA, profile, {"C#4":{"technique":"tone", "target_id":"tone-1"}})
 	_check(explicit.get("ok") == true and explicit["chart"]["notes"][0]["target_id"] == "tone-1", "explicit pitch mapping", failures)
@@ -63,7 +65,7 @@ func _initialize() -> void:
 	var slap_pitch_chart := _chart_with_notes([_timed_note("a6", "A", 6, 0)])
 	_check(_code(Merger.merge(slap_pitch_chart, {}, SOURCE_SHA, profile)) == "unsupported_pitch", "Slap is not inferred from MusicXML pitch", failures)
 	_check(slap.get("ok") and slap["canonical_json"] == Merger.merge(compiled["chart"], overlay, SOURCE_SHA, profile)["canonical_json"], "overlay merge canonical output deterministic", failures)
-	_finish(failures, 20)
+	_finish(failures, 21)
 
 func _chart_with_notes(notes: Array[Dictionary]) -> RefCounted:
 	return TimedChart.new("test", "panbeat-musicxml-importer-v1", 4, 4, 500000, [{"tick":0,"bpm_milli":120000,"start_us":0}], [], notes)

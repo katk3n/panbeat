@@ -13,6 +13,8 @@ const COLOR := {
 	"tone_luminous": Color("2fd4ff"),
 	"ding_luminous": Color("ffc45f"),
 	"slap_luminous": Color("ff806f"),
+	"right_hand_luminous": Color("38d9ff"),
+	"left_hand_luminous": Color("ff72b6"),
 	"spawn_luminous": Color("9a7cff"),
 	"success": Color("8ed3a7"),
 	"warning": Color("e8bd72"),

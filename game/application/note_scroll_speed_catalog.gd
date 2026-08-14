@@ -3,10 +3,10 @@ extends RefCounted
 
 const DEFAULT_ID := "normal"
 const PRESETS: Array[Dictionary] = [
-	{"id":"slow", "label":"Slow · 0.75×", "multiplier":0.75, "lookahead_us":2_666_667},
-	{"id":"normal", "label":"Normal · 1.0×", "multiplier":1.0, "lookahead_us":2_000_000},
-	{"id":"fast", "label":"Fast · 1.5×", "multiplier":1.5, "lookahead_us":1_333_333},
-	{"id":"very_fast", "label":"Very Fast · 2.0×", "multiplier":2.0, "lookahead_us":1_000_000}
+	{"id":"slow", "label":"Slow · 0.75×", "multiplier":0.75, "lookahead_us":1_333_333},
+	{"id":"normal", "label":"Normal · 1.0×", "multiplier":1.0, "lookahead_us":1_000_000},
+	{"id":"fast", "label":"Fast · 1.5×", "multiplier":1.5, "lookahead_us":666_667},
+	{"id":"very_fast", "label":"Very Fast · 2.0×", "multiplier":2.0, "lookahead_us":500_000}
 ]
 
 static func all() -> Array[Dictionary]:

@@ -20,7 +20,12 @@ func _initialize() -> void:
 	var count_in := Hud.overlay_model("scheduled", -2_100_000)
 	_check(count_in["visible"] and count_in["title"] == "3" and count_in["action"] == "Audio starts at zero", "count-in derives from negative transport time", failures)
 	var paused := Hud.overlay_model("paused", 4_000_000)
-	_check(paused["title"] == "PAUSED" and String(paused["action"]).contains("RESUME"), "pause names resume action", failures)
+	_check(paused["title"] == "PAUSED" and String(paused["action"]).contains("RESUME") and paused["pause_actions"], "pause exposes resume and interactive secondary actions", failures)
+	var pause_contract := Hud.pause_action_contract()
+	_check(pause_contract == {"resume":"space", "retry":"r", "song_library":"escape", "abandons_result":true, "process_restart_required":false}, "pause action contract uses in-process retry and safely abandons the current result", failures)
+	var hud_view := Hud.new(); root.add_child(hud_view); hud_view.present({}, 4_000_000, "paused", "midi")
+	_check(hud_view.get_node("PauseActions").visible and hud_view.get_node("PauseActions/RetryButton") is Button and hud_view.get_node("PauseActions/SongLibraryButton") is Button and hud_view.get_node("PauseActions/RetryButton").text.contains("R") and hud_view.get_node("PauseActions/SongLibraryButton").text.contains("ESC"), "paused HUD presents clickable retry and Song Library buttons with keyboard hints", failures)
+	hud_view.present({}, 4_000_000, "playing", "midi"); _check(not hud_view.get_node("PauseActions").visible, "pause actions hide after resume", failures); hud_view.free()
 	var failed := Hud.overlay_model("failed", 0, "audio backend unavailable")
 	_check(failed["title"] == "PLAYBACK STOPPED" and String(failed["action"]).contains("RETRY") and failed["detail"] == "audio backend unavailable", "failure separates summary actions and detail", failures)
 	var complete := Hud.overlay_model("completed", 10_000_000, "", true)
@@ -33,7 +38,7 @@ func _initialize() -> void:
 	for key: String in ["current_score","current_combo","current_accuracy","latest_grade","latest_direction"]:
 		contract_complete = contract_complete and engine_hud.has(key)
 	_check(contract_complete, "HUD contract contains all engine-derived performance fields", failures)
-	_finish(failures, 15)
+	_finish(failures, 18)
 
 func _check(condition: bool, label: String, failures: Array[String]) -> void:
 	if not condition: failures.append(label)
