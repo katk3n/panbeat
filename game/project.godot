@@ -2,6 +2,7 @@ config_version=5
 
 [application]
 config/name="PanBeat"
+config/icon="res://assets/branding/panbeat-icon.png"
 run/main_scene="res://presentation/main.tscn"
 config/features=PackedStringArray("4.6", "GL Compatibility")
 

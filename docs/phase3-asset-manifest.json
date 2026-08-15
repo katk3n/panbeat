@@ -20,6 +20,14 @@
       "redistribution": "Success, warning, error, and info retain text labels and shapes when glyph fallback differs."
     },
     {
+      "kind": "icon",
+      "name": "PanBeat application icon",
+      "source": "User-provided artwork supplied for the PanBeat application icon on 2026-08-16",
+      "bundled_file": "game/assets/branding/panbeat-icon.png",
+      "license": "authorized for PanBeat use by the user in this task",
+      "redistribution": "Bundled as the project icon and macOS export icon; white outer margins were removed and the raster was normalized to 1024x1024 PNG."
+    },
+    {
       "kind": "shader",
       "name": "Quiet Forge radial field",
       "source": "PanBeat-authored audio-time-driven deterministic canvas_item shader",
