@@ -4,6 +4,7 @@
   "version": "0.0.0",
   "description": "Engine-independent validation tools for PanBeat Phase 0",
   "scripts": {
+    "test": "node --test scripts/*.test.mjs",
     "generate:test-pack": "node scripts/generate-test-pack.mjs generate",
     "audit:instrument-profile": "node scripts/instrument-profile.mjs audit --output artifacts/reports/m03-instrument-profile-audit.json",
     "test:instrument-profile": "node --test scripts/instrument-profile.test.mjs",

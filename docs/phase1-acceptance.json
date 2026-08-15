@@ -62,7 +62,7 @@
       "id": "chart-schema",
       "kind": "schema",
       "path": "schemas/panbeat-chart.schema.json",
-      "sha256": "e0db8e435c49fb0ffa7f06980cc67597a1ddbf65c686ac985abf2be1deb3436b"
+      "sha256": "50d3f1676cf7ac1eb481636890663ed4b393d3de888942aead653d1679fb9ee2"
     },
     {
       "id": "phase0-chart",
@@ -165,6 +165,13 @@
       "change": "Reclassify R-P1-001 and R-P1-003 from Phase 1 blockers to deferred release-gate blockers and schedule them in the mandatory Final Release Hardening Phase.",
       "reason": "The fixed-song slice and three real-device sessions passed without an observed gameplay problem. The measured values remain above target, but the Phase 1 methods include 0.1x audio stretching and an artificial frame wait and should not stop unrelated feature development.",
       "supersedes": "artifacts/raw/phase1-p114-gate-20260812/run-manifest.json",
+      "confirmed_by_owner": true
+    },
+    {
+      "story": "P306",
+      "date": "2026-08-14",
+      "change": "Add optional explicit hand metadata to the chart schema and annotate the fixed product chart without changing note IDs, timestamps, techniques, or targets.",
+      "reason": "The product owner approved explicit right/left note colors while prohibiting runtime hand inference. The accepted schema checksum is updated so future unreviewed changes remain detectable.",
       "confirmed_by_owner": true
     }
   ],

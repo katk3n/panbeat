@@ -1,6 +1,8 @@
 class_name SongLibraryService
 extends RefCounted
 
+const PerformanceLayouts := preload("res://application/performance_layout_service.gd")
+
 var _files: RefCounted
 
 func _init(file_backend: RefCounted) -> void:
@@ -63,20 +65,20 @@ func _inspect_entry(repository_root: String, entry: Dictionary, selected_profile
 	if not package_result.get("ok", false): return _invalid(view, package_result.get("diagnostics", []))
 	var package: Dictionary = package_result["document"]
 	var package_version := str(package.get("schema_version", ""))
-	if package_version not in ["1.0.0", "1.1.0", "1.2.0"] or package.get("song_id") != entry.get("song_id") or int(package.get("import_version", 0)) != int(entry.get("import_version", -1)):
+	if package_version not in ["1.0.0", "1.1.0", "1.2.0", "1.3.0"] or package.get("song_id") != entry.get("song_id") or int(package.get("import_version", 0)) != int(entry.get("import_version", -1)):
 		return _invalid(view, [_diagnostic("package_metadata_mismatch", entry.get("package_path", ""), "Package identity/version does not match the song index.", "Re-import or delete this song.")])
 	var handpan_scale_name := ""
 	if package.has("handpan_scale_name"):
 		var scale_value: Variant = package["handpan_scale_name"]
-		if package_version not in ["1.1.0", "1.2.0"] or scale_value is not String or not _valid_handpan_scale_name(str(scale_value)):
+		if package_version not in ["1.1.0", "1.2.0", "1.3.0"] or scale_value is not String or not _valid_handpan_scale_name(str(scale_value)):
 			return _invalid(view, [_diagnostic("invalid_handpan_scale_name", entry.get("package_path", ""), "Package handpan_scale_name is not valid for its schema version.", "Re-import with supported scale metadata and a trimmed single-line scale name of at most 80 characters.")])
 		handpan_scale_name = str(scale_value)
 	var required_assets: Array[String] = [str(package.get("chart_path", ""))]
-	if package_version == "1.2.0":
+	if package_version in ["1.2.0", "1.3.0"]:
 		var source_format := str(package.get("source", {}).get("format", ""))
 		var source_asset := str(package.get("source", {}).get("stored_path", ""))
 		var source_extension := str(package.get("source", {}).get("extension", ""))
-		var expected_importer := "panbeat-score-importer-v2" if source_format == "notepan" else "panbeat-musicxml-importer-v1"
+		var expected_importer := ("panbeat-score-importer-v3" if package_version == "1.3.0" else "panbeat-score-importer-v2") if source_format == "notepan" else ("panbeat-musicxml-importer-v2" if package_version == "1.3.0" else "panbeat-musicxml-importer-v1")
 		var extension_valid := source_extension == ".pan" if source_format == "notepan" else source_extension in [".musicxml", ".xml", ".mxl"]
 		if source_format not in ["musicxml", "notepan"] or source_asset != ("source.pan" if source_format == "notepan" else "source.musicxml") or package.get("importer_version") != expected_importer or not extension_valid:
 			return _invalid(view, [_diagnostic("package_source_metadata_invalid", entry.get("package_path", ""), "Package source format and stored path do not agree.", "Re-import or delete this song.")])
@@ -89,10 +91,13 @@ func _inspect_entry(repository_root: String, entry: Dictionary, selected_profile
 	view["title"] = package.get("title", entry.get("title", entry.get("song_id", "")))
 	view["artist"] = package.get("artist", "")
 	view["handpan_scale_name"] = handpan_scale_name
+	view["performance_layout"] = package.get("performance_layout", {})
+	if package_version == "1.3.0" and not _valid_performance_layout(view["performance_layout"]):
+		return _invalid(view, [_diagnostic("invalid_performance_layout", entry.get("package_path", ""), "Package performance layout is invalid.", "Re-import the song.")])
 	view["duration_us"] = int(package.get("duration_us", 0))
 	view["chart_schema_version"] = package.get("chart_schema_version", "unknown")
 	view["artwork_label"] = "No artwork"
-	if package_version == "1.2.0":
+	if package_version in ["1.2.0", "1.3.0"]:
 		var import_diagnostics: Variant = package.get("import_diagnostics", [])
 		if import_diagnostics is not Array: return _invalid(view, [_diagnostic("package_diagnostics_invalid", entry.get("package_path", ""), "Package import diagnostics are invalid.", "Re-import or delete this song.")])
 		for diagnostic: Variant in import_diagnostics:
@@ -108,6 +113,9 @@ func _inspect_entry(repository_root: String, entry: Dictionary, selected_profile
 
 func _valid_handpan_scale_name(value: String) -> bool:
 	return not value.is_empty() and value.length() <= 80 and value == value.strip_edges() and "\n" not in value and "\r" not in value and "\t" not in value
+
+func _valid_performance_layout(value: Variant) -> bool:
+	return value is Dictionary and PerformanceLayouts.validate(value as Dictionary)
 
 func _invalid(view: Dictionary, diagnostics: Array) -> Dictionary:
 	view["display_status"] = "invalid"; view["playable"] = false; view["profile_compatibility"] = "unknown"; view["artwork_label"] = "Unavailable"; view["diagnostics"] = diagnostics

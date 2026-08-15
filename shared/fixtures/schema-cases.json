@@ -12,6 +12,7 @@
     {"schema":"schemas/song-package.schema.json","fixture":"shared/fixtures/schema-valid/song-package-1.1.json","format":"json","expected_valid":true},
     {"schema":"schemas/song-package.schema.json","fixture":"shared/fixtures/schema-valid/song-package-1.2-notepan.json","format":"json","expected_valid":true},
     {"schema":"schemas/result-history.schema.json","fixture":"shared/fixtures/schema-valid/result-history.json","format":"json","expected_valid":true},
+    {"schema":"schemas/song-package.schema.json","fixture":"shared/fixtures/schema-valid/song-package-1.3-layout.json","format":"json","expected_valid":true},
     {"schema":"schemas/panbeat-chart.schema.json","fixture":"shared/fixtures/schema-invalid/chart.json","format":"json","expected_valid":false},
     {"schema":"schemas/instrument-profile.schema.json","fixture":"shared/fixtures/schema-invalid/instrument-profile.json","format":"json","expected_valid":false},
     {"schema":"schemas/raw-midi-trace.schema.json","fixture":"shared/fixtures/schema-invalid/raw-midi-trace.jsonl","format":"jsonl","expected_valid":false},

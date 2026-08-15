@@ -24,7 +24,8 @@
             "properties": {
               "song_id": {"type": "string", "minLength": 1}, "importer_version": {"type": "string", "minLength": 1},
               "chart_version": {"type": "string", "minLength": 1}, "profile_id": {"type": "string", "minLength": 1},
-              "judgement_rule_id": {"type": "string", "minLength": 1}, "score_rule_id": {"type": "string", "minLength": 1}
+              "judgement_rule_id": {"type": "string", "minLength": 1}, "score_rule_id": {"type": "string", "minLength": 1},
+              "performance_layout_id": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
             }
           },
           "summary": {

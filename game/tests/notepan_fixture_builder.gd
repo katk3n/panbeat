@@ -55,6 +55,8 @@ static func _track(writer: Writer, track_index: int, options: Dictionary) -> voi
 		{"column":7, "lane":3, "note":1, "nuance":1, "effect":2, "grace":true, "finger_roll":true},
 		{"column":8, "lane":0, "note":2},
 		{"column":8, "lane":1, "note":39},
+		{"column":1, "lane":0, "note":40},
+		{"column":8, "lane":2, "note":40},
 	]
 	if options.get("bad_column", false): notes[0]["column"] = 999
 	if options.get("bad_lane", false): notes[0]["lane"] = 4
@@ -82,6 +84,7 @@ static func _track_v8(writer: Writer, track_index: int, options: Dictionary) -> 
 		{"column":4, "lane":1, "note":54}, {"column":5, "lane":2, "note":161},
 		{"column":6, "lane":1, "note":153}, {"column":7, "lane":2, "note":1},
 		{"column":8, "lane":1, "note":2}, {"column":8, "lane":3, "note":151},
+		{"column":1, "lane":0, "note":152}, {"column":8, "lane":2, "note":152},
 	]
 	if options.get("bad_column", false): notes[0]["column"] = 999
 	if options.get("bad_lane", false): notes[0]["lane"] = 4

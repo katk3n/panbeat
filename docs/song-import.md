@@ -22,11 +22,11 @@ Import writes `source.musicxml` or `source.pan`, optional MusicXML `overlay.json
 
 The index stores paths relative to the Song Repository and package metadata stores only the original filename, never a user-specific absolute source path.
 
-Overlay `1.1.0` `handpan_scale_name` is validated during merge. NotePan uses its explicit embedded scale string. Both are copied to package metadata and deliberately excluded from Runtime Chart and the song index. Package `1.2.0` adds source format/path and persistent non-blocking import diagnostics; existing package `1.0.0` and `1.1.0` remain readable.
+Overlay `1.1.0` `handpan_scale_name` is validated during merge. NotePan uses its explicit embedded scale string. Both are copied to package metadata and deliberately excluded from Runtime Chart and the song index. Package `1.2.0` adds source format/path and persistent non-blocking import diagnostics. Package `1.3.0` adds the canonical song-specific `performance_layout`; older packages remain readable through their fixed-profile path.
 
 ## Duplicate and update policy
 
-The cache key covers importer version, cache contract version, source format and content SHA-256, overlay SHA-256, Instrument Profile SHA-256, explicit pitch mapping SHA-256, notation octave shift, and audio SHA-256. NotePan uses importer `panbeat-score-importer-v2`; existing MusicXML continues to identify charts as `panbeat-musicxml-importer-v1`. The NotePan cache contract is `notepan-hand-lanes-v2`, so packages created before schema 8 right/left lane preservation are regenerated instead of being returned as duplicates.
+The cache key covers importer version, cache contract version, source format and content SHA-256, overlay SHA-256, Instrument Profile SHA-256, explicit pitch mapping SHA-256, notation octave shift, performance layout ID, and audio SHA-256. New packages use MusicXML importer `panbeat-musicxml-importer-v2` or NotePan importer `panbeat-score-importer-v3` with cache contract `performance-layout-v1`.
 It also covers `notation_octave_shift`. Song Library exposes “Written 1 octave high”; when selected, mapping resolves each written pitch one octave lower while preserving the source MusicXML pitch in the chart. This is explicit rather than auto-detected because the written and sounding ranges can overlap.
 
 For NotePan-authored `<unpitched>` notes, the first NotePan lyric token is authoritative: `g` advances score time but is omitted from Gameplay, while standalone `S` and `T` both map to Slap. Mood Pan cannot play a Slap and Tone Field chord, so compound labels such as `T+1` and `S+6` omit the unpitched `T`/`S` member; only the pitched member from the following MusicXML chord note is imported and judged.
@@ -38,4 +38,4 @@ For NotePan-authored `<unpitched>` notes, the first NotePan lyric token is autho
 
 Diagnostics contain severity, code, file, part, measure, element or overlay/archive location, message, and remediation. Unknown schema major versions are rejected by the owning MusicXML, overlay, profile, or persistence contract.
 
-An `unsupported_pitch` produced during profile mapping is a non-blocking warning. The importer omits that note from the Runtime Chart, persists the warning with its source location, and continues importing all supported notes. Other invalid or ambiguous mappings remain blocking errors.
+New imports generate a complete song-specific layout instead of omitting pitches absent from the fixed D Kurd profile. More than nine distinct pitched sounds, multiple Dings, a target assigned to multiple pitches, or an ambiguous Slap collision is a blocking error. No required pitched note is silently omitted.

@@ -6,7 +6,7 @@
 |---|---|
 | 対象 | PanBeat MVP およびその後の拡張 |
 | 入力要件 | `docs/requirement.md` |
-| 想定プラットフォーム | Phase 0と初期MVPはmacOSのみ。Windows / ブラウザは将来候補 |
+| 想定プラットフォーム | macOSのみ。Windowsは将来候補、ブラウザ提供は現状予定なし |
 | 技術選定状況 | Godot 4.6.stable.official.89cea1439 + typed GDScriptを採用（ADR-001 Accepted） |
 | 設計方針 | オーディオクロック基準、エンジン非依存ドメイン、デバイス依存部の分離、データ駆動 |
 | 調査日 | 2026-08-08 |
@@ -26,11 +26,11 @@ PanBeat は一般的なデスクトップ業務アプリではなく、次の性
 - 初期対象のmacOSで安定し、将来Windowsへ移植可能な境界を保つ
 - 将来、練習モードや演出を大きく拡張する可能性がある
 
-選定したGodotは標準MIDI入力、テキストscene、headless CLI、Web export、MIT Licenseに強みがある。Phase 1のMood Pan製品buildは実機3/3 sessionを完走し、Tone / Ding / Slap、+30 ms Input Offset、pause/resume、物理再接続を確認した。一方、CoreAudio release相当5分59秒×3回のdrift最大値6.078 msとrecorded-burst MIDI dispatch p95 8.295 msは目標5 msを超えた。実機で体感不具合がなく判定窓より小さいこと、測定が0.1倍速audioと人工的なframe待ちを含むことから、プロダクト責任者判断で機能開発を止めない`deferred-release-gate-blocker`へ再分類した。Phase 1 gateは通過させるが、Final Release Hardening Phaseで再測定・改善するまでreleaseは許可せず、MVP完成とも扱わない。OS MIDI受信timestampと物理切断状態がpublic APIにない制約も継続する。
+選定したGodotは標準MIDI入力、テキストscene、headless CLI、Web export、MIT Licenseに強みがある。Phase 1のMood Pan製品buildは実機3/3 sessionを完走し、Tone / Ding / Slap、+30 ms Input Offset、pause/resume、物理再接続を確認した。一方、CoreAudio release相当5分59秒×3回のdrift最大値6.078 msとrecorded-burst MIDI dispatch p95 8.295 msは目標5 msを超えた。実機で体感不具合がなく判定窓より小さいこと、測定が0.1倍速audioと人工的なframe待ちを含むことから、プロダクト責任者判断で機能開発を止めない`deferred-release-gate-blocker`へ再分類した。Phase 1時点ではFinal Release Hardening Phaseへ引き継いだが、2026-08-14の製品判断により同Phaseは現行ロードマップから外した。測定値と制約は解決済みにせず保持し、現在のbuildについて署名、公証、store配布、または正式なrelease candidate品質を主張しない。OS MIDI受信timestampと物理切断状態がpublic APIにない制約も継続する。
 
 設計の中心となるChart、Instrument Profile、入力正規化、判定、scoreの概念とテストベクターは両候補で同一にする。PoCは使い捨ての別ゲームを二つ作るのではなく、同一仕様の薄いvertical sliceを各エンジンで実装し、測定値とCodex運用性を比較する。
 
-ブラウザ版は技術的には実現可能だが、MVPの正式対応にはしない。Web MIDI APIはsecure contextと利用者の許可を必要とし、主要ブラウザの一部では利用できないためである。まずデスクトップで低遅延性と実機互換性を確立し、その後、**Chromium系ブラウザ限定の体験版または練習版**として選定エンジンのWeb buildを評価する。Godotを選びWeb派生を維持する場合は、Godot 4のC# projectがWeb export非対応であるためtyped GDScriptを採用する。
+ブラウザ版は技術的には実現可能だが、2026-08-14の製品判断により、**Webでの提供およびWeb MIDI PoCは現行ロードマップに含めない**。Web MIDI APIがsecure contextと利用者の許可を必要とし、主要ブラウザの一部では利用できないことに加え、現在はmacOSデスクトップ版のrelease品質を優先するためである。将来あらためてWeb提供を検討する場合は、新しいPhaseと対応ブラウザ、品質基準を定義してから評価する。既存のWeb比較記録はPhase 0の技術選定履歴として保持するが、予定済みの作業とは扱わない。
 
 ### 採用stackとPhase 0比較履歴
 
@@ -43,7 +43,7 @@ PanBeat は一般的なデスクトップ業務アプリではなく、次の性
 | メニュー・設定 | Godot Control node |
 | 音声 | Phase 1固定曲は48 kHz mono 16-bit PCM WAV。Phase 2 import曲は48 kHz stereo Ogg Vorbis + `IGameTransport`相当の境界 + Godot AudioServer/playback clock |
 | MIDI（デスクトップ） | Godot標準`InputEventMIDI`。OS timestamp/切断状態の非公開を診断へ明記 |
-| MIDI（Web） | Godot Web MIDI入力（MVP対象外） |
+| MIDI（Web） | 現状は提供・PoCとも予定なし。Godot Web MIDI入力は技術選定履歴上の候補のみ |
 | MusicXML | エンジンの安全なストリーミングXML APIでMVP範囲を明示実装 |
 | NotePan | bounded binary readerでschema 6/8非圧縮・単一trackの対応範囲を明示実装 |
 | データ形式 | MusicXML 4.0 / NotePan schema 6/8 + PanBeat JSON Schema + 任意の伴奏音源ファイル |
@@ -339,7 +339,7 @@ PanBeat/
 │   ├── fixtures/
 │   │   ├── midi-traces/
 │   │   ├── charts/
-│   │   └── expected-results/
+│   │   └── test-pack/          # golden input/resultを含む共通fixture
 │   └── assets/                 # 同一音源・画像・shader要件
 ├── schemas/
 │   ├── panbeat-song.schema.json
@@ -428,7 +428,9 @@ MusicXMLのChordは、base noteと`<chord/>` memberを同じtimestampに持つ�
 
 NotePan lyricを持つMusicXML `<unpitched>`は、primary label（`+`より前）をauthoring techniqueへ変換する。`g`はGhostとしてscore cursorを進めるがRuntime Noteを作らない。`S`と`T`は`slap:outer-hit-radius`とする。複合ラベルの追加Toneは後続のMusicXML `<chord/>` noteから独立Runtime Noteとして得るため、lyric文字列からToneを二重生成しない。未知labelは位置付きdiagnosticで拒否する。
 
-NotePan `.pan`の直接importでは埋め込みpitchをそのままInstrument Profileへ解決し、MusicXML向けoctave shiftを適用しない。schema 6/8のlane 0–1をright、lane 2–3をleftとして保持する。`S/T`はSlap、`d/P/F`はDingへ変換し、profile内でtechnique targetが一意でない場合は拒否する。装飾の縮退warningはpackageへ永続化し、profile不一致とは別の再生可能状態として扱う。
+NotePan `.pan`の直接importでは埋め込みpitchをそのままInstrument Profileへ解決し、MusicXML向けoctave shiftを適用しない。schema 6/8のlane 0–1をright、lane 2–3をleftとして保持する。`S/T/K`はSlap、`d/P/F`はDingへ変換し、`K`はschema 6 code `40`とschema 8 code `152`を正規化する。profile内でtechnique targetが一意でない場合は拒否する。装飾の縮退warningはpackageへ永続化し、profile不一致とは別の再生可能状態として扱う。
+
+曲の実音配置はpackage 1.3の`performance_layout`としてInstrument Profileから分離する。基礎Profileは機器、Slap binding、Calibration identityを保持し、曲開始時にlayoutのDing/Tone MIDI bindingを合成したeffective profileをRuntime Chart検証、入力正規化、判定へ共通投入する。layout IDはcanonical layout内容のSHA-256とし、cache keyと新規Result metadataへ保持する。既存packageは固定Profileの従来経路で読み込む。
 
 ### 6.5 Pause / Resume / Seek
 
@@ -826,23 +828,26 @@ Input OffsetとAudio Offsetは、この分解結果と利用者のキャリブ�
 
 従来候補だったPractice Mode、苦手箇所分析、Free Play、Pressure / dynamicsは、2026-08-12の製品判断により発展的な学習機能として本Phaseでは実施しない。左右手ガイドは2026-08-14の製品判断により、譜面の明示的な`hand`をノート色へ反映する範囲だけ採用した。位置やノート順からの手の推定は行わない。
 
-### Phase 4: Web評価
+### Phase 4: Score Format Expansion
 
-- Unity採用時はUnity Web + `.jslib`、Godot採用時はtyped GDScript Web exportでWeb MIDI PoC
-- Chrome / Edgeでpermission、reconnect、audio start、latencyを測定
-- デスクトップと同じtrace/golden testを実行
-- 品質基準を満たす場合のみ対応環境を明記して公開
+詳細は[`phase4-stories.md`](./phase4-stories.md)を参照する。Phase 4の対象はP401のNotePan schema 6/8直接importであり、Web評価は含まない。
 
-### Final Phase: Release Hardening
+- schema 6/8の非圧縮・単一track `.pan`を安全に読み込む
+- 共通Symbolic Score、Runtime Chart、atomic song packageへ接続する
+- 通常音、Ghost、Slap、Ding、拍節、split、tempo、metadataを決定的に変換する
+- 未対応形式と不正binaryを固有diagnosticで拒否し、既存importとGameplayを回帰させない
 
-主要機能の実装終了後、release candidateを許可する直前に[`final-phase-stories.md`](./final-phase-stories.md)を実施する。
+2026-08-14の製品判断により、Webでの提供およびWeb MIDI PoCには現状Phaseを割り当てず、Final Phaseの前後を問わず予定作業に含めない。
 
-- 6分以上の実音源を1倍速で3回測り、長時間driftと終了frame誤差を分離する
-- 人工的な1 frame待ちを含まないMIDI dispatchを60/120 Hzと実機またはvirtual CoreMIDIで測る
-- 必要に応じてsample-based transport、MIDI arrival timestampのsong-time変換、native CoreMIDI adapterを実装する
-- drift各run 5 ms以下、MIDI dispatch p95 5 ms以下をrelease gateとする
-- allocationを外部profilerで確認する。物理打撃から音・画面までの外部end-to-end latency計測は製品判断により実施せず、software timestampを代用しない
-- R-P1-001とR-P1-003が未解決なら正式releaseを許可しない
+### Final Phase: 現状予定なし
+
+2026-08-14の製品判断により、従来のRelease Hardening計画は実施しない。旧FH01〜FH04は[`final-phase-stories.md`](./final-phase-stories.md)へ判断履歴として保持するが、現行ロードマップの未完了作業には数えない。
+
+現行ロードマップの完了状態、最終自動検証、テスト整理の判断は[`project-closeout.md`](./project-closeout.md)を正とする。
+
+- R-P1-001、R-P1-003、外部allocation未計測、MIDI hot-plug制約は解決済みにせず既知の制約として保持する
+- 現在のbuildについて署名、公証、store配布、正式なrelease candidate品質を主張しない
+- 将来正式配布を行う場合は、その時点の対象OS、配布方法、性能基準を定義した新しいrelease計画を作る
 
 ### 将来Phase: Windows移植
 
@@ -861,7 +866,7 @@ Input OffsetとAudio Offsetは、この分解結果と利用者のキャリブ�
 | Tone Fieldのnote mapping | Styleで変化し得る | 製品用途に合わせHandpan / Minorを基準に実機採取 | Phase 0 |
 | Ch.1/2重複 | 音色により両方出力 | traceからdedupe規則策定 | Phase 0 |
 | 判定窓 | 要プレイテスト | latency測定後に調整 | Vertical Slice後 |
-| 音源形式 | Phase 1は48 kHz mono 16-bit PCM WAV。Phase 2 import曲は48 kHz stereo Ogg Vorbisに決定 | CoreAudio実速度と外部loop seamはFinal Phaseで再確認 | Final Phase |
+| 音源形式 | Phase 1は48 kHz mono 16-bit PCM WAV。Phase 2 import曲は48 kHz stereo Ogg Vorbisに決定 | 現行形式を維持。正式配布を再計画する場合に再評価 | 必要時 |
 | ゲームエンジン | Godot 4.6を採用 | ADR-001 / E03 | 決定済み |
 | 実装言語 | typed GDScript | ADR-001 / E03 | 決定済み |
 | MIDI backend | Godot標準MIDI | E02で3/3 session復旧。OS timestamp/切断通知なしは残存risk | 決定済み |
@@ -936,12 +941,12 @@ Input OffsetとAudio Offsetは、この分解結果と利用者のキャリブ�
 - **Decision:** MusicXMLを音楽原本、PanBeat JSONをゲーム注釈と作者入力メタデータ、Runtime Chartを生成キャッシュとする。譜面固有のハンドパンスケール表示名はoverlayで明示し、生成したsong packageへ正規化するが、Runtime Chartやsong indexへ複製しない。
 - **Consequences:** source参照の安定性とmigrationが必要だが、標準形式、作者入力、表示用曲メタデータ、ゲーム実行データの責務が明確になる。スケール名は音符列やInstrument Profileから推測しない。
 
-### ADR-004: ブラウザはMVP正式対象外
+### ADR-004: Web提供は現行ロードマップ対象外
 
-- **Status:** Accepted
+- **Status:** Accepted（2026-08-14更新）
 - **Context:** Web MIDIはlimited availabilityで、secure context、許可、ブラウザ差がある。
-- **Decision:** デスクトップ品質を先に確立し、WebはChromium系限定PoCを経て判断する。
-- **Consequences:** 初期到達性より互換性と判定品質を優先する。Domainと入力境界はWeb派生を妨げない設計にする。
+- **Decision:** Webでの提供とWeb MIDI PoCは現行ロードマップに含めない。将来検討する場合は、新しいPhaseとして対応環境と品質基準を定義してから判断する。
+- **Consequences:** macOSデスクトップ版のrelease品質を優先する。Phase 0のWeb比較記録は技術選定履歴として保持するが、Web export、ブラウザ互換性試験、Web MIDI adapterを未完了作業またはrelease blockerとして追跡しない。
 
 ### ADR-005: 曲importはstaging後にindexを最後に公開する
 

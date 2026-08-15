@@ -6,11 +6,12 @@ const NotePanReader := preload("res://infrastructure/safe_notepan_reader.gd")
 const MxlReader := preload("res://infrastructure/secure_mxl_reader.gd")
 const Compiler := preload("res://application/symbolic_score_compiler.gd")
 const Merger := preload("res://application/panbeat_overlay_merger.gd")
+const PerformanceLayouts := preload("res://application/performance_layout_service.gd")
 const Canonical := preload("res://application/canonical_json.gd")
-const IMPORTER_VERSION := "panbeat-musicxml-importer-v1"
-const NOTEPAN_IMPORTER_VERSION := "panbeat-score-importer-v2"
-const PACKAGE_VERSION := "1.2.0"
-const CACHE_CONTRACT_VERSION := "notepan-hand-lanes-v2"
+const IMPORTER_VERSION := "panbeat-musicxml-importer-v2"
+const NOTEPAN_IMPORTER_VERSION := "panbeat-score-importer-v3"
+const PACKAGE_VERSION := "1.3.0"
+const CACHE_CONTRACT_VERSION := "performance-layout-v1"
 const AUDIO_END_TOLERANCE_US := 10_000
 
 var _files: RefCounted
@@ -70,8 +71,15 @@ func import_song(request: Dictionary, repository_root: String, song_repository: 
 	if profile.get("schema_version") != "1.0.0" or str(profile.get("profile_id", "")).is_empty(): return _failure("unsupported_profile_version", "profile", "Instrument Profile must use schema 1.0.0 and contain profile_id.", "Select a supported versioned Instrument Profile.")
 	var notation_octave_shift := int(request.get("notation_octave_shift", 0))
 	if notation_octave_shift not in [-1, 0]: return _failure("invalid_notation_octave_shift", "request", "notation_octave_shift must be 0 or -1.", "Use -1 only when the score is written one octave above sounding pitch.")
-	var merged := Merger.merge(compiled["chart"], overlay, source_sha, profile, request.get("pitch_mapping", {}), notation_octave_shift)
+	var ding_pitches: Array = source_metadata.get("handpan_ding_pitches", [])
+	if ding_pitches.size() > 1: return _failure("performance_layout_multiple_dings", score_location, "The source defines more than one Ding pitch.", "Use a score with one Ding and at most eight Tone pitches.")
+	var preferred_ding_midi := PerformanceLayouts.preferred_ding_midi(source_metadata, notation_octave_shift)
+	var provisional_profile := PerformanceLayouts.provisional_profile(compiled["chart"], profile, notation_octave_shift, preferred_ding_midi)
+	var merged := Merger.merge(compiled["chart"], overlay, source_sha, provisional_profile, request.get("pitch_mapping", {}), notation_octave_shift)
 	if not merged.get("ok", false): return merged
+	var layout_result := PerformanceLayouts.build(merged["chart"], profile, notation_octave_shift, preferred_ding_midi)
+	if not layout_result.get("ok", false): return layout_result
+	var performance_layout: Dictionary = layout_result["layout"]
 	for diagnostic: Dictionary in merged.get("diagnostics", []):
 		var persisted_diagnostic := diagnostic.duplicate(true)
 		if persisted_diagnostic.get("file") == "MusicXML": persisted_diagnostic["file"] = score_path.get_file()
@@ -84,7 +92,7 @@ func import_song(request: Dictionary, repository_root: String, song_repository: 
 		if not audio_file.get("ok", false): return audio_file
 	var profile_sha: String = _files.hash_bytes((Canonical.encode(profile) + "\n").to_utf8_buffer())
 	var mapping_sha: String = _files.hash_bytes((Canonical.encode(request.get("pitch_mapping", {})) + "\n").to_utf8_buffer())
-	var cache_contract := {"importer_version":importer_version, "cache_contract_version":CACHE_CONTRACT_VERSION, "source_format":source_format, "source_sha256":source_sha, "overlay_sha256":overlay_sha, "profile_sha256":profile_sha, "pitch_mapping_sha256":mapping_sha, "notation_octave_shift":notation_octave_shift, "audio_sha256":audio_file["sha256"]}
+	var cache_contract := {"importer_version":importer_version, "cache_contract_version":CACHE_CONTRACT_VERSION, "source_format":source_format, "source_sha256":source_sha, "overlay_sha256":overlay_sha, "profile_sha256":profile_sha, "pitch_mapping_sha256":mapping_sha, "notation_octave_shift":notation_octave_shift, "performance_layout_id":performance_layout["layout_id"], "audio_sha256":audio_file["sha256"]}
 	var cache_key: String = _files.hash_bytes((Canonical.encode(cache_contract) + "\n").to_utf8_buffer())
 	var loaded: Dictionary = song_repository.load()
 	if not loaded.get("ok", false): return _repository_failure(loaded)
@@ -114,7 +122,7 @@ func import_song(request: Dictionary, repository_root: String, song_repository: 
 		else: result = reconciled
 	if result.get("ok", false): result = _files.write_text(staging.path_join("chart.json"), Canonical.encode(runtime_chart) + "\n")
 	if result.get("ok", false) and _cancelled(cancelled): result = _failure("import_cancelled", score_location, "Import was cancelled after conversion.", "No song was published.")
-	var package := {"schema_version":PACKAGE_VERSION, "song_id":chart_id, "import_version":import_version, "title":title, "artist":artist, "duration_us":runtime_duration_us, "chart_schema_version":str(merged["chart"].get("schema_version", "1.0.0")), "artwork_path":"", "status":"valid", "importer_version":importer_version, "profile_id":profile.get("profile_id", ""), "cache_key":cache_key, "notation_octave_shift":notation_octave_shift, "source":{"format":source_format, "stored_path":source_asset, "original_name":str(request["score_path"]).get_file(), "archive_rootfile":score_location.get_slice("#", 1) if "#" in score_location else "", "extension":score_file["extension"], "sha256":source_sha, "bytes":score_bytes.size(), "archive_entries":archive_manifest}, "overlay_sha256":overlay_sha, "audio":{"present":has_audio, "source_sha256":audio_file["sha256"], "runtime_path":"runtime.ogg" if has_audio else ""}, "chart_path":"chart.json", "import_diagnostics":import_diagnostics}
+	var package := {"schema_version":PACKAGE_VERSION, "song_id":chart_id, "import_version":import_version, "title":title, "artist":artist, "duration_us":runtime_duration_us, "chart_schema_version":str(merged["chart"].get("schema_version", "1.0.0")), "artwork_path":"", "status":"valid", "importer_version":importer_version, "profile_id":profile.get("profile_id", ""), "performance_layout":performance_layout, "cache_key":cache_key, "notation_octave_shift":notation_octave_shift, "source":{"format":source_format, "stored_path":source_asset, "original_name":str(request["score_path"]).get_file(), "archive_rootfile":score_location.get_slice("#", 1) if "#" in score_location else "", "extension":score_file["extension"], "sha256":source_sha, "bytes":score_bytes.size(), "archive_entries":archive_manifest}, "overlay_sha256":overlay_sha, "audio":{"present":has_audio, "source_sha256":audio_file["sha256"], "runtime_path":"runtime.ogg" if has_audio else ""}, "chart_path":"chart.json", "import_diagnostics":import_diagnostics}
 	if not merged.get("song_metadata", {}).is_empty(): package.merge(merged["song_metadata"])
 	if source_format == "notepan":
 		var scale_name := str(source_metadata.get("handpan_scale_name", ""))

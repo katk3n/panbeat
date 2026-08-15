@@ -49,10 +49,9 @@ Phase 3 は2026-08-12に完了した。P301で選択した Quiet Forge を出発
 - Reduced Effectsは製品判断によりPhase 3対象外。Glow-off、monochrome、高コントラストはaccessibility検証用設定として維持する。
 - 通常起動はmaximized、reference captureは1600×900、対応下限検証は1280×720とする。
 
-## Final Phase handoff
+## Post-Phase 3 status
 
-- `R-P1-001`: 長時間driftはFinal Phaseのrelease blockerとして残る。
-- `R-P1-003`: MIDI dispatch p95はFinal Phaseのrelease blockerとして残る。
-- Godot release static heap計測で0だった外部allocation profilingはFinal Phase FH04へ引き継ぐ。
+- Phase 3完了時点では`R-P1-001`、`R-P1-003`、外部allocation profilingをFinal Phaseへ引き継いだ。
+- 2026-08-14の製品判断によりFinal Phaseは現行ロードマップから外した。これらの測定値と制約は解決済みにせず、既知の制約として保持する。
 - Practice Mode、左右手ガイド、苦手箇所分析、Free Play、Pressure / dynamicsはPhase 3外であり、release blockerではない。
-- 署名、公証、配布可否はFinal Phase gateでのみ決定する。
+- 現在のbuildについて、署名、公証、store配布、または正式なrelease candidate品質を主張しない。将来正式配布を計画する場合は新しいrelease計画を作成する。

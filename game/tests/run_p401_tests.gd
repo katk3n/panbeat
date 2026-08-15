@@ -11,12 +11,13 @@ const Repositories := preload("res://infrastructure/user_data_repositories.gd")
 
 func _initialize() -> void:
 	var failures: Array[String] = []
-	_check(Importer.CACHE_CONTRACT_VERSION == "notepan-hand-lanes-v2", "hand-aware NotePan imports invalidate pre-hand cache entries", failures)
+	_check(Importer.CACHE_CONTRACT_VERSION == "performance-layout-v1", "performance-layout imports invalidate fixed-profile cache entries", failures)
 	var bytes := Builder.valid()
 	var parsed := Reader.read_bytes(bytes, "fixture.pan")
 	_check(parsed.get("ok") and parsed.get("metadata", {}).get("title") == "Schema Six Song" and parsed.get("metadata", {}).get("handpan_scale_name") == "D Kurd 9", "schema 6 metadata parsed", failures)
-	_check(parsed.get("score") != null and parsed["score"].ticks_per_quarter == 96 and parsed["score"].notes.size() == 10 and parsed["score"].time_signatures.size() == 1, "rhythmic grid and attacks parsed", failures)
-	_check(_hand_count(parsed.get("score").notes, "right") == 6 and _hand_count(parsed.get("score").notes, "left") == 4, "schema 6 lanes preserve right and left hands", failures)
+	_check(parsed.get("score") != null and parsed["score"].ticks_per_quarter == 96 and parsed["score"].notes.size() == 12 and parsed["score"].time_signatures.size() == 1, "rhythmic grid and attacks parsed", failures)
+	_check(_hand_count(parsed.get("score").notes, "right") == 7 and _hand_count(parsed.get("score").notes, "left") == 5, "schema 6 lanes preserve right and left hands", failures)
+	_check(_label_count(parsed.get("score").notes, "K") == 2 and _authoring_technique_count(parsed.get("score").notes, "slap") == 3, "schema 6 K maps to Slap and keeps its NotePan label", failures)
 	_check(_codes(parsed).has("notepan_nuance_simplified") and _codes(parsed).has("notepan_effect_simplified") and _codes(parsed).has("notepan_grace_simplified") and _codes(parsed).has("notepan_finger_roll_simplified") and _codes(parsed).has("notepan_background_ignored") and _codes(parsed).has("notepan_annotations_ignored"), "lossy notation produces explicit warnings", failures)
 	var bad_header := bytes.duplicate(); bad_header[0] = 0
 	_check(_code(Reader.read_bytes(bad_header, "header.pan")) == "invalid_notepan_header", "invalid header rejected", failures)
@@ -25,8 +26,9 @@ func _initialize() -> void:
 	_check(_code(Reader.read_bytes(Builder.valid({"schema":8}), "schema8-compressed.pan")) == "unsupported_notepan_compression", "compressed schema 8 rejected", failures)
 	var schema8 := Reader.read_bytes(Builder.valid({"schema":8, "compressed":false}), "schema8.pan")
 	var schema8_chart := Compiler.compile(schema8.get("score"), "schema8-chart") if schema8.get("ok", false) else {}
-	_check(schema8.get("ok", false) and schema8.get("metadata", {}).get("handpan_scale_name") == "D Kurd 9" and schema8.get("score").version == "notepan-schema-8" and schema8.get("score").notes.size() == 10 and schema8_chart.get("ok", false), "uncompressed schema 8 handpan, notes, and chart parsed", failures)
-	_check(_hand_count(schema8.get("score").notes, "right") == 5 and _hand_count(schema8.get("score").notes, "left") == 5, "schema 8 lanes 0-1 and 2-3 preserve right and left hands", failures)
+	_check(schema8.get("ok", false) and schema8.get("metadata", {}).get("handpan_scale_name") == "D Kurd 9" and schema8.get("score").version == "notepan-schema-8" and schema8.get("score").notes.size() == 12 and schema8_chart.get("ok", false), "uncompressed schema 8 handpan, notes, and chart parsed", failures)
+	_check(_hand_count(schema8.get("score").notes, "right") == 6 and _hand_count(schema8.get("score").notes, "left") == 6, "schema 8 lanes 0-1 and 2-3 preserve right and left hands", failures)
+	_check(_label_count(schema8.get("score").notes, "K") == 2 and _authoring_technique_count(schema8.get("score").notes, "slap") == 3, "schema 8 code 152 maps K to Slap", failures)
 	_check(_code(Reader.read_bytes(Builder.valid({"content_type":1}), "bundle.pan")) == "unsupported_notepan_content", "bundle rejected", failures)
 	_check(_code(Reader.read_bytes(Builder.valid({"track_count":2}), "tracks.pan")) == "unsupported_notepan_track_count", "multiple tracks rejected", failures)
 	_check(_code(Reader.read_bytes(Builder.valid({"track_count":250001, "stop_after_track_count":true}), "count.pan")) == "notepan_record_limit", "declared record limit enforced before allocation", failures)
@@ -55,12 +57,12 @@ func _initialize() -> void:
 	var request := {"score_path":source, "profile":profile, "song_id":"notepan-song", "title":""}
 	var imported := importer.import_song(request, root.path_join("library"), repositories.songs)
 	var package: Dictionary = imported.get("package", {})
-	_check(imported.get("ok", false) and package.get("schema_version") == "1.2.0" and package.get("importer_version") == "panbeat-score-importer-v2" and package.get("title") == "Schema Six Song" and package.get("artist") == "NotePan Artist" and package.get("handpan_scale_name") == "D Kurd 9", "NotePan metadata imported to package 1.2: %s" % str(imported), failures)
+	_check(imported.get("ok", false) and package.get("schema_version") == "1.3.0" and package.get("importer_version") == "panbeat-score-importer-v3" and package.get("title") == "Schema Six Song" and package.get("artist") == "NotePan Artist" and package.get("handpan_scale_name") == "D Kurd 9" and package.get("performance_layout", {}).get("slots", []).size() == 3, "NotePan metadata and sounding layout imported to package 1.3: %s" % str(imported), failures)
 	_check(FileAccess.file_exists(str(imported.get("published_path", "")).path_join("source.pan")) and FileAccess.get_sha256(source) == files.hash_bytes(bytes), "raw NotePan source preserved unchanged", failures)
 	var chart_result := files.read_json(str(imported.get("published_path", "")).path_join("chart.json"), 1024 * 1024)
 	var chart_notes: Array = chart_result.get("document", {}).get("notes", [])
-	_check(chart_notes.size() == 8 and _technique_count(chart_notes, "slap") == 2 and _technique_count(chart_notes, "ding") == 4 and _technique_count(chart_notes, "tone") == 2, "S/T map to Slap, d/P/F and Ding map to Ding, ghost and technique chord are omitted", failures)
-	_check(_hand_count(chart_notes, "right") == 4 and _hand_count(chart_notes, "left") == 4, "imported Runtime Chart preserves explicit NotePan hands", failures)
+	_check(chart_notes.size() == 9 and _technique_count(chart_notes, "slap") == 3 and _technique_count(chart_notes, "ding") == 4 and _technique_count(chart_notes, "tone") == 2, "S/T/K map to Slap, d/P/F and Ding map to Ding, ghost and technique chord are omitted", failures)
+	_check(_hand_count(chart_notes, "right") == 5 and _hand_count(chart_notes, "left") == 4, "imported Runtime Chart preserves explicit NotePan hands", failures)
 	var queried := Library.new(files).query(root.path_join("library"), repositories.songs, str(profile["profile_id"]))
 	var song: Dictionary = queried.get("songs", [])[0] if not queried.get("songs", []).is_empty() else {}
 	_check(song.get("display_status") == "warning" and song.get("playable", false) and song.get("handpan_scale_name") == "D Kurd 9", "persisted import warnings remain playable in Song Library: %s" % str(song), failures)
@@ -101,6 +103,18 @@ func _technique_count(notes: Array, technique: String) -> int:
 	var count := 0
 	for note: Dictionary in notes:
 		if note.get("technique") == technique: count += 1
+	return count
+
+func _authoring_technique_count(notes: Array, technique: String) -> int:
+	var count := 0
+	for note: Dictionary in notes:
+		if note.get("authoring_technique") == technique: count += 1
+	return count
+
+func _label_count(notes: Array, label: String) -> int:
+	var count := 0
+	for note: Dictionary in notes:
+		if note.get("notepan_label") == label: count += 1
 	return count
 
 func _hand_count(notes: Array, hand: String) -> int:

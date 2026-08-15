@@ -120,12 +120,20 @@
     },
     "immutable_assets": [
       {"path": "game/content/phase1-fixed-song-v1/package.json", "sha256": "6b9af4af0dfaef17128aa210402a28e47e4cb8838773da4cc9250d33f493f0db"},
-      {"path": "game/content/phase1-fixed-song-v1/chart.json", "sha256": "04e9b186a0214da5b484c0519648d68f24d23b1d9941469b7cb67515934efc9f"},
+      {"path": "game/content/phase1-fixed-song-v1/chart.json", "sha256": "92d5531cb692a4b6ef73b5312fd5a5262de3c8ecf0e845d7e34c5325f4e36441"},
       {"path": "game/content/phase1-fixed-song-v1/orbit-practice.wav", "sha256": "0c5adbe1ec8887f51684b2af4f9f7acff48d2ee5f8ee5c25ec46b9a11e18818c"},
       {"path": "shared/fixtures/instrument-profiles/roland-mn10-handpan-minor-v1.json", "sha256": "abfe1eae01e2b2c1e24801a7946354f35924426adc33c903672dce4d036fb42d"},
       {"path": "game/config/judgement-rules-v1.json", "sha256": "08b17ac576db76145cbe6c412cef801dc16a1ec56186f597395c5afba0f1f33f"},
       {"path": "game/config/score-rules-v1.json", "sha256": "4f81663f029b5e1566f76044999d0288cd5071467f4a814f1e5633aaaacdf5b1"},
       {"path": "game/config/gameplay-settings-v1.json", "sha256": "809ceaf9f9a05b0698f3263f3028333bd9ecf1d88bc82d5c93026de0fbb03143"}
+    ],
+    "accepted_amendments": [
+      {
+        "story": "P306",
+        "date": "2026-08-14",
+        "asset": "game/content/phase1-fixed-song-v1/chart.json",
+        "change": "Add explicit right/left hand metadata only; preserve note IDs, timing, techniques, and targets."
+      }
     ],
     "evidence": "artifacts/raw/phase2-p201-baseline-20260812/run-manifest.json"
   },

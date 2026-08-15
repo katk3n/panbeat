@@ -8,8 +8,8 @@ const MAX_STRING_BYTES := 1024 * 1024
 const MAX_RECORDS := 250_000
 const MAX_FOOTER_BYTES := 1024
 const TICKS_PER_QUARTER := 96
-const SPECIAL_LABELS := {31:"D", 35:"g", 36:"d", 37:"T", 38:"P", 39:"S", 41:"F"}
-const NEW_TO_LEGACY_NOTE := {51:31, 54:36, 150:35, 151:39, 153:41, 161:38, 171:37}
+const SPECIAL_LABELS := {31:"D", 35:"g", 36:"d", 37:"T", 38:"P", 39:"S", 40:"K", 41:"F"}
+const NEW_TO_LEGACY_NOTE := {51:31, 54:36, 150:35, 151:39, 152:40, 153:41, 161:38, 171:37}
 const SCHEMA8_PITCHES := {0:"C", 1:"C#", 2:"Db", 3:"D", 4:"D#", 5:"Eb", 6:"E", 7:"F", 8:"F#", 9:"Gb", 10:"G", 11:"G#", 12:"Ab", 13:"A", 14:"A#", 15:"Bb", 16:"B"}
 
 class ByteReader extends RefCounted:
@@ -312,7 +312,7 @@ static func _build_score(source: String, app_version: String, schema: int, title
 		var has_pitched := false
 		for raw: Dictionary in attack_notes:
 			var code := int(raw["note"])
-			if code not in [35, 36, 37, 38, 39, 41]: has_pitched = true
+			if code not in [35, 36, 37, 38, 39, 40, 41]: has_pitched = true
 		for raw: Dictionary in attack_notes:
 			var converted := _convert_note(source, raw, column_data, next_tick - int(column_data["tick"]), pitch_by_code, has_pitched)
 			if not converted.get("ok", false): return converted
@@ -371,7 +371,11 @@ static func _build_score(source: String, app_version: String, schema: int, title
 	for tempo_tick: Variant in tempo_ticks: tempo_events.append(tempo_by_tick[tempo_tick])
 	if collision_count > 0: warnings.append(_diagnostic("warning", "notepan_tempo_collision_resolved", source, "tempo", "Resolved %d same-tick tempo collision(s) using the later NotePan variation." % collision_count, "No action is required unless playback timing differs from NotePan."))
 	var score := SymbolicScoreModel.new(source, "notepan-schema-%d" % schema, str(track["name"]), TICKS_PER_QUARTER, measures, notes, tempo_events, time_signatures, [])
-	var metadata := {"title":title, "artist":artist, "handpan_scale_name":str(track["handpan"]["scale"]), "notepan_info":info, "notepan_app_version":app_version}
+	var ding_pitches: Array[String] = []
+	for handpan_note: Dictionary in track["handpan"]["notes"]:
+		if bool(handpan_note.get("ding_pitch", false)) and not str(handpan_note.get("pitch", "")).is_empty(): ding_pitches.append(str(handpan_note["pitch"]))
+	ding_pitches.sort()
+	var metadata := {"title":title, "artist":artist, "handpan_scale_name":str(track["handpan"]["scale"]), "handpan_ding_pitches":ding_pitches, "notepan_info":info, "notepan_app_version":app_version}
 	return {"ok":true, "score":score, "metadata":metadata, "diagnostics":warnings}
 
 static func _convert_note(source: String, raw: Dictionary, column: Dictionary, duration_ticks: int, pitch_by_code: Dictionary, has_pitched: bool) -> Dictionary:
@@ -382,7 +386,7 @@ static func _convert_note(source: String, raw: Dictionary, column: Dictionary, d
 	var note := {"part":"NotePan", "measure":str(int(column["bar"]) + 1), "measure_index":int(column["bar"]), "tick":int(column["tick"]), "duration_ticks":duration_ticks, "voice":str(lane + 1), "hand":hand, "line":0, "tie_types":[], "notepan_label":str(SPECIAL_LABELS.get(code, code))}
 	match code:
 		35: note["is_unpitched"] = true; note["is_ignored"] = true
-		37, 39:
+		37, 39, 40:
 			note["is_unpitched"] = true
 			if has_pitched: note["is_ignored"] = true
 			else: note["authoring_technique"] = "slap"

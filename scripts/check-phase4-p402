@@ -1,0 +1,19 @@
+#!/bin/sh
+set -eu
+script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+repository_root=$(CDPATH= cd -- "$script_dir/.." && pwd)
+run_id=${1:-phase4-p402-custom-layout-latest}
+case "$run_id" in ''|*[!A-Za-z0-9._-]*) printf '%s\n' 'check-phase4-p402: invalid run ID' >&2; exit 64 ;; esac
+raw_dir="$repository_root/artifacts/raw/$run_id"
+build_run="$run_id-build"
+build_path="$repository_root/artifacts/builds/$build_run/PanBeat.zip"
+if test -e "$raw_dir"; then printf 'check-phase4-p402: evidence directory already exists: %s\n' "$raw_dir" >&2; exit 73; fi
+mkdir -p "$raw_dir"
+"$script_dir/godot" --path "$repository_root/game" --headless --script res://tests/run_p402_tests.gd --log-file "$raw_dir/p402.log"
+node "$script_dir/validate-fixtures.mjs" > "$raw_dir/schema.log"
+"$script_dir/godot" --path "$repository_root/game" --resolution 1600x900 --script res://tests/capture_p402.gd --log-file "$raw_dir/capture.log" -- --output "$raw_dir/custom-layout-library.png"
+test -s "$raw_dir/custom-layout-library.png"
+if rg -n 'SCRIPT ERROR' "$raw_dir"/*.log; then printf '%s\n' 'check-phase4-p402: log contains a script error' >&2; exit 1; fi
+"$script_dir/check-game" --mode build --run-id "$build_run"
+node "$script_dir/summarize-phase4-p402.mjs" "$run_id" "$raw_dir" "$build_path"
+printf '%s\n' 'check-phase4-p402: passed'

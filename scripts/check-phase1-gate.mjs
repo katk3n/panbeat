@@ -38,13 +38,13 @@ for (const required of ["Decision: Complete with deferred release-gate items", "
   if (!report.includes(required)) throw new Error(`completion report is missing: ${required}`);
 }
 const architecture = fs.readFileSync(path.join(root, "docs/architecture.md"), "utf8");
-for (const required of ["Phase 1 runtime音源形式", "48 kHz、mono、signed 16-bit PCM", "open-before-enumerate", "deferred-release-gate-blocker", "Final Phase: Release Hardening"]) {
+for (const required of ["Phase 1 runtime音源形式", "48 kHz、mono、signed 16-bit PCM", "open-before-enumerate", "deferred-release-gate-blocker", "Final Phase: 現状予定なし"]) {
   if (!architecture.includes(required)) throw new Error(`architecture is missing: ${required}`);
 }
 
 const finalPlan = fs.readFileSync(path.join(root, acceptance.phase1_gate.final_phase_plan), "utf8");
-for (const required of ["FH01", "FH02", "FH03", "FH04", "6分以上", "p95が5 ms以下", "正式releaseを許可しない"]) {
+for (const required of ["NOT PLANNED", "Archived plan", "FH01", "FH02", "FH03", "FH04", "6分以上", "p95が5 ms以下", "正式releaseを許可しない"]) {
   if (!finalPlan.includes(required)) throw new Error(`final phase plan is missing: ${required}`);
 }
 
-console.log("PANBEAT_PHASE1_GATE_AUDIT_OK complete-with-2-deferred-release-gate-blockers");
+console.log("PANBEAT_PHASE1_GATE_AUDIT_OK historical-deferrals-retained-current-final-phase-not-planned");

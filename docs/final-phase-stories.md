@@ -1,5 +1,15 @@
 # PanBeat Final Phase: Release Hardening
 
+Status: **NOT PLANNED（2026-08-14 product decision）**
+
+2026-08-14の製品判断により、FH01〜FH04は現行ロードマップから外した。以下はPhase 1〜3で想定していたrelease hardening計画の履歴として保持し、予定済み作業、未完了story、または現在のrelease blocker一覧としては扱わない。
+
+この判断は過去の測定値を改善済みまたは目標達成済みへ変更するものではない。R-P1-001、R-P1-003、外部allocation未計測、Godot標準MIDIのhot-plug制約は既知の制約として残る。現在のbuildは機能完成したmacOS向けbuildであり、署名、公証、store配布、または正式なrelease candidate品質を主張しない。将来、正式配布を計画する場合は、その時点の対象OS、配布方法、性能基準を定義した新しいrelease計画を作成する。
+
+---
+
+## Archived plan
+
 ## 1. 目的と開始条件
 
 このPhaseは、主要な製品機能とコンテンツ実装が一通り完了し、release candidateを作る直前に開始する。Phase 1で計測した長時間driftとMIDI dispatch p95は、それ以前の機能開発を止めないが、このFinal Phaseを通過するまで正式releaseを許可しない。

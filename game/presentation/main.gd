@@ -28,6 +28,7 @@ const GameplayHudView := preload("res://presentation/gameplay_hud.gd")
 const Accessibility := preload("res://presentation/accessibility_presenter.gd")
 const NoteScrollSpeeds := preload("res://application/note_scroll_speed_catalog.gd")
 const PracticeTempos := preload("res://application/practice_tempo_catalog.gd")
+const PerformanceLayouts := preload("res://application/performance_layout_service.gd")
 
 var midi_adapter: Node
 var audio_player: AudioStreamPlayer
@@ -140,6 +141,8 @@ func _initialize_gameplay(imported_package_path: String = "") -> void:
 		_fail("required profile, package, rule, or settings JSON failed to load")
 		return
 	_profile_id = String(profile.get("profile_id", ""))
+	if package.get("performance_layout") is Dictionary:
+		profile = PerformanceLayouts.effective_profile(profile, package["performance_layout"])
 	_package_id = String(package.get("package_id", package.get("song_id", "")))
 	_song_title = String(package.get("title", _package_id))
 	_song_duration_us = int(package.get("duration_us", 0))
@@ -209,6 +212,7 @@ func _initialize_gameplay(imported_package_path: String = "") -> void:
 	var offsets: Dictionary = TimingOffsets.from_seconds(_effective_input_offset_sec, _effective_audio_offset_sec)
 	judgement_pipeline = Pipeline.new(runtime_result["chart"], judgement_rules, offsets)
 	_active_result_metadata = {"song_id":_package_id, "importer_version":str(package.get("importer_version", "phase1-fixed-package-v1")), "chart_version":str(package.get("chart_schema_version", loaded_chart["chart"].get("schema_version", "1.0.0"))), "profile_id":str(profile.get("profile_id", "")), "judgement_rule_id":str(judgement_rules.get("rule_id", "")), "score_rule_id":str(_score_rules.get("rule_id", "")), "practice_tempo_id":practice_tempo_id, "practice_tempo_multiplier":float(practice_tempo["multiplier"])}
+	if package.get("performance_layout") is Dictionary: _active_result_metadata["performance_layout_id"] = str(package["performance_layout"].get("layout_id", ""))
 	configure(runtime_result["chart"], profile, 64, int(note_scroll_speed["lookahead_us"]))
 	var accessibility_defaults := _load_json("res://config/accessibility-settings-v1.json")
 	var accessibility := Accessibility.resolve(accessibility_defaults, OS.get_cmdline_user_args())

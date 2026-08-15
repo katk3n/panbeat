@@ -653,13 +653,15 @@ MusicXMLでSlapをどのように表現・識別するかについては、Music
 
 NotePan由来の`<unpitched>`は、NotePan lyricのprimary labelを使用する。`g`（Ghost）はMood Panで再現できないため時刻だけ保持してRuntime Noteを生成せず、`S`と`T`はSlapへ変換する。`T+1`や`S+6`の`+`以降はMusicXMLの直後の`<chord/>` pitched noteとして個別にimport・判定する。
 
-NotePan `.pan` schema 6およびschema 8の直接importでは、単一trackの非圧縮tablatureだけを対象とする。埋め込みの実音pitchをInstrument Profileへ解決し、`S`と`T`はSlap、`d`、`P`、`F`はDing、`g`は時刻のみとして扱う。tempo rampは開始BPMから終了BPMまで96 TPQのtick単位で線形展開し、決定的なtempo mapへ変換する。bundle、圧縮stream、未対応schema、複数track、不完全・重複・譜面外のtempo rampは推測または黙った欠落を行わず明示的に拒否する。ゲームに表現先がない装飾は基礎attackへ縮退し、再生可能なwarningとしてpackageに保持する。
+NotePan `.pan` schema 6およびschema 8の直接importでは、単一trackの非圧縮tablatureだけを対象とする。埋め込みの実音pitchをInstrument Profileへ解決し、`S`、`T`、`K`（Knock）はSlap、`d`、`P`、`F`はDing、`g`は時刻のみとして扱う。`K`はschema 6のcode `40`とschema 8のcode `152`を受け付ける。tempo rampは開始BPMから終了BPMまで96 TPQのtick単位で線形展開し、決定的なtempo mapへ変換する。bundle、圧縮stream、未対応schema、複数track、不完全・重複・譜面外のtempo rampは推測または黙った欠落を行わず明示的に拒否する。ゲームに表現先がない装飾は基礎attackへ縮退し、再生可能なwarningとしてpackageに保持する。
 
 練習時は曲ごとに50〜100%のテンポを選択できる。伴奏音源の音程は原音を維持し、audio-backed transport、audioなしのclock、ノーツ表示、MIDI判定、進捗、完了時刻は同じ倍率の楽曲時刻を使用する。これはノーツの見た目だけを変える速度設定とは分離する。
 
 Mood Panが未接続でも、MIDIエラーとview-only状態を演奏画面へ明示したうえで、音源、楽曲時刻、ノーツ表示を開始できる。未接続中はMIDI判定入力を利用できないが、譜面のノート配置確認を妨げない。
 
 譜面が想定するハンドパンのスケール名は音符列から推測しない。MusicXMLではsource checksumに結び付いたPanBeat overlayの任意メタデータ`handpan_scale_name`で明示し、NotePanでは`.pan`に格納されたscale名を使用する。インポート後は曲packageのメタデータとして保持し、曲選択画面の一覧と詳細に表示する。未指定の既存曲は有効なまま`Not specified`と表示する。
+
+D Kurd以外の曲は、固定Instrument Profileを追加せず、曲ごとの`performance_layout`で扱う。MusicXMLは最低実音をDing、残り最大8実音を昇順の標準ジグザグへ割り当て、NotePanは単一の埋め込みDing実音を優先する。Song Libraryはスケール名と全使用実音、各Tone Fieldへの配置を表示し、自由打撃で受信したMIDI Noteを任意確認できるようにする。確認は再生必須条件にせず、画面退出時に破棄する。配置不能な音数や競合では対象noteを黙って欠落させずimportを拒否する。
 
 ---
 

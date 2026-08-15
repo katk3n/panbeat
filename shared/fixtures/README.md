@@ -6,7 +6,6 @@ contract and both consumers are updated together.
 
 - `midi-traces/`: recorded or synthetic MIDI input fixtures
 - `charts/`: deterministic Phase 0 chart inputs
-- `expected-results/`: golden judgement and timing results
 - `schema-valid/`: examples that every contract must accept
 - `schema-invalid/`: negative examples that every contract must reject
 - `schema-cases.json`: schema-to-fixture validation manifest

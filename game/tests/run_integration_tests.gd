@@ -47,9 +47,14 @@ func _run() -> void:
 	var expected_notes: Array[Dictionary] = []
 	for input: Dictionary in expected["inputs"]:
 		expected_notes.append({"note_id": (input["event_id"] as String).trim_suffix(":input"), "timestamp_us": int(input["timestamp_us"]), "technique": input["technique"], "target_id": input["target_id"]})
-	var runtime_notes_json: String = JSON.stringify(runtime_result["chart"].to_dictionary()["notes"]) if runtime_result.get("ok") == true else JSON.stringify(runtime_result)
+	var runtime_notes: Array = runtime_result["chart"].to_dictionary()["notes"] if runtime_result.get("ok") == true else []
+	var runtime_judgement_notes: Array[Dictionary] = []
+	for note: Dictionary in runtime_notes:
+		runtime_judgement_notes.append({"note_id":note["note_id"], "timestamp_us":note["timestamp_us"], "technique":note["technique"], "target_id":note["target_id"]})
+	var runtime_notes_json: String = JSON.stringify(runtime_judgement_notes) if runtime_result.get("ok") == true else JSON.stringify(runtime_result)
 	var expected_notes_json: String = JSON.stringify(expected_notes)
-	_check(runtime_result.get("ok") == true and runtime_notes_json == expected_notes_json, "golden product Runtime Chart", failures)
+	_check(runtime_result.get("ok") == true and runtime_notes_json == expected_notes_json, "golden product Runtime Chart judgement fields", failures)
+	_check(runtime_notes.size() == 45 and runtime_notes[0].get("hand") == "right" and runtime_notes[1].get("hand") == "left" and runtime_notes.all(func(note: Dictionary) -> bool: return note.get("hand") in ["right", "left"]), "product Runtime Chart preserves every explicit hand", failures)
 	var expected_summary: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(ProjectSettings.globalize_path("res://content/phase1-fixed-song-v1/expected-summary.json"))) as Dictionary
 	var replay_run: Dictionary = ReplaySession.run(runtime_result["chart"], expected["inputs"], rules, score_rules)
 	var replay_summary: Dictionary = replay_run["summary"]
@@ -135,14 +140,17 @@ func _run() -> void:
 	_check(godot_transport.pause().get("ok") == true and godot_transport.resume().get("ok") == true, "transport pause and resume", failures)
 	await process_frame
 	player.stop()
-	player.stream = null
-	player.free()
-	player = null
+	player.stream_paused = false
 	godot_transport = null
+	await process_frame
+	player.stream = null
+	player.queue_free()
+	await process_frame
+	player = null
 	audio = null
-	for _frame: int in 3:
+	for _frame: int in 2:
 		await process_frame
-	_finish(failures, 35)
+	_finish(failures, 36)
 
 func _scheduler_snapshot(scheduler: RefCounted, song_time_us: int) -> String:
 	var snapshot: Array[Dictionary] = []
