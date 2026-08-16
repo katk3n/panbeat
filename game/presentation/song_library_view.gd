@@ -3,6 +3,7 @@ extends Control
 
 const AppTheme := preload("res://presentation/panbeat_theme.gd")
 const RichBackground := preload("res://presentation/rich_ui_background.gd")
+const Tokens := preload("res://presentation/ui_tokens.gd")
 
 signal play_requested(package_path: String)
 
@@ -75,21 +76,21 @@ func _build_ui() -> void:
 	var reimport := Button.new(); reimport.text = "Re-import Selected…"; reimport.pressed.connect(func() -> void: _open_import_dialog(true)); primary_actions.add_child(reimport)
 	_delete = Button.new(); _delete.text = "Delete…"; _delete.pressed.connect(_on_delete); primary_actions.add_child(_delete)
 	var settings_row := HBoxContainer.new(); settings_row.add_theme_constant_override("separation", 12); layout.add_child(settings_row)
-	var background_label := Label.new(); background_label.text = "BACKGROUND"; background_label.add_theme_color_override("font_color", Color("d6b66d")); settings_row.add_child(background_label)
+	var background_label := Label.new(); background_label.text = "BACKGROUND"; background_label.add_theme_color_override("font_color", Tokens.color("accent")); settings_row.add_child(background_label)
 	_background_picker = OptionButton.new(); _background_picker.custom_minimum_size.x = 260
 	for preset: Dictionary in BackgroundPresets.all():
 		_background_picker.add_item(str(preset["label"])); _background_picker.set_item_metadata(_background_picker.item_count - 1, preset["id"])
 	_background_picker.tooltip_text = "Gameplay background; saved per song"
 	_background_picker.item_selected.connect(_on_background_selected); settings_row.add_child(_background_picker)
 	_select_background_id(_global_background_id())
-	var speed_label := Label.new(); speed_label.text = "NOTE SPEED"; speed_label.add_theme_color_override("font_color", Color("d6b66d")); settings_row.add_child(speed_label)
+	var speed_label := Label.new(); speed_label.text = "NOTE SPEED"; speed_label.add_theme_color_override("font_color", Tokens.color("accent")); settings_row.add_child(speed_label)
 	_note_scroll_speed_picker = OptionButton.new(); _note_scroll_speed_picker.custom_minimum_size.x = 260
 	for preset: Dictionary in NoteScrollSpeeds.all():
 		_note_scroll_speed_picker.add_item(str(preset["label"])); _note_scroll_speed_picker.set_item_metadata(_note_scroll_speed_picker.item_count - 1, preset["id"])
 	_note_scroll_speed_picker.tooltip_text = "Faster speeds reduce overlapping notes; saved per song"
 	_note_scroll_speed_picker.item_selected.connect(_on_note_scroll_speed_selected); settings_row.add_child(_note_scroll_speed_picker)
 	_select_note_scroll_speed_id(_global_note_scroll_speed_id())
-	var tempo_label := Label.new(); tempo_label.text = "TEMPO"; tempo_label.add_theme_color_override("font_color", Color("d6b66d")); settings_row.add_child(tempo_label)
+	var tempo_label := Label.new(); tempo_label.text = "TEMPO"; tempo_label.add_theme_color_override("font_color", Tokens.color("accent")); settings_row.add_child(tempo_label)
 	_practice_tempo_picker = OptionButton.new(); _practice_tempo_picker.custom_minimum_size.x = 190
 	for preset: Dictionary in PracticeTempos.all():
 		_practice_tempo_picker.add_item(str(preset["label"])); _practice_tempo_picker.set_item_metadata(_practice_tempo_picker.item_count - 1, preset["id"])
@@ -121,15 +122,15 @@ func _build_import_dialog() -> void:
 	_import_scroll = ScrollContainer.new(); _import_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL; _import_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED; _import_scroll.follow_focus = true; dialog_layout.add_child(_import_scroll)
 	var form := VBoxContainer.new(); form.add_theme_constant_override("separation", 10); form.size_flags_horizontal = Control.SIZE_EXPAND_FILL; _import_scroll.add_child(form)
 	var heading := Label.new(); heading.text = "Choose the score and optional playback assets."; heading.add_theme_font_size_override("font_size", 20); form.add_child(heading)
-	var title_label := Label.new(); title_label.text = "SONG TITLE (OPTIONAL)"; title_label.add_theme_color_override("font_color", Color("d6b66d")); form.add_child(title_label)
+	var title_label := Label.new(); title_label.text = "SONG TITLE (OPTIONAL)"; title_label.add_theme_color_override("font_color", Tokens.color("accent")); form.add_child(title_label)
 	_title_input = LineEdit.new(); _title_input.placeholder_text = "Use the score title when empty"; form.add_child(_title_input)
-	var score_label := Label.new(); score_label.text = "SCORE"; score_label.add_theme_color_override("font_color", Color("d6b66d")); form.add_child(score_label)
+	var score_label := Label.new(); score_label.text = "SCORE"; score_label.add_theme_color_override("font_color", Tokens.color("accent")); form.add_child(score_label)
 	_score_button = Button.new(); _score_button.text = "Choose MusicXML or NotePan…"; _score_button.clip_text = true; _score_button.pressed.connect(func() -> void: _choose_file("score")); form.add_child(_score_button)
-	var audio_label := Label.new(); audio_label.text = "BACKING AUDIO (OPTIONAL)"; audio_label.add_theme_color_override("font_color", Color("d6b66d")); form.add_child(audio_label)
+	var audio_label := Label.new(); audio_label.text = "BACKING AUDIO (OPTIONAL)"; audio_label.add_theme_color_override("font_color", Tokens.color("accent")); form.add_child(audio_label)
 	var audio_row := HBoxContainer.new(); form.add_child(audio_row)
 	_audio_button = Button.new(); _audio_button.text = "Choose WAV or Ogg…"; _audio_button.clip_text = true; _audio_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL; _audio_button.pressed.connect(func() -> void: _choose_file("audio")); audio_row.add_child(_audio_button)
 	var clear_audio := Button.new(); clear_audio.text = "No Audio"; clear_audio.tooltip_text = "Import without backing audio; Mood Pan provides the sound"; clear_audio.pressed.connect(_clear_audio); audio_row.add_child(clear_audio)
-	var overlay_label := Label.new(); overlay_label.text = "PANBEAT OVERLAY (OPTIONAL)"; overlay_label.add_theme_color_override("font_color", Color("d6b66d")); form.add_child(overlay_label)
+	var overlay_label := Label.new(); overlay_label.text = "PANBEAT OVERLAY (OPTIONAL)"; overlay_label.add_theme_color_override("font_color", Tokens.color("accent")); form.add_child(overlay_label)
 	_overlay_button = Button.new(); _overlay_button.text = "Choose Overlay…"; _overlay_button.clip_text = true; _overlay_button.pressed.connect(func() -> void: _choose_file("overlay")); form.add_child(_overlay_button)
 	_written_octave_high = CheckBox.new(); _written_octave_high.text = "Written 1 octave high"; _written_octave_high.tooltip_text = "Map every written pitch to the Mood Pan note one octave lower"; form.add_child(_written_octave_high)
 	_import_message = Label.new(); _import_message.visible = false; _import_message.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART; _import_message.add_theme_color_override("font_color", Color("ef8f8f")); form.add_child(_import_message)
@@ -139,7 +140,7 @@ func _build_import_dialog() -> void:
 
 func _open_import_dialog(reimport: bool) -> void:
 	if reimport and _pending_delete.is_empty():
-		_layout_status.visible = true; _layout_status.add_theme_color_override("font_color", Color("e0bc67")); _layout_status.text = "WARNING — Select a song before re-importing."
+		_layout_status.visible = true; _layout_status.add_theme_color_override("font_color", Tokens.color("warning")); _layout_status.text = "WARNING — Select a song before re-importing."
 		return
 	_import_reimport = reimport; _import_dialog.title = "Re-import Song" if reimport else "Import Song"; _import_message.visible = false; _import_message.text = ""
 	_import_scroll.scroll_vertical = 0
@@ -255,7 +256,7 @@ func _on_selected(index: int) -> void:
 		_midi_adapter.profile = PerformanceLayouts.effective_profile(_base_profile(), _selected_layout)
 	else:
 		_handpan_layout.show_layout({})
-		_midi_adapter.profile = _base_profile(); _layout_status.visible = true; _layout_status.add_theme_color_override("font_color", Color("e0bc67")); _layout_status.text = "WARNING — Re-import this song to generate its handpan map."
+		_midi_adapter.profile = _base_profile(); _layout_status.visible = true; _layout_status.add_theme_color_override("font_color", Tokens.color("warning")); _layout_status.text = "WARNING — Re-import this song to generate its handpan map."
 	for diagnostic: Dictionary in song.get("diagnostics", []): lines.append("%s %s: %s\nFix: %s" % [str(diagnostic.get("severity", "error")).to_upper(), diagnostic.get("code", "unknown"), diagnostic.get("message", ""), diagnostic.get("remediation", "")])
 	var selected_background := _resolved_background_id(_pending_delete); _select_background_id(selected_background)
 	var selected_speed := _resolved_note_scroll_speed_id(_pending_delete); _select_note_scroll_speed_id(selected_speed)

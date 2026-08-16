@@ -35,30 +35,31 @@ void fragment() {
 	float t = TIME * motion_speed;
 	float radius = length(p);
 
-	vec3 night_jade = vec3(0.008, 0.030, 0.032);
-	vec3 mineral = vec3(0.045, 0.145, 0.135);
-	vec3 dusk = vec3(0.115, 0.070, 0.105);
-	vec3 copper_light = vec3(0.68, 0.35, 0.16);
-	vec3 moonstone = vec3(0.45, 0.64, 0.57);
+	vec3 midnight = vec3(0.004, 0.008, 0.035);
+	vec3 cyan_light = vec3(0.035, 0.78, 0.88);
+	vec3 blue_light = vec3(0.08, 0.28, 0.92);
+	vec3 violet_light = vec3(0.45, 0.12, 0.92);
+	vec3 magenta_light = vec3(0.92, 0.08, 0.68);
 	float mist = soft_fbm(p * 1.75 + vec2(t * 0.34, -t * 0.18) + 4.0);
 	float folded_mist = soft_fbm(vec2(p.x * 1.25 - p.y * 0.42, p.y * 2.15 + p.x * 0.20) - vec2(t * 0.18, t * 0.26));
 	float veil = smoothstep(0.43, 0.82, mist) * smoothstep(1.18, 0.22, radius);
-	vec3 color = mix(night_jade, dusk, clamp(UV.y * 0.44 + veil * 0.46, 0.0, 1.0));
-	color += mineral * veil * 0.46 * intensity;
+	vec3 spectral = mix(cyan_light, magenta_light, smoothstep(0.08, 0.94, UV.x));
+	spectral = mix(spectral, blue_light, 0.22 + 0.20 * sin(UV.y * 3.14159));
+	vec3 color = midnight + spectral * veil * 0.075 * intensity;
 
 	float breathing_radius = 0.58 + sin(t * 1.36) * 0.060;
 	float breathing_halo = exp(-abs(radius + (mist - 0.5) * 0.035 - breathing_radius) * 11.0);
 	float resonance = pow(0.5 + 0.5 * cos((radius + (folded_mist - 0.5) * 0.072) * 30.0 - t * 1.85), 11.0);
 	resonance *= smoothstep(0.16, 0.48, radius) * smoothstep(1.16, 0.60, radius);
 	float moving_veil = exp(-abs(p.y - sin(p.x * 2.5 + t * 1.35) * 0.22 - sin(t * 0.82) * 0.22) * 6.5);
-	color += moonstone * breathing_halo * 0.13 * intensity;
-	color += mix(moonstone, copper_light, 0.38) * resonance * 0.075 * intensity;
-	color += mix(mineral, moonstone, 0.55) * moving_veil * 0.14 * intensity;
+	color += spectral * breathing_halo * 0.105 * intensity;
+	color += mix(cyan_light, magenta_light, smoothstep(-0.7, 0.7, p.x)) * resonance * 0.070 * intensity;
+	color += mix(blue_light, violet_light, smoothstep(-0.6, 0.6, p.y)) * moving_veil * 0.075 * intensity;
 
 	float dawn_pool = exp(-length(p - vec2(-0.72 + sin(t * 0.64) * 0.42, 0.38 + cos(t * 0.52) * 0.24)) * 3.2);
 	float quiet_pool = exp(-length(p - vec2(0.76 + cos(t * 0.58) * 0.36, -0.30 + sin(t * 0.70) * 0.22)) * 3.8);
-	color += copper_light * dawn_pool * 0.22 * intensity;
-	color += moonstone * quiet_pool * 0.17 * intensity;
+	color += cyan_light * dawn_pool * 0.10 * intensity;
+	color += magenta_light * quiet_pool * 0.095 * intensity;
 	float edge = smoothstep(0.34, 1.18, radius);
 	color *= 1.0 - edge * 0.48;
 	COLOR = vec4(color, 1.0);

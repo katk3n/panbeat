@@ -19,6 +19,7 @@ func _initialize() -> void:
 	_check(fallback["summary"].contains("Operation failed") and fallback["technical"].contains("Unavailable"), "error fallback", failures)
 	var background := RichBackground.visual_contract()
 	_check(background["procedural_shader"] and background["meditative_fog"] and background["breathing_halo"] and background["resonance_ripples"] and background["visible_slow_motion"] and is_equal_approx(background["motion_speed"], 0.38) and background["motion_strength"] == "dramatic", "shared menu background uses clearly animated meditative visual language", failures)
+	_check(background["palette"] == "icon_cyan_blue_magenta" and background["dark_negative_space"], "shared menu background follows the app icon palette", failures)
 	_check(not background["perspective_grid"] and not background["particle_field"] and not background["cyber_aesthetic"], "shared menu background omits cyber grid and particles", failures)
 	_finish(failures, 12)
 

@@ -88,6 +88,9 @@ func _ready() -> void:
 		return
 	if not _has_explicit_input_mode():
 		visible = false; set_process(false); set_process_unhandled_input(false); _open_product_flow.call_deferred(); return
+	# The scene starts hidden so Product Flow never flashes the gameplay field.
+	# Explicit automation/gameplay launches opt in to visibility here.
+	visible = true
 	_product_flow = ProductFlow.new()
 	var automation_start: Dictionary = _product_flow.begin_session(true)
 	if not automation_start.get("ok", false): _fail(automation_start.get("error", "automation flow start failed")); return

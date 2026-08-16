@@ -820,7 +820,7 @@ Input OffsetとAudio Offsetは、この分解結果と利用者のキャリブ�
 詳細な実行単位、依存関係、各storyの受け入れ条件は[`phase3-stories.md`](./phase3-stories.md)を参照する。
 
 - Dingを要件どおりSpawn Ringから中央Ding判定リングへ収束する全周リングに修正
-- 共通Theme、アプリシェル、navigation、error UXを統一
+- 共通Theme、アプリシェル、navigation、error UXを統一する。製品メニューはアプリアイコンの暗い藍色とシアン→青→マゼンタの発光色を共通トークンとし、状態色は意味を保つ
 - ハンドパン本体、Tone / Ding / Slap、HIT feedback、Gameplay HUDの視覚品質を改善
 - `silent_resonance`、`breath_of_dawn`、`deep_resonance`の瞑想的な背景を曲ごとに選択し、半透明の銅色ハンドパンと局所発光Toneオーブを前景へ描画
 - Device Setup、Song Library、Calibration、Resultsの情報設計と状態表現を改善
@@ -830,10 +830,11 @@ Input OffsetとAudio Offsetは、この分解結果と利用者のキャリブ�
 
 ### Phase 4: Score Format Expansion
 
-詳細は[`phase4-stories.md`](./phase4-stories.md)を参照する。Phase 4の対象はP401のNotePan schema 6/8直接importであり、Web評価は含まない。
+詳細は[`phase4-stories.md`](./phase4-stories.md)を参照する。Phase 4の対象はP401のNotePan schema 6/8直接importとP402の曲別カスタムスケール／演奏配置であり、Web評価は含まない。
 
 - schema 6/8の非圧縮・単一track `.pan`を安全に読み込む
 - 共通Symbolic Score、Runtime Chart、atomic song packageへ接続する
+- Song LibraryのHandpan Mapはアプリアイコンと同じ暗い本体を用い、色変化を抑えたシアン／青のシンプルな発光リングで曲別配置を表示する
 - 通常音、Ghost、Slap、Ding、拍節、split、tempo、metadataを決定的に変換する
 - 未対応形式と不正binaryを固有diagnosticで拒否し、既存importとGameplayを回帰させない
 

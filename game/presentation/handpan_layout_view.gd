@@ -1,6 +1,8 @@
 class_name HandpanLayoutView
 extends Control
 
+const Tokens := preload("res://presentation/ui_tokens.gd")
+
 const TARGET_ANGLES := {
 	"tone-7": 22.5,
 	"tone-5": 67.5,
@@ -54,12 +56,14 @@ func _draw() -> void:
 	var center := Vector2(size.x * 0.5, size.y * 0.5 + 14.0)
 	var title := "HANDPAN MAP"
 	if not scale_name.is_empty(): title += "  ·  %s" % scale_name
-	draw_string(font, Vector2(0, 18), title, HORIZONTAL_ALIGNMENT_CENTER, size.x, 13, Color("d6b66d"))
+	draw_string(font, Vector2(0, 18), title, HORIZONTAL_ALIGNMENT_CENTER, size.x, 13, Tokens.color("accent"))
 
-	# A quiet metallic body keeps the map legible over PanBeat's animated background.
-	draw_circle(center + Vector2(0, 3), radius + 3.0, Color(0, 0, 0, 0.30))
-	draw_circle(center, radius, Color("78869d"))
-	draw_arc(center, radius - 1.0, 0.0, TAU, 96, Color("aeb9ca"), 1.5, true)
+	# Echo the app icon with a restrained, nearly monochrome luminous outline.
+	draw_circle(center + Vector2(0, 5), radius + 7.0, Color(0, 0, 0, 0.42))
+	draw_circle(center, radius, Color("060a1b"))
+	draw_circle(center, radius * 0.91, Color("091026"))
+	draw_arc(center, radius - 1.0, 0.0, TAU, 96, Tokens.color("accent_blue"), 3.0, true)
+	draw_arc(center, radius + 2.0, 0.0, TAU, 96, Color(Tokens.color("accent"), 0.08), 8.0, true)
 
 	var labels := slot_labels(performance_layout)
 	var pad_radius := radius * 0.168
@@ -70,21 +74,30 @@ func _draw() -> void:
 
 	var ding_radius := radius * 0.275
 	var ding_active := highlighted_target == "ding"
-	draw_circle(center, ding_radius, Color("ff9500") if ding_active else Color("f5f5f3"))
-	draw_circle(center, ding_radius * 0.56, Color("ff9500") if ding_active else Color("b8c3d4"))
+	draw_circle(center, ding_radius, Color("050817"))
+	draw_circle(center, ding_radius * 0.57, Color("080d25"))
+	draw_arc(center, ding_radius, 0.0, TAU, 64, Tokens.color("accent_blue"), 3.0 if not ding_active else 5.0, true)
+	if ding_active: draw_arc(center, ding_radius + 2.0, 0.0, TAU, 64, Color(Tokens.color("accent_blue"), 0.18), 10.0, true)
 	if verified_targets.has("ding") and not ding_active:
-		draw_arc(center, ding_radius - 1.0, 0.0, TAU, 64, Color("e0bc67"), 3.0, true)
-	_draw_centered_pair(center, str(labels.get("ding", "—")), "D", font, Color.WHITE if ding_active else Color("30394e"), radius)
+		draw_arc(center, ding_radius - 5.0, 0.0, TAU, 64, Tokens.color("focus"), 2.0, true)
+	_draw_centered_pair(center, str(labels.get("ding", "—")), "D", font, Color.WHITE if ding_active else Color("dbe7ff"), radius)
 
 func _draw_pad(center: Vector2, radius: float, target_id: String, pitch: String, font: Font) -> void:
 	var active := highlighted_target == target_id
-	draw_circle(center, radius, Color("ff9500") if active else Color("f5f5f3"))
+	var rim := Tokens.color("accent_blue")
+	draw_circle(center, radius, Color("060a1b"))
+	draw_arc(center, radius - 1.0, 0.0, TAU, 48, rim, 2.5 if not active else 4.5, true)
+	if active:
+		draw_arc(center, radius + 2.0, 0.0, TAU, 48, Color(rim, 0.20), 10.0, true)
 	if verified_targets.has(target_id) and not active:
-		draw_arc(center, radius - 1.0, 0.0, TAU, 40, Color("e0bc67"), 3.0, true)
+		draw_arc(center, radius - 5.0, 0.0, TAU, 40, Tokens.color("focus"), 2.0, true)
 	var number := target_id.trim_prefix("tone-")
-	var ink := Color.WHITE if active else Color("30394e")
-	if pitch == "—": ink = Color("747c8f")
+	var ink := Color.WHITE if active else Color("dbe7ff")
+	if pitch == "—": ink = Color("7381a8")
 	_draw_centered_pair(center, pitch, number, font, ink, radius / 0.168)
+
+static func visual_contract() -> Dictionary:
+	return {"icon_palette":true, "dark_body":true, "restrained_color":true, "uniform_rim":true, "luminous_pad_outlines":true, "solid_light_pads":false}
 
 func _draw_centered_pair(center: Vector2, first: String, second: String, font: Font, color: Color, body_radius: float) -> void:
 	var pitch_size := maxi(12, int(body_radius * 0.073))

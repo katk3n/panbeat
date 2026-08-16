@@ -2,6 +2,7 @@ class_name DeviceSetupView
 extends Control
 
 const AppTheme := preload("res://presentation/panbeat_theme.gd")
+const Tokens := preload("res://presentation/ui_tokens.gd")
 const RichBackground := preload("res://presentation/rich_ui_background.gd")
 
 const MidiAdapter := preload("res://infrastructure/godot_midi_adapter.gd")
@@ -47,7 +48,7 @@ func _build_ui() -> void:
 	var layout := VBoxContainer.new(); layout.add_theme_constant_override("separation", 14); margin.add_child(layout)
 	var title := Label.new(); title.text = "DEVICE SETUP"; title.add_theme_font_size_override("font_size", 38); layout.add_child(title)
 	var intro := Label.new(); intro.text = "1. Connect Mood Pan by USB  2. Select the MN-10 port  3. Confirm Tone / Ding / Slap below"; intro.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART; layout.add_child(intro)
-	var connection_heading := Label.new(); connection_heading.text = "CONNECTION STATUS"; connection_heading.add_theme_color_override("font_color", Color("e4b45f")); layout.add_child(connection_heading)
+	var connection_heading := Label.new(); connection_heading.text = "CONNECTION STATUS"; connection_heading.add_theme_color_override("font_color", Tokens.color("accent")); layout.add_child(connection_heading)
 	_status = Label.new(); _status.text = "OPENING MIDI…"; _status.add_theme_font_size_override("font_size", 22); layout.add_child(_status)
 	var port_row := HBoxContainer.new(); layout.add_child(port_row)
 	var port_label := Label.new(); port_label.text = "MIDI Port"; port_label.custom_minimum_size.x = 130; port_row.add_child(port_label)
@@ -59,7 +60,7 @@ func _build_ui() -> void:
 	var reopen := Button.new(); reopen.text = "Reopen MIDI"; reopen.tooltip_text = "Close and open MIDI once, without duplicate registration"; reopen.pressed.connect(_on_reopen); actions.add_child(reopen)
 	var save := Button.new(); save.text = "Save Diagnostics"; save.pressed.connect(_save_diagnostics); actions.add_child(save)
 	var quit := Button.new(); quit.text = "Quit"; quit.pressed.connect(func() -> void: get_tree().quit(0)); actions.add_child(quit)
-	var monitor_heading := Label.new(); monitor_heading.text = "LIVE INPUT MONITOR"; monitor_heading.add_theme_color_override("font_color", Color("e4b45f")); layout.add_child(monitor_heading)
+	var monitor_heading := Label.new(); monitor_heading.text = "LIVE INPUT MONITOR"; monitor_heading.add_theme_color_override("font_color", Tokens.color("accent")); layout.add_child(monitor_heading)
 	_monitor = Label.new(); _monitor.text = "Strike Tone, Ding, and Slap"; _monitor.add_theme_font_size_override("font_size", 24); layout.add_child(_monitor)
 	_history = RichTextLabel.new(); _history.fit_content = true; _history.custom_minimum_size.y = 170; _history.text = "No MIDI events yet."; layout.add_child(_history)
 	var limitation := Label.new(); limitation.text = "TECHNICAL DETAILS — Godot does not expose physical disconnect state or the OS receive timestamp. Silence alone does not prove disconnection. Use Reopen MIDI; if input does not return, quit and relaunch PanBeat after reconnecting the USB cable."; limitation.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART; layout.add_child(limitation)

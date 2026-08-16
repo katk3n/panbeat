@@ -6,8 +6,8 @@ const AppTheme := preload("res://presentation/panbeat_theme.gd")
 func _initialize() -> void:
 	var failures: Array[String] = []
 	var theme := AppTheme.shared()
-	_check(Tokens.VERSION == "phase3-quiet-forge-v3", "approved visual-quality token version", failures)
-	_check(Tokens.color("accent") == Color("e4b45f") and Tokens.color("focus") == Color("ffe29b"), "Quiet Forge accent and focus", failures)
+	_check(Tokens.VERSION == "panbeat-icon-neon-v1", "approved visual-quality token version", failures)
+	_check(Tokens.color("accent") == Color("28e7ec") and Tokens.color("accent_blue") == Color("4384ff") and Tokens.color("accent_magenta") == Color("f04bd8") and Tokens.color("focus") == Color("f76be2"), "app icon cyan, blue, magenta palette", failures)
 	_check(Tokens.spacing("page") == 48 and Tokens.FONT_SIZE["body"] == 19, "spacing and typography tokens", failures)
 	_check(Tokens.color("tone_luminous") == Color("2fd4ff") and Tokens.color("ding_luminous") == Color("ffc45f") and Tokens.color("slap_luminous") == Color("ff806f") and Tokens.color("right_hand_luminous") == Color("38d9ff") and Tokens.color("left_hand_luminous") == Color("ff72b6") and Tokens.MOTION_MS["hit"] == 180, "technique fallback, hand, and motion tokens", failures)
 	for type: String in ["Button", "OptionButton"]:
@@ -17,6 +17,8 @@ func _initialize() -> void:
 		_check(theme.has_stylebox(state, "LineEdit"), "LineEdit %s style" % state, failures)
 	for state: String in ["panel", "focus", "cursor", "cursor_unfocused"]:
 		_check(theme.has_stylebox(state, "ItemList"), "ItemList %s style" % state, failures)
+	_check(not theme.has_stylebox("title_button_normal", "Tree") and theme.has_color("title_button_color", "Tree"), "Tree preserves default header geometry and changes color only", failures)
+	_check(theme.has_stylebox("embedded_border", "Window") and theme.get_color("title_color", "Window") == Tokens.color("primary"), "embedded modal uses the shared menu palette", failures)
 	for kind: String in ["Success", "Warning", "Error", "Info"]:
 		_check(theme.has_stylebox("panel", "%sPanel" % kind), "%s status shape" % kind, failures)
 	_check(AppTheme.status_text("success", "Ready").begins_with("✓") and AppTheme.status_text("error", "Failed").begins_with("!"), "status text is not color-only", failures)

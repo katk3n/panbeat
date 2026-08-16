@@ -36,6 +36,8 @@ func _initialize() -> void:
 	var labels := HandpanLayoutView.slot_labels(built["layout"])
 	_check(labels.get("ding") == "D3" and labels.get("tone-1") == "F♯3", "Song Library presents pitch labels in the handpan map", failures)
 	_check(HandpanLayoutView.target_direction("ding") == Vector2.ZERO and HandpanLayoutView.target_direction("tone-7").x > 0.0 and HandpanLayoutView.target_direction("tone-8").x < 0.0, "handpan diagram keeps Ding centered and upper pads mirrored", failures)
+	var map_visual := HandpanLayoutView.visual_contract()
+	_check(map_visual["icon_palette"] and map_visual["dark_body"] and map_visual["restrained_color"] and map_visual["uniform_rim"] and map_visual["luminous_pad_outlines"] and not map_visual["solid_light_pads"], "handpan map uses one blue for Ding and Tone rims", failures)
 	_finish(failures, 11)
 
 func _timed(notes: Array[Dictionary]) -> RefCounted:

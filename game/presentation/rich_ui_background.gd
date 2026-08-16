@@ -24,4 +24,4 @@ func _sync_shader() -> void:
 	_shader_material.set_shader_parameter("intensity", intensity)
 
 static func visual_contract() -> Dictionary:
-	return {"procedural_shader":true, "meditative_fog":true, "breathing_halo":true, "resonance_ripples":true, "visible_slow_motion":true, "motion_speed":0.38, "motion_strength":"dramatic", "perspective_grid":false, "particle_field":false, "cyber_aesthetic":false}
+	return {"procedural_shader":true, "meditative_fog":true, "breathing_halo":true, "resonance_ripples":true, "visible_slow_motion":true, "motion_speed":0.38, "motion_strength":"dramatic", "palette":"icon_cyan_blue_magenta", "dark_negative_space":true, "perspective_grid":false, "particle_field":false, "cyber_aesthetic":false}

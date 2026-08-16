@@ -27,6 +27,8 @@ static func _build() -> Theme:
 	_build_button(theme, "OptionButton")
 	_build_line_edit(theme)
 	_build_item_list(theme)
+	_build_tree(theme)
+	_build_window(theme)
 	_build_panels(theme)
 	_build_controls(theme)
 	_build_preview_variations(theme)
@@ -40,9 +42,9 @@ static func _set_text_colors(theme: Theme, type: String) -> void:
 	theme.set_constant("shadow_offset_y", type, 1)
 
 static func _build_button(theme: Theme, type: String) -> void:
-	var normal := _box(Tokens.color("surface_raised"), Color(Tokens.color("accent"), 0.38), Tokens.CORNER["control"], 1, 16, 11)
+	var normal := _box(Tokens.color("surface_raised"), Color(Tokens.color("accent_blue"), 0.58), Tokens.CORNER["control"], 1, 16, 11)
 	var hover := _box(Tokens.color("surface_raised").lightened(0.08), Tokens.color("accent"), Tokens.CORNER["control"], 2, 12, 8)
-	var pressed := _box(Tokens.color("accent").darkened(0.48), Tokens.color("accent"), Tokens.CORNER["control"], 2, 12, 8)
+	var pressed := _box(Color(Tokens.color("accent_magenta"), 0.22), Tokens.color("focus"), Tokens.CORNER["control"], 2, 12, 8)
 	var disabled := _box(Tokens.color("surface"), Tokens.color("disabled"), Tokens.CORNER["control"], 1, 12, 8)
 	var focus := _box(Color(0, 0, 0, 0), Tokens.color("focus"), Tokens.CORNER["control"], Tokens.STROKE["focus"], 10, 6)
 	for state: String in ["normal", "hover", "pressed", "disabled", "focus"]:
@@ -71,6 +73,31 @@ static func _build_item_list(theme: Theme) -> void:
 	theme.set_color("font_color", "ItemList", Tokens.color("primary"))
 	theme.set_color("font_selected_color", "ItemList", Tokens.color("primary"))
 	theme.set_color("font_hovered_color", "ItemList", Tokens.color("primary"))
+
+static func _build_tree(theme: Theme) -> void:
+	# Keep Godot's established Tree geometry; only recolor its text and guides.
+	theme.set_color("font_color", "Tree", Tokens.color("primary"))
+	theme.set_color("font_selected_color", "Tree", Tokens.color("primary"))
+	theme.set_color("title_button_color", "Tree", Tokens.color("accent"))
+	theme.set_color("relationship_line_color", "Tree", Color(Tokens.color("accent_blue"), 0.42))
+
+static func _build_window(theme: Theme) -> void:
+	var defaults := ThemeDB.get_default_theme()
+	var focused := defaults.get_stylebox("embedded_border", "Window").duplicate()
+	var unfocused := defaults.get_stylebox("embedded_unfocused_border", "Window").duplicate()
+	_recolor_window_box(focused, Tokens.color("surface_raised"), Tokens.color("accent_blue"))
+	_recolor_window_box(unfocused, Tokens.color("surface"), Tokens.color("line"))
+	theme.set_stylebox("embedded_border", "Window", focused)
+	theme.set_stylebox("embedded_unfocused_border", "Window", unfocused)
+	theme.set_color("title_color", "Window", Tokens.color("primary"))
+	theme.set_color("title_outline_modulate", "Window", Color(Tokens.color("background"), 0.84))
+
+static func _recolor_window_box(box: StyleBox, background: Color, border: Color) -> void:
+	if box is StyleBoxFlat:
+		var flat := box as StyleBoxFlat
+		flat.bg_color = background
+		flat.border_color = border
+		flat.shadow_color = Color(0, 0, 0, 0.58)
 
 static func _build_panels(theme: Theme) -> void:
 	theme.set_stylebox("panel", "Panel", _box(Color(Tokens.color("surface"), 0.86), Color(Tokens.color("accent"), 0.34), Tokens.CORNER["panel"], 1, 20, 20))

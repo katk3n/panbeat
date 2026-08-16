@@ -1,15 +1,17 @@
 class_name UiTokens
 extends RefCounted
 
-const VERSION := "phase3-quiet-forge-v3"
+const VERSION := "panbeat-icon-neon-v1"
 
 const COLOR := {
-	"background": Color("0b0e16"),
-	"background_depth": Color("211a1b"),
-	"surface": Color("171b24e6"),
-	"surface_raised": Color("202b3af2"),
-	"primary": Color("f4f1e8"),
-	"accent": Color("e4b45f"),
+	"background": Color("030510"),
+	"background_depth": Color("090b22"),
+	"surface": Color("0a1024e8"),
+	"surface_raised": Color("111936f2"),
+	"primary": Color("f4f7ff"),
+	"accent": Color("28e7ec"),
+	"accent_blue": Color("4384ff"),
+	"accent_magenta": Color("f04bd8"),
 	"tone_luminous": Color("2fd4ff"),
 	"ding_luminous": Color("ffc45f"),
 	"slap_luminous": Color("ff806f"),
@@ -20,9 +22,9 @@ const COLOR := {
 	"warning": Color("e8bd72"),
 	"error": Color("e78072"),
 	"muted": Color("aaa79f"),
-	"focus": Color("ffe29b"),
+	"focus": Color("f76be2"),
 	"disabled": Color("696a6f"),
-	"line": Color("777a82")
+	"line": Color("55658e")
 }
 
 const SPACE := {"xs":5, "sm":10, "md":14, "lg":19, "xl":28, "xxl":38, "page":48}
